@@ -1,0 +1,16 @@
+{
+  "name": "@digdir/assistants",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build:assistant-lib": "tsc -p ./packages/assistant-lib/",
+    "build:slack-app": "tsc -p ./apps/slack-app/",
+    "run:slack-app": "node ./apps/slack-app/dist/src/app.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

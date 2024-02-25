@@ -1,0 +1,22 @@
+{
+    "name": "@digdir/assistant-lib",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Core assistant library",
+    "main": "dist/src/index.js",
+    "license": "MIT",
+    "dependencies": {
+        "@azure/openai": "^1.0.0-beta.11",
+        "@instructor-ai/instructor": "^0.0.7",
+        "@supabase/supabase-js": "^2.39.7",
+        "axios": "^1.6.7",
+        "dataclass": "^2.1.1",
+        "js-yaml": "^4.1.0",
+        "lodash": "^4.17.21",
+        "openai": "^4.28.0",
+        "remeda": "^1.44.1",
+        "typesense": "^1.7.2",
+        "zod": "^3.22.4",
+        "zod-to-json-schema": "^3.22.4"
+    }
+}
