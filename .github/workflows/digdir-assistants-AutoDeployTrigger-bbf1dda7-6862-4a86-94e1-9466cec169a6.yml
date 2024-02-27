@@ -1,0 +1,43 @@
+name: Trigger auto deployment for digdir-assistants
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ release ]
+    paths:
+    - '**'
+    - '.github/workflows/digdir-assistants-AutoDeployTrigger-bbf1dda7-6862-4a86-94e1-9466cec169a6.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.DIGDIRASSISTANTS_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: altinnaicontainers.azurecr.io
+          registryUsername: ${{ secrets.DIGDIRASSISTANTS_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.DIGDIRASSISTANTS_REGISTRY_PASSWORD }}
+          containerAppName: digdir-assistants
+          resourceGroup: altinn-ai-assistant
+          imageToBuild: altinnaicontainers.azurecr.io/digdir-assistants-prod:${{ github.sha }}
+          
+            
+
+     
+
