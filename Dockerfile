@@ -5,14 +5,13 @@ WORKDIR /usr/src/app
 
 # Install app dependencies
 COPY package.json yarn.lock ./
+COPY apps/ ./apps/
+COPY packages/ ./packages/
 
-RUN yarn install --frozen-lockfile
-
-COPY . .
-
+RUN yarn install --frozen-lockfile 
 RUN yarn build:assistant-lib && yarn build:slack-app
 
-FROM node:slim
+FROM node:slim as runner
 
 ENV NODE_ENV production
 USER node
