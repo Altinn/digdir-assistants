@@ -6,7 +6,7 @@ import { getEventContext, timeSecondsToMs, getReactionItemContext } from './util
 import { userInputAnalysis, UserQueryAnalysis } from '@digdir/assistant-lib'
 import { ragPipeline, RagPipelineResult } from '@digdir/assistant-lib'
 import { botLog, BotLogEntry, updateReactions } from './utils/bot-log'
-import { splitToSections } from '@digdir/assistant-lib';
+import { splitToSections, isNullOrEmpty } from '@digdir/assistant-lib';
 import OpenAI from 'openai';
 
 const expressReceiver = new ExpressReceiver({ signingSecret: envVar("SLACK_BOT_SIGNING_SECRET") });
@@ -25,8 +25,14 @@ app.message(async ({ message, say }) => {
   var srcEvtContext = getEventContext(message as GenericMessageEvent);
   var userInput = ((message as GenericMessageEvent).text || "").trim();
 
-  if (!userInput) {
-    console.log('Ignoring empty userInput');
+  if (message.subtype == 'message_changed') {
+    // ignoring message changes in channels
+    // - could regenerate responses in a non-shared context, as ChatGPT does
+    return;
+  }
+
+  if (isNullOrEmpty(userInput)) {
+    console.log('Ignoring empty userInput.');
     return;
   }
 
@@ -269,12 +275,14 @@ app.message(async ({ message, say }) => {
 
 async function handleReactionEvents(eventBody: any) {
 
+  console.log('handle reactions: eventBody: ', JSON.stringify(eventBody));
+
   const channelInfo = await app.client.conversations.info({
-    channel: eventBody.item.channel
+    channel: eventBody?.body?.event?.item?.channel
   });
 
-  if (!channelInfo.ok) {
-    console.log(`Error: App not in channel ${eventBody.item.channel}`);
+  if (channelInfo == null || !channelInfo.ok) {
+    console.log(`Error: App not in channel ${eventBody?.body?.event?.item?.channel}`);
     return;
   }
 
@@ -292,7 +300,22 @@ async function handleReactionEvents(eventBody: any) {
     const reactions = messageInfo?.message?.reactions || [];
     console.log(`Current reactions: ${JSON.stringify(reactions)}`);
 
-    updateReactions(getReactionItemContext(eventBody), reactions);
+    await updateReactions(getReactionItemContext(eventBody), reactions);
+
+    console.log('reactions: ', JSON.stringify(reactions));
+
+     // Check if 'reactions' contains a value with name 'stopwatch'
+
+     // TODO: extract relevant debug message block data from payload property on existing supabase record.
+    if (reactions.some(reaction => reaction.name === 'stopwatch')) {
+      // Send a debug message
+      app.client.chat.postMessage({
+        channel: itemContext.channel,
+        thread_ts: itemContext.ts,
+        text: "Debug message",
+        blocks: debugBlocks,
+      });
+    }
 
   } catch (e) {
     console.log(`Error fetching reactions: ${e}`);
@@ -319,12 +342,21 @@ function updateSlackMsgCallback(slackApp: App, threadTs: { channel?: string; ts?
     throw new Error('Slack message callback cannot be initialized without a valid channel or ts.');
   }
 
-  const inner = (partialResponse: string) => {
+  const inner = async (partialResponse: string) => {
 
 
     if (!threadTs?.channel || !threadTs.ts) {
       throw new Error('Slack message callback cannot be initialized without a valid channel or ts.');
     }
+
+    if (partialResponse == undefined) {
+      console.warn('partialResponse is undefined');
+    }
+
+    if (partialResponse == null) {
+      console.warn('partialResponse is null');
+    }
+
 
     contentChunks.push(partialResponse);
 
@@ -338,7 +370,7 @@ function updateSlackMsgCallback(slackApp: App, threadTs: { channel?: string; ts?
     console.log(`Partial response update for channel '${threadTs.channel}' ts ${threadTs.ts}, time: ${Date.now()}`);
 
     try {
-      slackApp.client.chat.update({
+      await slackApp.client.chat.update({
         channel: threadTs.channel,
         ts: threadTs.ts,
         text: '...',
@@ -363,7 +395,7 @@ function finalizeAnswer(app: App, threadTs: { channel?: string; ts?: string } | 
 
   const sections = splitToSections(answer);
 
-  const blocks: any[] = sections.map((paragraph, i) => ({
+  const blocks: any[] = sections.filter(section => !isNullOrEmpty(section)).map((paragraph, i) => ({
     type: "section",
     text: { type: "mrkdwn", text: paragraph },
   }));

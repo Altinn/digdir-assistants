@@ -21,20 +21,24 @@ export function splitToSections(markdown: string | null): string[] {
       let a = i + 1;
       while (hasOpenCodeBlock(sections[i]) && a <= (sections.length - 1)) {
         console.log(`Merging section ${i} and ${a}`);
-        sections[i] = sections[i] + sectionDelimiter + sections[a];
+        sections[i] = (sections[i] || "") + sectionDelimiter + (sections[a] || "");
         sections[a] = "";
         a += 1;
       }
     }
   }
 
-  sections = sections.filter(section => section !== "");
+  sections = sections.filter(section => !isNullOrEmpty(section));
 
   return sections;
 }
 
-function isNullOrEmpty(inputStr: string | null | undefined): boolean {
-  return !inputStr;
+
+export function isNullOrEmpty(inputStr: string | null | undefined): boolean {
+  if (inputStr === undefined || inputStr == null || inputStr == '') {
+    return true;
+  }
+  return false;
 }
 
 function logSections(sections: string[]): void {

@@ -4,6 +4,7 @@ import { ChatCompletionMessageParam } from 'openai/resources';
 import { AzureKeyCredential, OpenAIClient as AzureOpenAI } from '@azure/openai'
 
 import { envVar, lapTimer } from './general';
+import { isNullOrEmpty } from './markdown';
 
 
 const JsonExtractionSchema = z.object({
@@ -113,7 +114,7 @@ export async function chat_stream(messages: Array<ChatCompletionMessageParam>,
         for await (const chunk of stream) {
             const content = (chunk && chunk.choices) ? chunk.choices[0].delta.content : null;
 
-            if (content !== null) {
+            if (!isNullOrEmpty(content)) {
                 latest_chunk += content;
                 content_so_far += content;
                 chunk_count += 1;

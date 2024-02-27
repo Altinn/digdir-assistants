@@ -28,7 +28,7 @@ export async function botLog(entry: BotLogEntry) {
     }
 
     if (envVar('LOG_LEVEL') === 'debug') {
-        console.log(`insertResponse: ${insertResponse}`);
+        console.log(`insertResponse: ${JSON.stringify(insertResponse)}`);
     }
 
     return insertResponse;
@@ -47,7 +47,7 @@ export async function updateReactions(slackContext: SlackContext, reactions: any
         const updateResponse = supabase.from('bot_log').update({ 'reactions': reactions }).eq("id", resultSet.data[0].id);
 
         if (envVar('LOG_LEVEL') === 'debug') {
-            console.log(`updateResponse: ${updateResponse}`);
+            console.log(`updateResponse: ${JSON.stringify(updateResponse)}`);
         }
     }
 

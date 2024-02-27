@@ -136,7 +136,7 @@ export async function ragPipeline(user_input: string,
 
     const rerankData = {
         user_input: user_input,
-        documents: searchHits.map(document => document.content_markdown.substring(0, Math.floor(envVar("MAX_SOURCE_LENGTH") / 3)))
+        documents: searchHits.map(document => document.content_markdown.substring(0, envVar("MAX_SOURCE_LENGTH")))
     };
 
     const rerankResponse = await axios.post(rerankUrl, rerankData);
