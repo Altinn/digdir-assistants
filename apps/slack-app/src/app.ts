@@ -2,28 +2,29 @@ import { App, ExpressReceiver, LogLevel, GenericMessageEvent } from '@slack/bolt
 import { SocketModeClient } from '@slack/socket-mode';
 import { createServer } from 'http';
 import { envVar, lapTimer } from '@digdir/assistant-lib';
-import { getEventContext, timeSecondsToMs, getReactionItemContext } from './utils/slack'
-import { userInputAnalysis, UserQueryAnalysis } from '@digdir/assistant-lib'
-import { ragPipeline, RagPipelineResult } from '@digdir/assistant-lib'
-import { botLog, BotLogEntry, updateReactions } from './utils/bot-log'
+import { getEventContext, timeSecondsToMs, getReactionItemContext } from './utils/slack';
+import { userInputAnalysis, UserQueryAnalysis } from '@digdir/assistant-lib';
+import { ragPipeline, RagPipelineResult } from '@digdir/assistant-lib';
+import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import { splitToSections, isNullOrEmpty } from '@digdir/assistant-lib';
 import OpenAI from 'openai';
 
-const expressReceiver = new ExpressReceiver({ signingSecret: envVar("SLACK_BOT_SIGNING_SECRET") });
+const expressReceiver = new ExpressReceiver({
+  signingSecret: envVar('SLACK_BOT_SIGNING_SECRET'),
+});
 const app = new App({
-  token: envVar("SLACK_BOT_TOKEN"),
-  signingSecret: envVar("SLACK_BOT_SIGNING_SECRET"),
+  token: envVar('SLACK_BOT_TOKEN'),
+  signingSecret: envVar('SLACK_BOT_SIGNING_SECRET'),
   receiver: expressReceiver,
-  appToken: envVar("SLACK_APP_TOKEN"),
+  appToken: envVar('SLACK_APP_TOKEN'),
   logLevel: LogLevel.INFO,
 });
 
-// Listens to incoming messages 
+// Listens to incoming messages
 app.message(async ({ message, say }) => {
-
   console.log('-- incoming slack message event payload --');
   var srcEvtContext = getEventContext(message as GenericMessageEvent);
-  var userInput = ((message as GenericMessageEvent).text || "").trim();
+  var userInput = ((message as GenericMessageEvent).text || '').trim();
 
   if (message.subtype == 'message_changed') {
     // ignoring message changes in channels
@@ -36,14 +37,14 @@ app.message(async ({ message, say }) => {
     return;
   }
 
-  if (message.subtype === "message_deleted") {
+  if (message.subtype === 'message_deleted') {
     console.log('Ignoring "Message deleted" event.');
     return;
   }
 
   let firstThreadTs: any = await say({
     text: 'Thinking...',
-    thread_ts: message.ts
+    thread_ts: message.ts,
   });
   console.log(JSON.stringify(message, null, 2));
 
@@ -51,7 +52,7 @@ app.message(async ({ message, say }) => {
     slack_context: srcEvtContext,
     elapsed_ms: 0,
     step_name: 'select_bot',
-    payload: { user_input: userInput, bot_name: 'docs' }
+    payload: { user_input: userInput, bot_name: 'docs' },
   });
   botLog(entry);
 
@@ -67,9 +68,9 @@ app.message(async ({ message, say }) => {
   let logEntry = BotLogEntry.create({
     slack_context: srcEvtContext,
     elapsed_ms: timeSecondsToMs(stage1Duration),
-    step_name: "stage1_analyze",
+    step_name: 'stage1_analyze',
     payload: {
-      bot_name: "docs",
+      bot_name: 'docs',
       english_user_query: stage1Result.questionTranslatedToEnglish,
       original_user_query: userInput,
       user_query_language_code: stage1Result.userInputLanguageCode,
@@ -80,23 +81,27 @@ app.message(async ({ message, say }) => {
 
   botLog(logEntry);
 
-  if (!stage1Result.contentCategory.includes("Support Request")) {
-    console.log(`Assistant does not know what to do with messages of category: "${stage1Result.contentCategory}"`);
+  if (!stage1Result.contentCategory.includes('Support Request')) {
+    console.log(
+      `Assistant does not know what to do with messages of category: "${stage1Result.contentCategory}"`,
+    );
     return;
   }
 
-  if (!stage1Result.contentCategory.includes("Support Request")) {
-    console.log(`Assistant does not know what to do with messages of category: "${stage1Result.contentCategory}"`);
+  if (!stage1Result.contentCategory.includes('Support Request')) {
+    console.log(
+      `Assistant does not know what to do with messages of category: "${stage1Result.contentCategory}"`,
+    );
     return;
   }
 
   let threadTs = srcEvtContext.ts;
 
-  const busyReadingMsg = "Reading Altinn Studio docs...";
+  const busyReadingMsg = 'Reading Altinn Studio docs...';
   let willTranslateMsg = '';
 
   if (stage1Result.userInputLanguageCode === 'no') {
-    willTranslateMsg = "Oversetter til norsk snart...";
+    willTranslateMsg = 'Oversetter til norsk snart...';
   } else {
     willTranslateMsg = `We will also translate this message to ${stage1Result.userInputLanguageName}.`;
   }
@@ -116,15 +121,20 @@ app.message(async ({ message, say }) => {
     firstThreadTs = await say({ text: busyReadingMsg, thread_ts: threadTs });
   }
 
-
   let translatedMsgCallback: any = null;
   let secThreadSayResult;
   let secondThreadTs = null;
   let payload = {};
 
   if (willTranslate(stage1Result)) {
-    secThreadSayResult = await say({ text: willTranslateMsg, thread_ts: threadTs });
-    secondThreadTs = { channel: secThreadSayResult.channel, ts: secThreadSayResult.ts }
+    secThreadSayResult = await say({
+      text: willTranslateMsg,
+      thread_ts: threadTs,
+    });
+    secondThreadTs = {
+      channel: secThreadSayResult.channel,
+      ts: secThreadSayResult.ts,
+    };
     translatedMsgCallback = updateSlackMsgCallback(app, secondThreadTs);
   }
 
@@ -138,13 +148,13 @@ app.message(async ({ message, say }) => {
       stage1Result.questionTranslatedToEnglish,
       stage1Result.userInputLanguageName,
       updateSlackMsgCallback(app, firstThreadTs),
-      translatedMsgCallback
+      translatedMsgCallback,
     );
 
     ragResponse.durations.analyze = stage1Duration;
 
     payload = {
-      bot_name: "docs",
+      bot_name: 'docs',
       original_user_query: ragResponse.original_user_query || '',
       english_user_query: ragResponse.english_user_query || '',
       user_query_language_code: stage1Result.userInputLanguageCode || '',
@@ -155,9 +165,8 @@ app.message(async ({ message, say }) => {
       source_urls: ragResponse.source_urls,
       relevant_urls: ragResponse.relevant_urls,
       not_loaded_urls: ragResponse.not_loaded_urls || [],
-      rag_success: !!ragResponse.rag_success
+      rag_success: !!ragResponse.rag_success,
     };
-
   } catch (e) {
     if (e instanceof OpenAI.APIConnectionError) {
       ragWithTypesenseError = `OpenAI error: ${e}`;
@@ -175,16 +184,16 @@ app.message(async ({ message, say }) => {
     console.log(`\n\nERROR running RAG: ${ragWithTypesenseError}\n\n`);
 
     payload = {
-      bot_name: "docs",
+      bot_name: 'docs',
       original_user_query: userInput, // Assuming `userInput` is the variable holding the original user query
       error: ragWithTypesenseError,
-      rag_success: false
+      rag_success: false,
     };
 
     logEntry = BotLogEntry.create({
       slack_context: getEventContext(message as GenericMessageEvent),
       elapsed_ms: timeSecondsToMs(lapTimer(ragStart)),
-      step_name: "rag_with_typesense",
+      step_name: 'rag_with_typesense',
       payload: payload,
     });
 
@@ -201,15 +210,27 @@ app.message(async ({ message, say }) => {
 
   // ragResponse null guard
   if (!ragResponse) {
-    console.error("We shouldn't get here, means we are missing an error handler.")
+    console.error("We shouldn't get here, means we are missing an error handler.");
     return;
   }
 
   // Call finalizeAnswer with the necessary parameters
-  finalizeAnswer(app, firstThreadTs, ragResponse.english_answer || '', ragResponse, ragResponse.durations.total + stage1Duration - ragResponse.durations.translation);
+  finalizeAnswer(
+    app,
+    firstThreadTs,
+    ragResponse.english_answer || '',
+    ragResponse,
+    ragResponse.durations.total + stage1Duration - ragResponse.durations.translation,
+  );
 
   if (willTranslate(stage1Result)) {
-    finalizeAnswer(app, secondThreadTs, ragResponse.translated_answer || '', ragResponse, ragResponse.durations.translation);
+    finalizeAnswer(
+      app,
+      secondThreadTs,
+      ragResponse.translated_answer || '',
+      ragResponse,
+      ragResponse.durations.translation,
+    );
   }
 
   // Log the bot operation
@@ -217,24 +238,25 @@ app.message(async ({ message, say }) => {
     slack_context: srcEvtContext,
     elapsed_ms: timeSecondsToMs(ragResponse.durations.total),
     durations: ragResponse.durations,
-    step_name: "rag_with_typesense",
+    step_name: 'rag_with_typesense',
     payload: payload,
-  })
+  });
   botLog(logEntry);
 
   // Process and format source documents and not loaded URLs for debug messages
-  let fieldsList = "*Retrieved articles*\n";
-  let notLoadedList = "";
-  const knownPathSegment = "https://docs.altinn.studio";
+  let fieldsList = '*Retrieved articles*\n';
+  let notLoadedList = '';
+  const knownPathSegment = 'https://docs.altinn.studio';
 
   ragResponse.source_documents.forEach((doc: any, i: number) => {
     let source = doc.metadata.source;
     const pathSegmentIndex = source.indexOf(knownPathSegment);
     if (pathSegmentIndex >= 0) {
-      source = "https://docs.altinn.studio" + source.substring(pathSegmentIndex + knownPathSegment.length);
-      source = source.substring(0, source.lastIndexOf("/")) + "/";
+      source =
+        'https://docs.altinn.studio' + source.substring(pathSegmentIndex + knownPathSegment.length);
+      source = source.substring(0, source.lastIndexOf('/')) + '/';
     }
-    const sourceText = source.replace("https://docs.altinn.studio/", "");
+    const sourceText = source.replace('https://docs.altinn.studio/', '');
     fieldsList += `#${i + 1}: <${source}|${sourceText}>\n`;
   });
 
@@ -242,23 +264,40 @@ app.message(async ({ message, say }) => {
     notLoadedList += `#${i + 1}: <${url}|${url.replace('https://docs.altinn.studio/', '')}>\n`;
   });
 
-  const searchQueriesSummary = ragResponse.search_queries.join("\n> ");
+  const searchQueriesSummary = ragResponse.search_queries.join('\n> ');
   const debugBlocks = [
     {
-      type: "section",
-      text: { type: "mrkdwn", text: `Phrases generated for retrieval:\n> ${searchQueriesSummary}` },
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `Phrases generated for retrieval:\n> ${searchQueriesSummary}`,
+      },
     },
     {
-      type: "section",
-      text: { type: "mrkdwn", text: fieldsList },
+      type: 'section',
+      text: { type: 'mrkdwn', text: fieldsList },
     },
-    ...(notLoadedList.length > 0 ? [{
-      type: "section",
-      text: { type: "mrkdwn", text: `*Retrieved, but not used:*\n${notLoadedList}` },
-    }] : []),
+    ...(notLoadedList.length > 0
+      ? [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `*Retrieved, but not used:*\n${notLoadedList}`,
+            },
+          },
+        ]
+      : []),
     {
-      type: "section",
-      text: { type: "mrkdwn", text: `Processing times (sec):\n\`\`\`\n${JSON.stringify(ragResponse.durations, null, 2)}\`\`\`` },
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `Processing times (sec):\n\`\`\`\n${JSON.stringify(
+          ragResponse.durations,
+          null,
+          2,
+        )}\`\`\``,
+      },
     },
   ];
 
@@ -267,18 +306,17 @@ app.message(async ({ message, say }) => {
     app.client.chat.postMessage({
       channel: srcEvtContext.channel,
       thread_ts: srcEvtContext.ts,
-      text: "Debug message",
+      text: 'Debug message',
       blocks: debugBlocks,
     });
   }
 });
 
 async function handleReactionEvents(eventBody: any) {
-
   console.log('handle reactions: eventBody: ', JSON.stringify(eventBody));
 
   const channelInfo = await app.client.conversations.info({
-    channel: eventBody?.body?.event?.item?.channel
+    channel: eventBody?.body?.event?.item?.channel,
   });
 
   if (channelInfo == null || !channelInfo.ok) {
@@ -286,15 +324,15 @@ async function handleReactionEvents(eventBody: any) {
     return;
   }
 
-  console.log("event:", JSON.stringify(eventBody))
+  console.log('event:', JSON.stringify(eventBody));
 
   try {
     const itemContext = getReactionItemContext(eventBody);
     const context = {
       channel: itemContext.channel,
       timestamp: itemContext.ts,
-    }
-  
+    };
+
     console.log('get reactions context: ', JSON.stringify(context));
     const messageInfo = await app.client.reactions.get(context);
     const reactions = messageInfo?.message?.reactions || [];
@@ -304,38 +342,39 @@ async function handleReactionEvents(eventBody: any) {
 
     console.log('reactions: ', JSON.stringify(reactions));
 
-     // Check if 'reactions' contains a value with name 'stopwatch'
+    // Check if 'reactions' contains a value with name 'stopwatch'
 
-     // TODO: extract relevant debug message block data from payload property on existing supabase record.
-    if (reactions.some(reaction => reaction.name === 'stopwatch')) {
+    // TODO: extract relevant debug message block data from payload property on existing supabase record.
+    if (reactions.some((reaction) => reaction.name === 'stopwatch')) {
       // Send a debug message
       app.client.chat.postMessage({
         channel: itemContext.channel,
         thread_ts: itemContext.ts,
-        text: "Debug message",
+        text: 'Debug message',
         blocks: debugBlocks,
       });
     }
-
   } catch (e) {
     console.log(`Error fetching reactions: ${e}`);
   }
 }
 
-app.event("reaction_added", async (event) => {
+app.event('reaction_added', async (event) => {
   await handleReactionEvents(event);
 });
 
-app.event("reaction_removed", async (event) => {
+app.event('reaction_removed', async (event) => {
   await handleReactionEvents(event);
 });
 
 function willTranslate(stage1_result: UserQueryAnalysis) {
-  return (stage1_result && stage1_result.userInputLanguageCode != 'en');
+  return stage1_result && stage1_result.userInputLanguageCode != 'en';
 }
 
-
-function updateSlackMsgCallback(slackApp: App, threadTs: { channel?: string; ts?: string } | null): (arg0: string) => void {
+function updateSlackMsgCallback(
+  slackApp: App,
+  threadTs: { channel?: string; ts?: string } | null,
+): (arg0: string) => void {
   const contentChunks: string[] = [];
 
   if (!threadTs?.channel || !threadTs.ts) {
@@ -343,10 +382,10 @@ function updateSlackMsgCallback(slackApp: App, threadTs: { channel?: string; ts?
   }
 
   const inner = async (partialResponse: string) => {
-
-
     if (!threadTs?.channel || !threadTs.ts) {
-      throw new Error('Slack message callback cannot be initialized without a valid channel or ts.');
+      throw new Error(
+        'Slack message callback cannot be initialized without a valid channel or ts.',
+      );
     }
 
     if (partialResponse == undefined) {
@@ -357,17 +396,20 @@ function updateSlackMsgCallback(slackApp: App, threadTs: { channel?: string; ts?
       console.warn('partialResponse is null');
     }
 
-
     contentChunks.push(partialResponse);
 
     const sections = splitToSections(contentChunks.join(''));
 
     const blocks = sections.map((paragraph, i) => ({
-      type: "section",
-      text: { type: "mrkdwn", text: paragraph },
+      type: 'section',
+      text: { type: 'mrkdwn', text: paragraph },
     }));
 
-    console.log(`Partial response update for channel '${threadTs.channel}' ts ${threadTs.ts}, time: ${Date.now()}`);
+    console.log(
+      `Partial response update for channel '${threadTs.channel}' ts ${
+        threadTs.ts
+      }, time: ${Date.now()}`,
+    );
 
     try {
       await slackApp.client.chat.update({
@@ -385,8 +427,13 @@ function updateSlackMsgCallback(slackApp: App, threadTs: { channel?: string; ts?
   return inner;
 }
 
-function finalizeAnswer(app: App, threadTs: { channel?: string; ts?: string } | null, answer: string, ragResponse: any, duration: number): void {
-
+function finalizeAnswer(
+  app: App,
+  threadTs: { channel?: string; ts?: string } | null,
+  answer: string,
+  ragResponse: any,
+  duration: number,
+): void {
   if (!threadTs?.channel || !threadTs.ts) {
     throw new Error('Slack message callback cannot be initialized without a valid channel or ts.');
   }
@@ -395,27 +442,33 @@ function finalizeAnswer(app: App, threadTs: { channel?: string; ts?: string } | 
 
   const sections = splitToSections(answer);
 
-  const blocks: any[] = sections.filter(section => !isNullOrEmpty(section)).map((paragraph, i) => ({
-    type: "section",
-    text: { type: "mrkdwn", text: paragraph },
-  }));
+  const blocks: any[] = sections
+    .filter((section) => !isNullOrEmpty(section))
+    .map((paragraph, i) => ({
+      type: 'section',
+      text: { type: 'mrkdwn', text: paragraph },
+    }));
 
   if (relevantSources.length > 0) {
-    const linksMarkdown = relevantSources.map((source: any) => `<${source.url}|${source.title}>`).join("\n");
+    const linksMarkdown = relevantSources
+      .map((source: any) => `<${source.url}|${source.title}>`)
+      .join('\n');
     blocks.push({
-      type: "section",
+      type: 'section',
       text: {
-        type: "mrkdwn",
+        type: 'mrkdwn',
         text: `For more information:\n${linksMarkdown}`,
       },
     });
   }
 
   blocks.push({
-    type: "section",
+    type: 'section',
     text: {
-      type: "mrkdwn",
-      text: `Generated in ${duration.toFixed(1)} seconds.\nPlease give us your feedback with a :+1: or :-1:`,
+      type: 'mrkdwn',
+      text: `Generated in ${duration.toFixed(
+        1,
+      )} seconds.\nPlease give us your feedback with a :+1: or :-1:`,
     },
   });
 
@@ -433,7 +486,6 @@ function finalizeAnswer(app: App, threadTs: { channel?: string; ts?: string } | 
 }
 
 (async () => {
-
   const server = createServer(expressReceiver.app);
 
   server.listen(process.env.PORT || 3000, () => {
@@ -441,7 +493,7 @@ function finalizeAnswer(app: App, threadTs: { channel?: string; ts?: string } | 
   });
 
   const socketModeHandler = new SocketModeClient({
-    appToken: envVar("SLACK_APP_TOKEN"),
+    appToken: envVar('SLACK_APP_TOKEN'),
     logLevel: LogLevel.WARN,
   });
   await socketModeHandler.start();
