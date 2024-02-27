@@ -2,7 +2,12 @@ import { App, ExpressReceiver, LogLevel, GenericMessageEvent, Block } from '@sla
 import { SocketModeClient } from '@slack/socket-mode';
 import { createServer } from 'http';
 import { envVar, lapTimer } from '@digdir/assistant-lib';
-import { getEventContext, timeSecondsToMs, getReactionItemContext, getThreadResponseContext } from './utils/slack';
+import {
+  getEventContext,
+  timeSecondsToMs,
+  getReactionItemContext,
+  getThreadResponseContext,
+} from './utils/slack';
 import { userInputAnalysis, UserQueryAnalysis } from '@digdir/assistant-lib';
 import { ragPipeline, RagPipelineResult } from '@digdir/assistant-lib';
 import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
@@ -189,7 +194,7 @@ app.message(async ({ message, say }) => {
       error: ragWithTypesenseError,
       rag_success: false,
     };
-    
+
     analyze_logEntry = BotLogEntry.create({
       slack_context: getEventContext(message as GenericMessageEvent),
       elapsed_ms: timeSecondsToMs(lapTimer(ragStart)),
@@ -241,7 +246,6 @@ app.message(async ({ message, say }) => {
     payload: payload,
   });
   botLog(rag_logEntry);
-
 });
 
 async function handleReactionEvents(eventBody: any) {
@@ -267,16 +271,18 @@ async function handleReactionEvents(eventBody: any) {
 
     const messageInfo = await app.client.reactions.get(context);
     const reactions = messageInfo?.message?.reactions || [];
-    
+
     const dbLog = await updateReactions(itemContext, reactions);
 
     // console.log('reactions: ', JSON.stringify(reactions));
 
-    if (eventBody?.body?.event?.type == 'reaction_added' &&
-        eventBody?.body?.event?.reaction == 'stopwatch') {
+    if (
+      eventBody?.body?.event?.type == 'reaction_added' &&
+      eventBody?.body?.event?.reaction == 'stopwatch'
+    ) {
       // Send a debug message
       await app.client.chat.postEphemeral({
-        channel: itemContext.channel,        
+        channel: itemContext.channel,
         thread_ts: itemContext.ts,
         user: eventBody?.body?.event?.user,
         text: 'Performance data',
@@ -415,7 +421,6 @@ async function finalizeAnswer(
 }
 
 function debugMessageBlocks(botLog: BotLogEntry): Array<Block> {
-
   const payload = botLog.payload;
   // Process and format source documents and not loaded URLs for debug messages
   let sourceList = '*Retrieved articles*\n';
@@ -463,11 +468,7 @@ function debugMessageBlocks(botLog: BotLogEntry): Array<Block> {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `Processing times (sec):\n\`\`\`\n${JSON.stringify(
-          botLog.durations,
-          null,
-          2,
-        )}\`\`\``,
+        text: `Processing times (sec):\n\`\`\`\n${JSON.stringify(botLog.durations, null, 2)}\`\`\``,
       },
     },
   ];

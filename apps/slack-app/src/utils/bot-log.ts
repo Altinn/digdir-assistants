@@ -55,7 +55,7 @@ export async function updateReactions(slackContext: SlackContext, reactions: any
     if (envVar('LOG_LEVEL') === 'debug') {
       console.log(`updateResponse: ${JSON.stringify(updateResponse)}`);
     }
-    return resultSet.data[0]
+    return resultSet.data[0];
   }
 
   return null;
