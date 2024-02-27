@@ -34,7 +34,7 @@ jobs:
           registryUsername: ${{ secrets.DIGDIRASSISTANTSPROD_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.DIGDIRASSISTANTSPROD_REGISTRY_PASSWORD }}
           containerAppName: digdir-assistants-prod
-          resourceGroup: digdir-assistants
+          resourceGroup: altinn-ai-assistant
           imageToBuild: altinnaicontainers.azurecr.io/digdir-assistants-prod:${{ github.sha }}
           
             
