@@ -1,8 +1,8 @@
-import { App, ExpressReceiver, LogLevel, GenericMessageEvent } from '@slack/bolt';
+import { App, ExpressReceiver, LogLevel, GenericMessageEvent, Block } from '@slack/bolt';
 import { SocketModeClient } from '@slack/socket-mode';
 import { createServer } from 'http';
 import { envVar, lapTimer } from '@digdir/assistant-lib';
-import { getEventContext, timeSecondsToMs, getReactionItemContext } from './utils/slack';
+import { getEventContext, timeSecondsToMs, getReactionItemContext, getThreadResponseContext } from './utils/slack';
 import { userInputAnalysis, UserQueryAnalysis } from '@digdir/assistant-lib';
 import { ragPipeline, RagPipelineResult } from '@digdir/assistant-lib';
 import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
@@ -48,13 +48,13 @@ app.message(async ({ message, say }) => {
   });
   console.log(JSON.stringify(message, null, 2));
 
-  const entry = BotLogEntry.create({
+  const selectBot_LogEntry = BotLogEntry.create({
     slack_context: srcEvtContext,
     elapsed_ms: 0,
     step_name: 'select_bot',
     payload: { user_input: userInput, bot_name: 'docs' },
   });
-  botLog(entry);
+  botLog(selectBot_LogEntry);
 
   var start = performance.now();
   const stage1Result = await userInputAnalysis(userInput);
@@ -65,7 +65,7 @@ app.message(async ({ message, say }) => {
     return;
   }
 
-  let logEntry = BotLogEntry.create({
+  let analyze_logEntry = BotLogEntry.create({
     slack_context: srcEvtContext,
     elapsed_ms: timeSecondsToMs(stage1Duration),
     step_name: 'stage1_analyze',
@@ -79,7 +79,7 @@ app.message(async ({ message, say }) => {
     },
   });
 
-  botLog(logEntry);
+  botLog(analyze_logEntry);
 
   if (!stage1Result.contentCategory.includes('Support Request')) {
     console.log(
@@ -189,15 +189,14 @@ app.message(async ({ message, say }) => {
       error: ragWithTypesenseError,
       rag_success: false,
     };
-
-    logEntry = BotLogEntry.create({
+    
+    analyze_logEntry = BotLogEntry.create({
       slack_context: getEventContext(message as GenericMessageEvent),
       elapsed_ms: timeSecondsToMs(lapTimer(ragStart)),
       step_name: 'rag_with_typesense',
       payload: payload,
     });
-
-    botLog(logEntry);
+    await botLog(analyze_logEntry);
 
     await app.client.chat.postMessage({
       thread_ts: srcEvtContext.ts,
@@ -234,82 +233,15 @@ app.message(async ({ message, say }) => {
   }
 
   // Log the bot operation
-  logEntry = BotLogEntry.create({
-    slack_context: srcEvtContext,
+  const rag_logEntry = BotLogEntry.create({
+    slack_context: getThreadResponseContext(message.ts, firstThreadTs),
     elapsed_ms: timeSecondsToMs(ragResponse.durations.total),
     durations: ragResponse.durations,
     step_name: 'rag_with_typesense',
     payload: payload,
   });
-  botLog(logEntry);
+  botLog(rag_logEntry);
 
-  // Process and format source documents and not loaded URLs for debug messages
-  let fieldsList = '*Retrieved articles*\n';
-  let notLoadedList = '';
-  const knownPathSegment = 'https://docs.altinn.studio';
-
-  ragResponse.source_documents.forEach((doc: any, i: number) => {
-    let source = doc.metadata.source;
-    const pathSegmentIndex = source.indexOf(knownPathSegment);
-    if (pathSegmentIndex >= 0) {
-      source =
-        'https://docs.altinn.studio' + source.substring(pathSegmentIndex + knownPathSegment.length);
-      source = source.substring(0, source.lastIndexOf('/')) + '/';
-    }
-    const sourceText = source.replace('https://docs.altinn.studio/', '');
-    fieldsList += `#${i + 1}: <${source}|${sourceText}>\n`;
-  });
-
-  ragResponse.not_loaded_urls.forEach((url: string, i: number) => {
-    notLoadedList += `#${i + 1}: <${url}|${url.replace('https://docs.altinn.studio/', '')}>\n`;
-  });
-
-  const searchQueriesSummary = ragResponse.search_queries.join('\n> ');
-  const debugBlocks = [
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `Phrases generated for retrieval:\n> ${searchQueriesSummary}`,
-      },
-    },
-    {
-      type: 'section',
-      text: { type: 'mrkdwn', text: fieldsList },
-    },
-    ...(notLoadedList.length > 0
-      ? [
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `*Retrieved, but not used:*\n${notLoadedList}`,
-            },
-          },
-        ]
-      : []),
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `Processing times (sec):\n\`\`\`\n${JSON.stringify(
-          ragResponse.durations,
-          null,
-          2,
-        )}\`\`\``,
-      },
-    },
-  ];
-
-  // TODO: send debug message as ephemeral message if/when user reacts with :stopwatch: emoji
-  if (false) {
-    app.client.chat.postMessage({
-      channel: srcEvtContext.channel,
-      thread_ts: srcEvtContext.ts,
-      text: 'Debug message',
-      blocks: debugBlocks,
-    });
-  }
 });
 
 async function handleReactionEvents(eventBody: any) {
@@ -333,25 +265,22 @@ async function handleReactionEvents(eventBody: any) {
       timestamp: itemContext.ts,
     };
 
-    console.log('get reactions context: ', JSON.stringify(context));
     const messageInfo = await app.client.reactions.get(context);
     const reactions = messageInfo?.message?.reactions || [];
-    console.log(`Current reactions: ${JSON.stringify(reactions)}`);
+    
+    const dbLog = await updateReactions(itemContext, reactions);
 
-    await updateReactions(getReactionItemContext(eventBody), reactions);
+    // console.log('reactions: ', JSON.stringify(reactions));
 
-    console.log('reactions: ', JSON.stringify(reactions));
-
-    // Check if 'reactions' contains a value with name 'stopwatch'
-
-    // TODO: extract relevant debug message block data from payload property on existing supabase record.
-    if (reactions.some((reaction) => reaction.name === 'stopwatch')) {
+    if (eventBody?.body?.event?.type == 'reaction_added' &&
+        eventBody?.body?.event?.reaction == 'stopwatch') {
       // Send a debug message
-      app.client.chat.postMessage({
-        channel: itemContext.channel,
+      await app.client.chat.postEphemeral({
+        channel: itemContext.channel,        
         thread_ts: itemContext.ts,
-        text: 'Debug message',
-        blocks: debugBlocks,
+        user: eventBody?.body?.event?.user,
+        text: 'Performance data',
+        blocks: debugMessageBlocks(dbLog),
       });
     }
   } catch (e) {
@@ -427,13 +356,13 @@ function updateSlackMsgCallback(
   return inner;
 }
 
-function finalizeAnswer(
+async function finalizeAnswer(
   app: App,
   threadTs: { channel?: string; ts?: string } | null,
   answer: string,
   ragResponse: any,
   duration: number,
-): void {
+): Promise<void> {
   if (!threadTs?.channel || !threadTs.ts) {
     throw new Error('Slack message callback cannot be initialized without a valid channel or ts.');
   }
@@ -473,7 +402,7 @@ function finalizeAnswer(
   });
 
   try {
-    app.client.chat.update({
+    await app.client.chat.update({
       channel: threadTs.channel,
       ts: threadTs.ts,
       text: 'Final answer',
@@ -483,6 +412,66 @@ function finalizeAnswer(
   } catch (e) {
     console.log(`Error attempting to update temp bot message ${e}`);
   }
+}
+
+function debugMessageBlocks(botLog: BotLogEntry): Array<Block> {
+
+  const payload = botLog.payload;
+  // Process and format source documents and not loaded URLs for debug messages
+  let sourceList = '*Retrieved articles*\n';
+  let notLoadedList = '';
+  const knownPathSegment = 'https://docs.altinn.studio';
+
+  payload.source_urls.forEach((url: string, i: number) => {
+    const pathSegmentIndex = url.indexOf(knownPathSegment);
+    if (pathSegmentIndex >= 0) {
+      url =
+        'https://docs.altinn.studio' + url.substring(pathSegmentIndex + knownPathSegment.length);
+      url = url.substring(0, url.lastIndexOf('/')) + '/';
+    }
+    sourceList += `#${i + 1}: <${url}|${url.replace('https://docs.altinn.studio/', '')}>\n`;
+  });
+
+  payload.not_loaded_urls.forEach((url: string, i: number) => {
+    notLoadedList += `#${i + 1}: <${url}|${url.replace('https://docs.altinn.studio/', '')}>\n`;
+  });
+
+  const debugBlocks = [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `Phrases generated for retrieval:\n> ${payload.search_queries.join('\n> ')}`,
+      },
+    },
+    {
+      type: 'section',
+      text: { type: 'mrkdwn', text: sourceList },
+    },
+    ...(notLoadedList.length > 0
+      ? [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `*Retrieved, but not used:*\n${notLoadedList}`,
+            },
+          },
+        ]
+      : []),
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `Processing times (sec):\n\`\`\`\n${JSON.stringify(
+          botLog.durations,
+          null,
+          2,
+        )}\`\`\``,
+      },
+    },
+  ];
+  return debugBlocks;
 }
 
 (async () => {

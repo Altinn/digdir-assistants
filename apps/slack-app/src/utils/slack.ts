@@ -38,11 +38,11 @@ export function getReactionItemContext(eventBody: any): SlackContext {
   const item = eventBody?.event?.item || {};
   const context = SlackContext.create({
     ts: item.ts,
-    thread_ts: '',
+    thread_ts: item.thread_ts,
     channel: item.channel,
-    team: '',
-    user: '',
-    time_utc: '',
+    team: item.team,
+    user: item.user,
+    time_utc: item.event_time_utc,
   });
   return context;
 }

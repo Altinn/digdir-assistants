@@ -42,8 +42,8 @@ export async function updateReactions(slackContext: SlackContext, reactions: any
   const resultSet = await supabase
     .from('bot_log')
     .select('*')
-    .eq('slackContext->>ts', ts)
-    .eq('slackContext->>channel', channel);
+    .eq('slack_context->>ts', ts)
+    .eq('slack_context->>channel', channel);
 
   if (resultSet && resultSet.data && resultSet.data.length > 0) {
     // update the row, storing the reactions object in the field called 'reactions'
@@ -55,7 +55,8 @@ export async function updateReactions(slackContext: SlackContext, reactions: any
     if (envVar('LOG_LEVEL') === 'debug') {
       console.log(`updateResponse: ${JSON.stringify(updateResponse)}`);
     }
+    return resultSet.data[0]
   }
 
-  return resultSet;
+  return null;
 }

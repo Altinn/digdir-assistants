@@ -156,14 +156,6 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-2.0.2.tgz#d9fae00a2d5cb40f92cfe64b47ad749fbc38f917"
   integrity sha512-6EwiSjwWYP7pTckG6I5eyFANjPhmPjUX9JRLUSfNPC7FX7zK9gyZAfUEaECL6ALTpGX5AjnBq3C9XmVWPitNpw==
 
-"@instructor-ai/instructor@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@instructor-ai/instructor/-/instructor-0.0.6.tgz#4c034e405e4038af7b7fcdb985d8732f505cdebd"
-  integrity sha512-eRmBTsseGExQjPu7MveK1KNOMFOQVob3Q4VhR12m5h5FlDEspu+LE7xThn5UmTrHL+Fo5G4Dg0WqJDb+vxFR0g==
-  dependencies:
-    zod-stream "0.0.6"
-    zod-validation-error "^2.1.0"
-
 "@instructor-ai/instructor@^0.0.7":
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/@instructor-ai/instructor/-/instructor-0.0.7.tgz#b701d497269edc84107c7f858b0bb3b660e5506e"
@@ -2518,13 +2510,6 @@ safe-regex-test@^1.0.3:
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
 
-schema-stream@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/schema-stream/-/schema-stream-2.1.0.tgz#0f67ec54ee97bd3d0c155919818f0136ea8f6cf9"
-  integrity sha512-Rcmd9jBGkYybO/01W0/aNqmsexERzhVfc7DzN3RUstzNtBi6kEhQHF93QRb6hGQCykhApj8RLj3LcJeRU86S/A==
-  dependencies:
-    ramda "^0.29.0"
-
 schema-stream@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/schema-stream/-/schema-stream-3.0.0.tgz#bd2b47c3412ea3254a496c48225ab2020c779d12"
@@ -2967,14 +2952,6 @@ yocto-queue@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
-
-zod-stream@0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/zod-stream/-/zod-stream-0.0.6.tgz#ddb67818e1940cbb52f5618f1f3b598825a54baf"
-  integrity sha512-i2KceRjxV8IFqYXVEgDF++yHIeVBrhNgxJMAw5ISUqbrx4eD2AWPSn/DQtftOtHjMG7stKTzLOSE0u8ZcWRWtg==
-  dependencies:
-    schema-stream "^2.1.0"
-    zod-to-json-schema "^3.22.3"
 
 zod-stream@0.0.8:
   version "0.0.8"

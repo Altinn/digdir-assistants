@@ -20,7 +20,7 @@ const _openaiClient = openaiClient();
 
 
 const RagContextRefsSchema = z.object({
-    source: z.string().nonempty(),
+    source: z.string().min(1),
 });
 
 const RagPromptReplySchema = z.object({
