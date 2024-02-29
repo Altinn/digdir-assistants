@@ -1,12 +1,14 @@
 import { App, ExpressReceiver, LogLevel, GenericMessageEvent, Block } from '@slack/bolt';
+import { ChatUpdateResponse } from '@slack/web-api';
 import { SocketModeClient } from '@slack/socket-mode';
 import { createServer } from 'http';
-import { envVar, lapTimer } from '@digdir/assistant-lib';
+import { envVar, round, lapTimer } from '@digdir/assistant-lib';
 import {
   getEventContext,
   timeSecondsToMs,
   getReactionItemContext,
   getThreadResponseContext,
+  getChatUpdateContext,
 } from './utils/slack';
 import { userInputAnalysis, UserQueryAnalysis } from '@digdir/assistant-lib';
 import { ragPipeline, RagPipelineResult } from '@digdir/assistant-lib';
@@ -47,6 +49,7 @@ app.message(async ({ message, say }) => {
     return;
   }
 
+  // #1 - Response with "Thinking..."
   let firstThreadTs: any = await say({
     text: 'Thinking...',
     thread_ts: message.ts,
@@ -63,7 +66,7 @@ app.message(async ({ message, say }) => {
 
   var start = performance.now();
   const stage1Result = await userInputAnalysis(userInput);
-  const stage1Duration = lapTimer(start);
+  const stage1Duration = round(lapTimer(start));
 
   if (!stage1Result) {
     console.warn(`Error analysing user input: ${userInput}`);
@@ -87,17 +90,9 @@ app.message(async ({ message, say }) => {
   botLog(analyze_logEntry);
 
   if (!stage1Result.contentCategory.includes('Support Request')) {
-    console.log(
-      `Assistant does not know what to do with messages of category: "${stage1Result.contentCategory}"`,
+    console.warn(
+      `Message category was not a support request. Category: "${stage1Result.contentCategory}"`,
     );
-    return;
-  }
-
-  if (!stage1Result.contentCategory.includes('Support Request')) {
-    console.log(
-      `Assistant does not know what to do with messages of category: "${stage1Result.contentCategory}"`,
-    );
-    return;
   }
 
   let threadTs = srcEvtContext.ts;
@@ -120,7 +115,7 @@ app.message(async ({ message, say }) => {
         as_user: true,
       });
     } catch (e) {
-      console.log(`Error attempting to delete temp bot message ${e}`);
+      console.log(`Error attempting to update app reply ${e}`);
     }
   } else {
     firstThreadTs = await say({ text: busyReadingMsg, thread_ts: threadTs });
@@ -182,7 +177,6 @@ app.message(async ({ message, say }) => {
     } else {
       ragWithTypesenseError = `Error: ${e}`;
     }
-    throw e;
   }
 
   if (ragWithTypesenseError) {
@@ -195,13 +189,13 @@ app.message(async ({ message, say }) => {
       rag_success: false,
     };
 
-    analyze_logEntry = BotLogEntry.create({
+    const error_logEntry = BotLogEntry.create({
       slack_context: getEventContext(message as GenericMessageEvent),
       elapsed_ms: timeSecondsToMs(lapTimer(ragStart)),
       step_name: 'rag_with_typesense',
       payload: payload,
     });
-    await botLog(analyze_logEntry);
+    await botLog(error_logEntry);
 
     await app.client.chat.postMessage({
       thread_ts: srcEvtContext.ts,
@@ -218,38 +212,93 @@ app.message(async ({ message, say }) => {
     return;
   }
 
-  // Call finalizeAnswer with the necessary parameters
-  finalizeAnswer(
-    app,
-    firstThreadTs,
-    ragResponse.english_answer || '',
-    ragResponse,
-    ragResponse.durations.total + stage1Duration - ragResponse.durations.translation,
-  );
+  let finalizeError = null;
+  let finalResponse: ChatUpdateResponse | undefined;
 
-  if (willTranslate(stage1Result)) {
-    finalizeAnswer(
+  try {
+    finalResponse = await finalizeAnswer(
       app,
-      secondThreadTs,
-      ragResponse.translated_answer || '',
+      firstThreadTs,
+      ragResponse.english_answer || '',
       ragResponse,
-      ragResponse.durations.translation,
+      ragResponse.durations.total + stage1Duration - ragResponse.durations.translation,
     );
+  } catch (e) {
+    finalizeError = e;
+    console.error(`Error attempting to finalize app reply ${e}`);
   }
+  let rag_logEntry: BotLogEntry | undefined;
 
-  // Log the bot operation
-  const rag_logEntry = BotLogEntry.create({
-    slack_context: getThreadResponseContext(message.ts, firstThreadTs),
-    elapsed_ms: timeSecondsToMs(ragResponse.durations.total),
-    durations: ragResponse.durations,
-    step_name: 'rag_with_typesense',
-    payload: payload,
-  });
-  botLog(rag_logEntry);
+  if (finalizeError != null) {
+    // Log the bot operation
+    rag_logEntry = BotLogEntry.create({
+      slack_context: getThreadResponseContext(srcEvtContext, firstThreadTs.ts),
+      elapsed_ms: timeSecondsToMs(ragResponse.durations.total + stage1Duration - ragResponse.durations.translation),
+      durations: ragResponse.durations,
+      step_name: 'rag_with_typesense',
+      payload: {
+        error: finalizeError,
+        ...payload,
+      },
+    });
+  } else if (finalResponse != undefined) {
+    // Log the bot operation
+    rag_logEntry = BotLogEntry.create({
+      slack_context: getChatUpdateContext(srcEvtContext, finalResponse),
+      elapsed_ms: timeSecondsToMs(ragResponse.durations.total + stage1Duration - ragResponse.durations.translation),
+      durations: ragResponse.durations,
+      step_name: 'rag_with_typesense',
+      payload: payload,
+    });
+  }
+  if (rag_logEntry != undefined) botLog(rag_logEntry);
+
+  // translation has already completed when we get here
+  if (willTranslate(stage1Result)) {
+    let translationResponse: ChatUpdateResponse | undefined;
+
+    try {
+      translationResponse = await finalizeAnswer(
+        app,
+        secondThreadTs,
+        ragResponse.translated_answer || '',
+        ragResponse,
+        ragResponse.durations.translation,
+      );
+    } catch (e) {
+      finalizeError = e;
+    }
+
+    if (finalizeError != null) {
+      // Log the bot operation
+      rag_logEntry = BotLogEntry.create({
+        slack_context: getThreadResponseContext(srcEvtContext, firstThreadTs.ts),
+        elapsed_ms: timeSecondsToMs(ragResponse.durations.translation),
+        durations: ragResponse.durations,
+        step_name: 'rag_translate',
+        payload: {
+          error: finalizeError,
+          ...payload,
+        },
+      });
+    } else if (finalResponse != undefined) {
+      // Log the bot operation
+      rag_logEntry = BotLogEntry.create({
+        slack_context: getChatUpdateContext(srcEvtContext, finalResponse),
+        elapsed_ms: timeSecondsToMs(ragResponse.durations.translation),
+        durations: ragResponse.durations,
+        step_name: 'rag_translate',
+        payload: payload,
+      });
+    }
+    if (rag_logEntry != undefined) botLog(rag_logEntry);
+  }
 });
 
 async function handleReactionEvents(eventBody: any) {
-  console.log('handle reactions: eventBody: ', JSON.stringify(eventBody));
+  if (envVar('LOG_LEVEL') === 'debug') {
+    console.log('handle reactions: eventBody: ', JSON.stringify(eventBody));
+  }
 
   const channelInfo = await app.client.conversations.info({
     channel: eventBody?.body?.event?.item?.channel,
@@ -368,7 +417,7 @@ async function finalizeAnswer(
   answer: string,
   ragResponse: any,
   duration: number,
-): Promise<void> {
+): Promise<ChatUpdateResponse> {
   if (!threadTs?.channel || !threadTs.ts) {
     throw new Error('Slack message callback cannot be initialized without a valid channel or ts.');
   }
@@ -407,17 +456,14 @@ async function finalizeAnswer(
     },
   });
 
-  try {
-    await app.client.chat.update({
-      channel: threadTs.channel,
-      ts: threadTs.ts,
-      text: 'Final answer',
-      blocks: blocks,
-      as_user: true,
-    });
-  } catch (e) {
-    console.log(`Error attempting to update temp bot message ${e}`);
-  }
+  const responseTs = await app.client.chat.update({
+    channel: threadTs.channel,
+    ts: threadTs.ts,
+    text: 'Final answer',
+    blocks: blocks,
+    as_user: true,
+  });
+  return responseTs;
 }
 
 function debugMessageBlocks(botLog: BotLogEntry): Array<Block> {

@@ -1,4 +1,5 @@
 import { GenericMessageEvent } from '@slack/bolt';
+import { ChatUpdateResponse } from '@slack/web-api'
 import { Data } from 'dataclass';
 
 export class SlackContext extends Data {
@@ -22,15 +23,30 @@ export function getEventContext(evt: GenericMessageEvent): SlackContext {
   return context;
 }
 
-export function getThreadResponseContext(parent_ts: string, slack_response: any): SlackContext {
+export function getChatUpdateContext(threadStart: SlackContext, evt: ChatUpdateResponse): SlackContext {
   const context = SlackContext.create({
-    ts: slack_response.ts,
-    thread_ts: parent_ts,
-    channel: slack_response.channel,
-    team: '',
-    user: '',
-    time_utc: '',
+    ts: evt.ts,
+    thread_ts: threadStart.ts,
+    channel: evt.channel,
+    team: threadStart.team,
+    user: threadStart.user,
+    time_utc: UtcNowTimestamptz()
   });
+  return context;
+}
+
+export function getThreadResponseContext(item: SlackContext, responseTs: string): SlackContext {
+  const context = SlackContext.create(
+    {
+      ts: responseTs,
+      thread_ts: item.thread_ts,
+      channel: item.channel,
+      team: item.team,
+      user: item.user,
+      time_utc: UtcNowTimestamptz(),
+    }
+    );
+  context.ts = responseTs;
   return context;
 }
 
@@ -63,6 +79,11 @@ export function unixtimeToTimestamptz(unixtime: number): string | null {
     return event_time_utc;
   }
   return null;
+}
+
+export function UtcNowTimestamptz(): string {
+  const utcNow = new Date().toLocaleString('en-US', { timeZone: 'UTC' });
+  return utcNow;
 }
 
 export function timeSecondsToMs(time_diff: number): number {
