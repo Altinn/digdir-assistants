@@ -30,12 +30,18 @@ const app = new App({
 // Listens to incoming messages
 app.message(async ({ message, say }) => {
   console.log('-- incoming slack message event payload --');
-  var srcEvtContext = getEventContext(message as GenericMessageEvent);
-  var userInput = ((message as GenericMessageEvent).text || '').trim();
+  const genericMsg = message as GenericMessageEvent
+  var srcEvtContext = getEventContext(genericMsg);
+  var userInput = ((genericMsg as GenericMessageEvent).text || '').trim();
 
-  if (message.subtype == 'message_changed') {
+  if (genericMsg.subtype == 'message_changed') {
     // ignoring message changes in channels
     // - could regenerate responses in a non-shared context, as ChatGPT does
+    return;
+  }
+
+  if (!isNullOrEmpty(genericMsg.thread_ts)) {
+    // we don't support replying to thread messages
     return;
   }
 
@@ -44,7 +50,7 @@ app.message(async ({ message, say }) => {
     return;
   }
 
-  if (message.subtype === 'message_deleted') {
+  if (genericMsg.subtype === 'message_deleted') {
     console.log('Ignoring "Message deleted" event.');
     return;
   }
@@ -52,9 +58,9 @@ app.message(async ({ message, say }) => {
   // #1 - Response with "Thinking..."
   let firstThreadTs: any = await say({
     text: 'Thinking...',
-    thread_ts: message.ts,
+    thread_ts: genericMsg.ts,
   });
-  console.log(JSON.stringify(message, null, 2));
+  console.log(JSON.stringify(genericMsg, null, 2));
 
   const selectBot_LogEntry = BotLogEntry.create({
     slack_context: srcEvtContext,
@@ -190,7 +196,7 @@ app.message(async ({ message, say }) => {
     };
 
     const error_logEntry = BotLogEntry.create({
-      slack_context: getEventContext(message as GenericMessageEvent),
+      slack_context: getEventContext(genericMsg as GenericMessageEvent),
       elapsed_ms: timeSecondsToMs(lapTimer(ragStart)),
       step_name: 'rag_with_typesense',
       payload: payload,
