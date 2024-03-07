@@ -51,7 +51,7 @@ export async function ragPipeline(
   user_input: string,
   user_query_language_name: string,
   stream_callback_msg1: any = null,
-  stream_callback_msg2: any = null
+  stream_callback_msg2: any = null,
 ): Promise<RagPipelineResult> {
   const durations: any = {
     total: 0,
@@ -76,19 +76,19 @@ export async function ragPipeline(
   if (envVar("LOG_LEVEL") === "debug") {
     console.log(
       "Extracted search queries:",
-      JSON.stringify(extract_search_queries)
+      JSON.stringify(extract_search_queries),
     );
   }
   start = performance.now();
   const search_phrase_hits = await lookupSearchPhrasesSimilar(
-    extract_search_queries
+    extract_search_queries,
   );
   durations["phrase_similarity_search"] = round(lapTimer(start));
 
   if (envVar("LOG_LEVEL") === "debug") {
     console.log(
       "Phrase similarity search:",
-      JSON.stringify(search_phrase_hits)
+      JSON.stringify(search_phrase_hits),
     );
   }
   start = performance.now();
@@ -108,8 +108,8 @@ export async function ragPipeline(
           lvl0: hit.document.hierarchy.lvl0,
           content_markdown: hit.document.content_markdown || "",
         };
-      })
-    )
+      }),
+    ),
   );
 
   if (searchHits.length == 0) {
@@ -160,19 +160,21 @@ export async function ragPipeline(
   const rerankUrl = envVar("COLBERT_API_URL");
   if (!isValidUrl(rerankUrl)) {
     throw new Error(
-      `Environment variable 'COLBERT_API_URL' is invalid: '${rerankUrl}'`
+      `Environment variable 'COLBERT_API_URL' is invalid: '${rerankUrl}'`,
     );
   }
 
   const rerankData = {
     user_input: user_input,
     documents: searchHits.map((document) =>
-      document.content_markdown.substring(0, envVar("MAX_SOURCE_LENGTH"))
+      document.content_markdown.substring(0, envVar("MAX_SOURCE_LENGTH")),
     ),
   };
 
   if (envVar("LOG_LEVEL") === "debug") {
-    console.log(`Calling ${rerankUrl}, sending:\n${JSON.stringify(rerankData)}`);
+    console.log(
+      `Calling ${rerankUrl}, sending:\n${JSON.stringify(rerankData)}`,
+    );
   }
   const rerankResponse = await axios.post(rerankUrl, rerankData);
   reranked = rerankResponse.data;
@@ -204,7 +206,7 @@ export async function ragPipeline(
     if (docsLength + docTrimmed.length > envVar("MAX_CONTEXT_LENGTH")) {
       docTrimmed = docTrimmed.substring(
         0,
-        envVar("MAX_CONTEXT_LENGTH") - docsLength - 20
+        envVar("MAX_CONTEXT_LENGTH") - docsLength - 20,
       );
     }
 
@@ -220,7 +222,7 @@ export async function ragPipeline(
     };
     if (envVar("LOG_LEVEL") === "debug") {
       console.log(
-        `loaded markdown doc, length= ${docTrimmed.length}, url= ${uniqueUrl}`
+        `loaded markdown doc, length= ${docTrimmed.length}, url= ${uniqueUrl}`,
       );
     }
 
@@ -247,7 +249,7 @@ export async function ragPipeline(
   }
 
   console.log(
-    `Starting RAG structured output chain, llm: ${envVar("OPENAI_API_MODEL_NAME")}`
+    `Starting RAG structured output chain, llm: ${envVar("OPENAI_API_MODEL_NAME")}`,
   );
   start = performance.now();
   let english_answer: string = "";
@@ -271,7 +273,7 @@ export async function ragPipeline(
       // english_answer = chatResponse.choices[0].message.content;
     } else {
       console.log(
-        `${stage_name} model name: ${envVar("OPENAI_API_MODEL_NAME")}`
+        `${stage_name} model name: ${envVar("OPENAI_API_MODEL_NAME")}`,
       );
       const chatResponse = await _openaiClient.chat.completions.create({
         model: envVar("OPENAI_API_MODEL_NAME"),
@@ -303,7 +305,7 @@ export async function ragPipeline(
           content: fullPrompt,
         },
       ],
-      stream_callback_msg1
+      stream_callback_msg1,
     );
     translated_answer = english_answer;
     rag_success = true;
@@ -323,7 +325,7 @@ export async function ragPipeline(
     translated_answer = await translate(
       english_answer,
       user_query_language_name,
-      stream_callback_msg2
+      stream_callback_msg2,
     );
   }
 

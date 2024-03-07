@@ -1,5 +1,5 @@
 const blockToken = "```";
-const sectionDelimiter = '\n\n';
+const sectionDelimiter = "\n\n";
 
 function blockTokenCount(markdown: string): number {
   return markdown.split(blockToken).length - 1;
@@ -19,23 +19,23 @@ export function splitToSections(markdown: string | null): string[] {
   for (let i = 0; i < sections.length; i++) {
     if (hasOpenCodeBlock(sections[i])) {
       let a = i + 1;
-      while (hasOpenCodeBlock(sections[i]) && a <= (sections.length - 1)) {
+      while (hasOpenCodeBlock(sections[i]) && a <= sections.length - 1) {
         console.log(`Merging section ${i} and ${a}`);
-        sections[i] = (sections[i] || "") + sectionDelimiter + (sections[a] || "");
+        sections[i] =
+          (sections[i] || "") + sectionDelimiter + (sections[a] || "");
         sections[a] = "";
         a += 1;
       }
     }
   }
 
-  sections = sections.filter(section => !isNullOrEmpty(section));
+  sections = sections.filter((section) => !isNullOrEmpty(section));
 
   return sections;
 }
 
-
 export function isNullOrEmpty(inputStr: string | null | undefined): boolean {
-  if (inputStr === undefined || inputStr == null || inputStr == '') {
+  if (inputStr === undefined || inputStr == null || inputStr == "") {
     return true;
   }
   return false;

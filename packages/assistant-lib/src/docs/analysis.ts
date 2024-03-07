@@ -38,7 +38,7 @@ const UserQueryAnalysisSchema = z.object({
 export type UserQueryAnalysis = z.infer<typeof UserQueryAnalysisSchema> | null;
 
 export async function userInputAnalysis(
-  userInput: string
+  userInput: string,
 ): Promise<UserQueryAnalysis> {
   let queryResult: UserQueryAnalysis | null = null;
 
