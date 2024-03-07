@@ -294,6 +294,7 @@ export async function ragPipeline(
     translated_answer = english_answer;
     rag_success = true;
   } else {
+    // OpenAI streaming
     english_answer = await chat_stream(
       [
         {

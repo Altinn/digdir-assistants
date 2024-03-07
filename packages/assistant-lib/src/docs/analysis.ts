@@ -64,6 +64,7 @@ export async function userInputAnalysis(
         { role: "system", content: stage1_analyze_query },
         { role: "user", content: `[USER INPUT]\n${userInput}` },
       ],
+      max_retries: 0,
     });
   }
 

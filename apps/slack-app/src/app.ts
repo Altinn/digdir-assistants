@@ -2,7 +2,7 @@ import { App, ExpressReceiver, LogLevel, GenericMessageEvent, Block } from '@sla
 import { ChatUpdateResponse } from '@slack/web-api';
 import { SocketModeClient } from '@slack/socket-mode';
 import { createServer } from 'http';
-import { envVar, round, lapTimer } from '@digdir/assistant-lib';
+import { envVar, round, lapTimer, timeoutPromise } from '@digdir/assistant-lib';
 import {
   getEventContext,
   timeSecondsToMs,
@@ -15,6 +15,8 @@ import { ragPipeline, RagPipelineResult } from '@digdir/assistant-lib';
 import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import { splitToSections, isNullOrEmpty } from '@digdir/assistant-lib';
 import OpenAI from 'openai';
+import { number } from 'zod';
+import { isNumber } from 'remeda';
 
 const expressReceiver = new ExpressReceiver({
   signingSecret: envVar('SLACK_BOT_SIGNING_SECRET'),
@@ -29,13 +31,12 @@ const app = new App({
 
 // Listens to incoming messages
 app.message(async ({ message, say }) => {
-
   if (envVar('DEBUG_SLACK') == true) {
     console.log('-- incoming slack message event payload --');
     console.log(JSON.stringify(message, null, 2));
   }
 
-  const genericMsg = message as GenericMessageEvent
+  const genericMsg = message as GenericMessageEvent;
   var srcEvtContext = getEventContext(genericMsg);
   var userInput = ((genericMsg as GenericMessageEvent).text || '').trim();
 
@@ -66,50 +67,63 @@ app.message(async ({ message, say }) => {
     thread_ts: genericMsg.ts,
   });
 
-  let queryAnalysisResult: UserQueryAnalysis | null = null;
+  let queryAnalysisResult: UserQueryAnalysis | unknown = null;
   let analysisError = null;
 
   var start = performance.now();
+
   try {
-    queryAnalysisResult = await userInputAnalysis(userInput);
+    // guard with a hard 10 second timeout
+    queryAnalysisResult = await Promise.race([
+      userInputAnalysis(userInput),
+      timeoutPromise(envVar('LLM_TIMEOUT', 10000)),
+    ]);
   } catch (error) {
-    console.error(`stage1_analyze ERROR: ${JSON.stringify(error)}`);
-    analysisError = JSON.stringify(error);
+    if (error instanceof Error) {
+      analysisError = error.message;
+    } else {
+      analysisError = JSON.stringify(error);
+    }
+    console.error(`stage1_analyze ERROR: ${analysisError}`);
   }
   const stage1Duration = round(lapTimer(start));
 
   if (analysisError != null) {
     const error_logEntry = BotLogEntry.create({
       slack_context: getEventContext(genericMsg as GenericMessageEvent),
-      elapsed_ms: timeSecondsToMs(lapTimer(start)),
+      elapsed_ms: timeSecondsToMs(stage1Duration),
       step_name: 'stage1_analyze',
       payload: {
         bot_name: 'docs',
-        original_user_query: userInput,        
+        original_user_query: userInput,
         error: analysisError,
       },
     });
-    await botLog(error_logEntry);
+    try {
+      await botLog(error_logEntry);
+    } catch (dblog_error) {
+      console.error(`Error occurred while logging an error to DB:\n${JSON.stringify(dblog_error)}`);
+    }
 
     try {
       await app.client.chat.update({
         channel: firstThreadTs.channel,
         ts: firstThreadTs.ts,
-        text: `Sorry, an error occurred while analyzing your query.\nThis sometimes happens when using certain characters.`,
+        text: `An unexpected error occurred while analyzing your query.\nPlease try to rephrase your request.`,
         as_user: true,
       });
     } catch (e) {
       console.log(`Error attempting to update app reply ${e}`);
     }
+    // can't process this query any further
     return;
-
   }
 
   if (envVar('LOG_LEVEL') == 'debug') {
     console.log(`stage1_analyze results:\n${JSON.stringify(queryAnalysisResult, null, 2)}`);
   }
 
-  const stage1Result = queryAnalysisResult!;
+  const stage1Result = (queryAnalysisResult as UserQueryAnalysis)!;
   let analyze_logEntry = BotLogEntry.create({
     slack_context: srcEvtContext,
     elapsed_ms: timeSecondsToMs(stage1Duration),
@@ -270,7 +284,9 @@ app.message(async ({ message, say }) => {
     // Log the bot operation
     rag_logEntry = BotLogEntry.create({
       slack_context: getThreadResponseContext(srcEvtContext, firstThreadTs.ts),
-      elapsed_ms: timeSecondsToMs(ragResponse.durations.total + stage1Duration - ragResponse.durations.translation),
+      elapsed_ms: timeSecondsToMs(
+        ragResponse.durations.total + stage1Duration - ragResponse.durations.translation,
+      ),
       durations: ragResponse.durations,
       step_name: 'rag_with_typesense',
       payload: {
@@ -282,7 +298,9 @@ app.message(async ({ message, say }) => {
     // Log the bot operation
     rag_logEntry = BotLogEntry.create({
       slack_context: getChatUpdateContext(srcEvtContext, finalResponse),
-      elapsed_ms: timeSecondsToMs(ragResponse.durations.total + stage1Duration - ragResponse.durations.translation),
+      elapsed_ms: timeSecondsToMs(
+        ragResponse.durations.total + stage1Duration - ragResponse.durations.translation,
+      ),
       durations: ragResponse.durations,
       step_name: 'rag_with_typesense',
       payload: payload,
@@ -559,6 +577,16 @@ function debugMessageBlocks(botLog: BotLogEntry): Array<Block> {
 }
 
 (async () => {
+
+  // check important envVars
+  const _LLM_TIMEOUT = Number(envVar('LLM_TIMEOUT', 10000));
+  if (_LLM_TIMEOUT !== null && isNaN(_LLM_TIMEOUT)) {
+    throw new Error(`_LLM_TIMEOUT must be a number or a string that represents a number. Current value: ${_LLM_TIMEOUT} `);
+  }
+  if (isNumber(_LLM_TIMEOUT) && Number(_LLM_TIMEOUT) < 6000) {
+    throw new Error("_LLM_TIMEOUT must be at least 6000 ms.");
+  }
+
   const server = createServer(expressReceiver.app);
 
   server.listen(process.env.PORT || 3000, () => {
