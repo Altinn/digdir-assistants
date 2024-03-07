@@ -87,7 +87,8 @@ export function UtcNowTimestamptz(): string {
 }
 
 export function timeSecondsToMs(time_diff: number): number {
-  return time_diff * 1000;
+  const time_diff_int = parseInt((time_diff * 1000).toString());
+  return time_diff_int;
 }
 
 export function isUserAdmin(app: any, user_id: string): void {
