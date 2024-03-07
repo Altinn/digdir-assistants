@@ -12,7 +12,8 @@ const envVar = scopedEnvVar(stage_name);
 // const azureClient = azure_client();
 const openaiClientInstance = Instructor({
     client: openaiClient() as any,
-    mode: "FUNCTIONS"
+    mode: "FUNCTIONS",
+    debug: envVar('DEBUG_INSTRUCTOR')
 });
 
 const QueryRelaxationSchema = z.object({

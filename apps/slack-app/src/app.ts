@@ -29,7 +29,12 @@ const app = new App({
 
 // Listens to incoming messages
 app.message(async ({ message, say }) => {
-  console.log('-- incoming slack message event payload --');
+
+  if (envVar('DEBUG_SLACK') == true) {
+    console.log('-- incoming slack message event payload --');
+    console.log(JSON.stringify(message, null, 2));
+  }
+
   const genericMsg = message as GenericMessageEvent
   var srcEvtContext = getEventContext(genericMsg);
   var userInput = ((genericMsg as GenericMessageEvent).text || '').trim();
@@ -60,25 +65,51 @@ app.message(async ({ message, say }) => {
     text: 'Thinking...',
     thread_ts: genericMsg.ts,
   });
-  console.log(JSON.stringify(genericMsg, null, 2));
 
-  const selectBot_LogEntry = BotLogEntry.create({
-    slack_context: srcEvtContext,
-    elapsed_ms: 0,
-    step_name: 'select_bot',
-    payload: { user_input: userInput, bot_name: 'docs' },
-  });
-  botLog(selectBot_LogEntry);
+  let queryAnalysisResult: UserQueryAnalysis | null = null;
+  let analysisError = null;
 
   var start = performance.now();
-  const stage1Result = await userInputAnalysis(userInput);
+  try {
+    queryAnalysisResult = await userInputAnalysis(userInput);
+  } catch (error) {
+    console.error(`stage1_analyze ERROR: ${JSON.stringify(error)}`);
+    analysisError = JSON.stringify(error);
+  }
   const stage1Duration = round(lapTimer(start));
 
-  if (!stage1Result) {
-    console.warn(`Error analysing user input: ${userInput}`);
+  if (analysisError != null) {
+    const error_logEntry = BotLogEntry.create({
+      slack_context: getEventContext(genericMsg as GenericMessageEvent),
+      elapsed_ms: timeSecondsToMs(lapTimer(start)),
+      step_name: 'stage1_analyze',
+      payload: {
+        bot_name: 'docs',
+        original_user_query: userInput,        
+        error: analysisError,
+      },
+    });
+    await botLog(error_logEntry);
+
+    try {
+      await app.client.chat.update({
+        channel: firstThreadTs.channel,
+        ts: firstThreadTs.ts,
+        text: `Sorry, an error occurred while analyzing your query.\nThis sometimes happens when using certain characters.`,
+        as_user: true,
+      });
+    } catch (e) {
+      console.log(`Error attempting to update app reply ${e}`);
+    }
     return;
+
   }
 
+  if (envVar('LOG_LEVEL') == 'debug') {
+    console.log(`stage1_analyze results:\n${JSON.stringify(queryAnalysisResult, null, 2)}`);
+  }
+
+  const stage1Result = queryAnalysisResult!;
   let analyze_logEntry = BotLogEntry.create({
     slack_context: srcEvtContext,
     elapsed_ms: timeSecondsToMs(stage1Duration),

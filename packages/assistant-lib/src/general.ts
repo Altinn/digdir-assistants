@@ -18,7 +18,10 @@ export function envVarWithScope(varName: string, scopeName: string, defaultValue
         result = process.env[varName] || defaultValue;
     }
 
-    console.log(`varName: ${varName}, scope: ${scopeName}, value: ${result}`)
+    
+    if (varName != 'LOG_LEVEL' && envVarWithScope('LOG_LEVEL', scopeName) == 'debug') {
+        console.debug(`varName: ${varName}, scope: ${scopeName}, value: ${result}`)
+    }
     return result;
 }
 
