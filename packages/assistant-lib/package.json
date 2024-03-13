@@ -15,6 +15,7 @@
     "@supabase/supabase-js": "^2.39.7",
     "axios": "^1.6.7",
     "dataclass": "^2.1.1",
+    "groq-sdk": "^0.3.2",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "openai": "^4.28.0",

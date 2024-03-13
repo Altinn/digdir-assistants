@@ -1,7 +1,8 @@
 import Instructor from "@instructor-ai/instructor";
 import { z } from "zod";
 
-import { openaiClient } from "../llm";
+import Groq from 'groq-sdk';
+import { openaiClient, groqClient } from "../llm";
 import { scopedEnvVar } from "../general";
 import { stage1_analyze_query } from "./prompts";
 
@@ -13,6 +14,12 @@ const openaiClientInstance = Instructor({
   client: openaiClient() as any,
   mode: "FUNCTIONS",
   debug: envVar("DEBUG_INSTRUCTOR"),
+});
+
+const groqApi = Instructor({
+    client: groqClient() as any,
+    mode: "FUNCTIONS",
+    debug: envVar("DEBUG_INSTRUCTOR"),
 });
 
 const UserQueryAnalysisSchema = z.object({
@@ -42,7 +49,22 @@ export async function userInputAnalysis(
 ): Promise<UserQueryAnalysis> {
   let queryResult: UserQueryAnalysis | null = null;
 
-  if (envVar("USE_AZURE_OPENAI_API", false) === "true") {
+  if (envVar("USE_GROQ_API") === "true") {
+    queryResult = await groqApi.chat.completions.create({
+        model: envVar("GROQ_API_MODEL_NAME", ""),
+        response_model: {
+          schema: UserQueryAnalysisSchema,
+          name: "UserQueryAnalysis",
+        },
+        temperature: 0.1,
+        messages: [
+          { role: "system", content: stage1_analyze_query },
+          { role: "user", content: `[USER INPUT]\n${userInput}` },
+        ],
+        max_retries: 0,
+      });      
+
+  } else if (envVar("USE_AZURE_OPENAI_API") === "true") {
     // queryResult = await azureClientInstance.chat.completions.create({
     //     model: envVar('AZURE_OPENAI_DEPLOYMENT'),
     //     response_model: { schema: UserQueryAnalysisSchema, name: "UserQueryAnalysis" },
@@ -53,7 +75,7 @@ export async function userInputAnalysis(
     //     ],
     // });
   } else {
-    queryResult = await openaiClientInstance.chat.completions.create({
+    queryResult = await openaiClientInstance.chat.completions.create({        
       model: envVar("OPENAI_API_MODEL_NAME", ""),
       response_model: {
         schema: UserQueryAnalysisSchema,

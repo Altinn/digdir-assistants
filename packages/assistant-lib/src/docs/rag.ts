@@ -7,7 +7,7 @@ import {
 import { translate } from "./translate";
 import { isValidUrl, lapTimer, scopedEnvVar, round } from "../general";
 import {} from "./translate";
-import { chat_stream, openaiClient } from "../llm";
+import { chat_stream, groqClient, openaiClient } from "../llm";
 import { typesenseConfig } from "../config/typesense";
 import axios from "axios";
 import { z } from "zod";
@@ -19,6 +19,7 @@ const envVar = scopedEnvVar(stage_name);
 const cfg = typesenseConfig();
 // const azureClient = azure_client();
 const _openaiClient = openaiClient();
+const _groqApi = groqClient();
 
 const RagContextRefsSchema = z.object({
   source: z.string().min(1),
@@ -263,7 +264,27 @@ export async function ragPipeline(
     .replace("{question}", user_input);
 
   if (typeof stream_callback_msg1 !== "function") {
-    if (envVar("USE_AZURE_OPENAI_API") === true) {
+    if (envVar("USE_GROQ_API") === "true") {
+
+        console.log('Using GROQ for RAG stage...')
+        const chatResponse = await _groqApi.chat.completions.create({
+            model: envVar("GROQ_API_MODEL_NAME"),
+            temperature: 0.1,
+            messages: [
+              {
+                role: "system",
+                content: "You are a helpful assistant.",
+              },
+              {
+                role: "user",
+                content: fullPrompt,
+              },
+            ],
+          });
+
+        english_answer = chatResponse.choices[0].message.content || "";
+    
+      } else if (envVar("USE_AZURE_OPENAI_API") === true) {
       // const chatResponse = await azureClient.chat.completions.create({
       //     model: envVar('AZURE_OPENAI_DEPLOYMENT'),
       //     temperature: 0.1,

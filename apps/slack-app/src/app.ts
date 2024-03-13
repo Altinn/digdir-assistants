@@ -15,7 +15,7 @@ import { ragPipeline, RagPipelineResult } from '@digdir/assistant-lib';
 import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import { splitToSections, isNullOrEmpty } from '@digdir/assistant-lib';
 import OpenAI from 'openai';
-import { number } from 'zod';
+import Groq from 'groq-sdk';
 import { isNumber } from 'remeda';
 
 const expressReceiver = new ExpressReceiver({
@@ -73,11 +73,21 @@ app.message(async ({ message, say }) => {
   var start = performance.now();
 
   try {
-    // guard with a hard 10 second timeout
-    queryAnalysisResult = await Promise.race([
-      userInputAnalysis(userInput),
-      timeoutPromise(envVar('LLM_TIMEOUT', 10000)),
-    ]);
+    if (envVar("USE_GROQ_API") == "true") {
+      console.log('Using GROQ for analysis, considering everything an English - Support Request')
+      queryAnalysisResult = {
+        userInputLanguageCode: 'en',
+        userInputLanguageName: 'English',
+        questionTranslatedToEnglish: userInput,
+        contentCategory: "Support Request",
+      }
+    } else {
+      // guard with a hard 10 second timeout
+      queryAnalysisResult = await Promise.race([
+        userInputAnalysis(userInput),
+        timeoutPromise(envVar('LLM_TIMEOUT', 10000)),
+      ]);
+    }
   } catch (error) {
     if (error instanceof Error) {
       analysisError = error.message;
@@ -198,8 +208,8 @@ app.message(async ({ message, say }) => {
     ragResponse = await ragPipeline(
       stage1Result.questionTranslatedToEnglish,
       stage1Result.userInputLanguageName,
-      updateSlackMsgCallback(app, firstThreadTs),
-      translatedMsgCallback,
+      // updateSlackMsgCallback(app, firstThreadTs),
+      // translatedMsgCallback,
     );
 
     ragResponse.durations.analyze = stage1Duration;
