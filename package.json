@@ -8,7 +8,9 @@
   "scripts": {
     "build:assistant-lib": "tsc -p ./packages/assistant-lib/",
     "build:slack-app": "tsc -p ./apps/slack-app/",
-    "run:slack-app": "node ./apps/slack-app/dist/src/app.js"
+    "build": "yarn run build:assistant-lib && yarn run build:slack-app",
+    "run:slack-app": "node ./apps/slack-app/dist/src/app.js",
+    "watch:slack-app": "pushd apps/slack-app && yarn run watch && popd"
   },
   "devDependencies": {
     "typescript": "^5.3.3"
