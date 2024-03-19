@@ -376,11 +376,14 @@ async function handleReactionEvents(eventBody: any) {
     const botInfo = await app.client.auth.test();
     const botId = botInfo.user_id;
 
-    if (channelInfo?.channel?.is_member != true) {
-      if (envVar('DEBUG_SLACK') == 'true') {
-        console.log(`Bot is not in the channel ${eventBody?.body?.event?.item?.channel}`);
+    const eventUserId = eventBody?.body?.event?.item_user;
+    if (envVar('LOG_LEVEL') === 'debug') {
+      if (botId === eventUserId) {
+        console.log('Reaction on message from Assistant, will update reactions in DB');
+      } else {
+        console.log('Reaction was for something else, ignoring.');
+        return;
       }
-      return;
     }
 
     const messageInfo = await app.client.reactions.get(context);
