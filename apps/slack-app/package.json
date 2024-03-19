@@ -19,8 +19,8 @@
     "@digdir/assistant-lib": "*",
     "@instructor-ai/instructor": "^0.0.7",
     "@slack/bolt": "^3.17.1",
-    "@supabase/supabase-js": "^2.39.3",
-    "axios": "^1.6.7",
+    "@supabase/supabase-js": "^2.39.8",
+    "axios": "^1.6.8",
     "dataclass": "^2.1.1",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
@@ -33,7 +33,6 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^20.11.20",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
     "eslint": "^8.56.0",
