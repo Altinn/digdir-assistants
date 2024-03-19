@@ -54,14 +54,27 @@ export async function ragPipeline(
   stream_callback_msg1: any = null,
   stream_callback_msg2: any = null,
 ): Promise<RagPipelineResult> {
-  const durations: any = {
+
+  type Durations = {
+    total: number,
+    analyze: number,
+    prepare_searches: number,
+    execute_searches: number,
+    compare_phrases: number,
+    colbert_rerank: number,
+    prepare_rag_query: number,
+    execute_rag_query: number,
+    translation: number,
+  };
+  const durations: Durations = {
     total: 0,
     analyze: 0,
-    generate_searches: 0,
+    prepare_searches: 0,
     execute_searches: 0,
-    phrase_similarity_search: 0,
+    compare_phrases: 0,
     colbert_rerank: 0,
-    rag_query: 0,
+    prepare_rag_query: 0,
+    execute_rag_query: 0,
     translation: 0,
   };
 
@@ -72,7 +85,7 @@ export async function ragPipeline(
   var start = total_start;
 
   const extract_search_queries = await queryRelaxation(user_input);
-  durations.generate_searches = round(lapTimer(total_start));
+  durations.prepare_searches = round(lapTimer(total_start));
 
   if (envVar("LOG_LEVEL") === "debug") {
     console.log(
@@ -84,7 +97,7 @@ export async function ragPipeline(
   const search_phrase_hits = await lookupSearchPhrasesSimilar(
     extract_search_queries,
   );
-  durations["phrase_similarity_search"] = round(lapTimer(start));
+  durations.compare_phrases = round(lapTimer(start));
 
   if (envVar("LOG_LEVEL") === "debug") {
     console.log(
@@ -94,7 +107,7 @@ export async function ragPipeline(
   }
   start = performance.now();
   const search_response = await retrieveAllByUrl(search_phrase_hits);
-  durations["execute_searches"] = round(lapTimer(start));
+  durations.execute_searches = round(lapTimer(start));
 
   if (envVar("LOG_LEVEL") === "debug") {
     console.log("Search response:", JSON.stringify(search_response));
@@ -263,6 +276,9 @@ export async function ragPipeline(
     .replace("{context}", contextYaml)
     .replace("{question}", user_input);
 
+  durations.prepare_rag_query = round(lapTimer(start));
+  start = performance.now();
+
   if (typeof stream_callback_msg1 !== "function") {
     if (envVar("USE_GROQ_API") === "true") {
       console.log("Using GROQ for RAG stage...");
@@ -282,6 +298,12 @@ export async function ragPipeline(
       });
 
       english_answer = chatResponse.choices[0].message.content || "";
+
+      console.log(`RAG with GROQ, completion time: ${chatResponse.usage?.completion_time}`);
+
+      durations.prepare_rag_query = round(lapTimer(start) - (chatResponse.usage?.completion_time || 0));
+      durations.execute_rag_query = round(chatResponse.usage?.completion_time || 0);
+
     } else if (envVar("USE_AZURE_OPENAI_API") === true) {
       // const chatResponse = await azureClient.chat.completions.create({
       //     model: envVar('AZURE_OPENAI_DEPLOYMENT'),
@@ -309,6 +331,7 @@ export async function ragPipeline(
         ],
       });
       english_answer = chatResponse.choices[0].message.content || "";
+      durations.execute_rag_query = round(lapTimer(start));
     }
     translated_answer = english_answer;
     rag_success = true;
@@ -329,9 +352,8 @@ export async function ragPipeline(
     );
     translated_answer = english_answer;
     rag_success = true;
-  }
-
-  durations["rag_query"] = round(lapTimer(start));
+    durations.execute_rag_query = round(lapTimer(start));
+  }  
 
   // Translation logic
   start = performance.now();
@@ -349,8 +371,8 @@ export async function ragPipeline(
     );
   }
 
-  durations["translation"] = round(lapTimer(start));
-  durations["total"] = round(lapTimer(total_start));
+  durations.translation = round(lapTimer(start));
+  durations.total = round(lapTimer(total_start));
 
   const response: RagPipelineResult = {
     original_user_query: user_input,

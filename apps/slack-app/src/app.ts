@@ -374,7 +374,9 @@ async function handleReactionEvents(eventBody: any) {
     return;
   }
 
-  console.log('event:', JSON.stringify(eventBody));
+  if (envVar('LOG_LEVEL') === 'debug') {
+    console.log('event:', JSON.stringify(eventBody));
+  }
 
   try {
     const itemContext = getReactionItemContext(eventBody);
