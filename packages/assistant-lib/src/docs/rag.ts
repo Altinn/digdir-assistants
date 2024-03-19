@@ -265,26 +265,24 @@ export async function ragPipeline(
 
   if (typeof stream_callback_msg1 !== "function") {
     if (envVar("USE_GROQ_API") === "true") {
+      console.log("Using GROQ for RAG stage...");
+      const chatResponse = await _groqApi.chat.completions.create({
+        model: envVar("GROQ_API_MODEL_NAME"),
+        temperature: 0.1,
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful assistant.",
+          },
+          {
+            role: "user",
+            content: fullPrompt,
+          },
+        ],
+      });
 
-        console.log('Using GROQ for RAG stage...')
-        const chatResponse = await _groqApi.chat.completions.create({
-            model: envVar("GROQ_API_MODEL_NAME"),
-            temperature: 0.1,
-            messages: [
-              {
-                role: "system",
-                content: "You are a helpful assistant.",
-              },
-              {
-                role: "user",
-                content: fullPrompt,
-              },
-            ],
-          });
-
-        english_answer = chatResponse.choices[0].message.content || "";
-    
-      } else if (envVar("USE_AZURE_OPENAI_API") === true) {
+      english_answer = chatResponse.choices[0].message.content || "";
+    } else if (envVar("USE_AZURE_OPENAI_API") === true) {
       // const chatResponse = await azureClient.chat.completions.create({
       //     model: envVar('AZURE_OPENAI_DEPLOYMENT'),
       //     temperature: 0.1,

@@ -30,7 +30,7 @@ const QueryRelaxationSchema = z.object({
 export type QueryRelaxation = z.infer<typeof QueryRelaxationSchema> | null;
 
 export async function queryRelaxation(
-  user_input: string
+  user_input: string,
 ): Promise<QueryRelaxation> {
   let query_result: QueryRelaxation | null = null;
 
@@ -49,9 +49,11 @@ Only reply with valid JSON, such as:
 `;
 
   if (envVar("USE_GROQ_API") == "true") {
-    console.log(
-      `${stage_name} model name: ${envVar("GROQ_API_MODEL_NAME", "")}`
-    );  
+    if (envVar("LOG_LEVEL") == "debug") {
+      console.log(
+        `${stage_name} model name: ${envVar("GROQ_API_MODEL_NAME", "")}`,
+      );
+    }
 
     const raw_query_result = await rawGroq.chat.completions.create({
       model: envVar("GROQ_API_MODEL_NAME"),
@@ -70,10 +72,13 @@ Only reply with valid JSON, such as:
       ],
     });
 
-    console.log(`QueryRelaxation response: ${JSON.stringify(raw_query_result)}`);
+    if (envVar("LOG_LEVEL") == "debug") {
+      console.log(
+        `QueryRelaxation response: ${JSON.stringify(raw_query_result)}`,
+      );
+    }
     const parsed = JSON.parse(raw_query_result.choices[0]?.message?.content);
     query_result = parsed;
-
   } else if (envVar("USE_AZURE_OPENAI_API") == "true") {
     //         query_result = await azureClient.chat.completions.create({
     //             model: envVar('AZURE_OPENAI_DEPLOYMENT'),
@@ -89,7 +94,7 @@ Only reply with valid JSON, such as:
     //         });
   } else {
     console.log(
-      `${stage_name} model name: ${envVar("OPENAI_API_MODEL_NAME", "")}`
+      `${stage_name} model name: ${envVar("OPENAI_API_MODEL_NAME", "")}`,
     );
     query_result = await openaiClientInstance.chat.completions.create({
       model: envVar("OPENAI_API_MODEL_NAME"),

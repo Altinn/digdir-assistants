@@ -2,7 +2,7 @@ import { z } from "zod";
 import { OpenAI } from "openai";
 import { ChatCompletionMessageParam } from "openai/resources";
 import { AzureKeyCredential, OpenAIClient as AzureOpenAI } from "@azure/openai";
-import Groq from 'groq-sdk';
+import Groq from "groq-sdk";
 
 import { envVar, lapTimer } from "./general";
 import { isNullOrEmpty } from "./markdown";
@@ -70,7 +70,7 @@ export function openaiClient(): OpenAI {
 export function groqClient(): Groq {
   const groq = new Groq({
     apiKey: envVar("GROQ_API_KEY"),
-    baseURL: envVar("GROQ_API_URL"),    
+    baseURL: envVar("GROQ_API_URL"),
   });
   return groq;
 }
