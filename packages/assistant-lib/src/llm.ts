@@ -82,7 +82,7 @@ export async function chat_stream(
 
   let llm_client: OpenAI;
 
-  if (envVar("USE_AZURE_OPENAI_API") === true) {
+  if (envVar("USE_AZURE_OPENAI_API") === 'true') {
     console.error("WHY ARE YOU HERE?");
     // console.log(`chat_stream - azure deployment: ${envVar('AZURE_OPENAI_DEPLOYMENT')}`);
 

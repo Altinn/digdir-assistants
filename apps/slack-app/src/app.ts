@@ -31,7 +31,7 @@ const app = new App({
 
 // Listens to incoming messages
 app.message(async ({ message, say }) => {
-  if (envVar('DEBUG_SLACK') == true) {
+  if (envVar('DEBUG_SLACK') == 'true') {
     console.log('-- incoming slack message event payload --');
     console.log(JSON.stringify(message, null, 2));
   }
@@ -577,14 +577,15 @@ function debugMessageBlocks(botLog: BotLogEntry): Array<Block> {
 }
 
 (async () => {
-
   // check important envVars
   const _LLM_TIMEOUT = Number(envVar('LLM_TIMEOUT', 10000));
   if (_LLM_TIMEOUT !== null && isNaN(_LLM_TIMEOUT)) {
-    throw new Error(`_LLM_TIMEOUT must be a number or a string that represents a number. Current value: ${_LLM_TIMEOUT} `);
+    throw new Error(
+      `_LLM_TIMEOUT must be a number or a string that represents a number. Current value: ${_LLM_TIMEOUT} `,
+    );
   }
   if (isNumber(_LLM_TIMEOUT) && Number(_LLM_TIMEOUT) < 6000) {
-    throw new Error("_LLM_TIMEOUT must be at least 6000 ms.");
+    throw new Error('_LLM_TIMEOUT must be at least 6000 ms.');
   }
 
   const server = createServer(expressReceiver.app);

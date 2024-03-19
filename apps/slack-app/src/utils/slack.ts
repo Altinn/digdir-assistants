@@ -1,5 +1,5 @@
 import { GenericMessageEvent } from '@slack/bolt';
-import { ChatUpdateResponse } from '@slack/web-api'
+import { ChatUpdateResponse } from '@slack/web-api';
 import { Data } from 'dataclass';
 
 export class SlackContext extends Data {
@@ -23,29 +23,30 @@ export function getEventContext(evt: GenericMessageEvent): SlackContext {
   return context;
 }
 
-export function getChatUpdateContext(threadStart: SlackContext, evt: ChatUpdateResponse): SlackContext {
+export function getChatUpdateContext(
+  threadStart: SlackContext,
+  evt: ChatUpdateResponse,
+): SlackContext {
   const context = SlackContext.create({
     ts: evt.ts,
     thread_ts: threadStart.ts,
     channel: evt.channel,
     team: threadStart.team,
     user: threadStart.user,
-    time_utc: UtcNowTimestamptz()
+    time_utc: UtcNowTimestamptz(),
   });
   return context;
 }
 
 export function getThreadResponseContext(item: SlackContext, responseTs: string): SlackContext {
-  const context = SlackContext.create(
-    {
-      ts: responseTs,
-      thread_ts: item.thread_ts,
-      channel: item.channel,
-      team: item.team,
-      user: item.user,
-      time_utc: UtcNowTimestamptz(),
-    }
-    );
+  const context = SlackContext.create({
+    ts: responseTs,
+    thread_ts: item.thread_ts,
+    channel: item.channel,
+    team: item.team,
+    user: item.user,
+    time_utc: UtcNowTimestamptz(),
+  });
   context.ts = responseTs;
   return context;
 }

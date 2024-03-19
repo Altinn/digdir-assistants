@@ -35,7 +35,7 @@ export async function queryRelaxation(
     For example, include queries like ['keyword_1 keyword_2', 'keyword_1', 'keyword_2'].
     Be creative. The more queries you include, the more likely you are to find relevant results.`;
 
-  if (envVar("USE_AZURE_OPENAI_API", false) == true) {
+  if (envVar("USE_AZURE_OPENAI_API", false) == 'true') {
     //         query_result = await azureClient.chat.completions.create({
     //             model: envVar('AZURE_OPENAI_DEPLOYMENT'),
     //             response_model: { schema: SearchQueriesSchema, name: "GeneratedSearchQueries" },

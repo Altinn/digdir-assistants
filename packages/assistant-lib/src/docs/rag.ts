@@ -263,7 +263,7 @@ export async function ragPipeline(
     .replace("{question}", user_input);
 
   if (typeof stream_callback_msg1 !== "function") {
-    if (envVar("USE_AZURE_OPENAI_API") === true) {
+    if (envVar("USE_AZURE_OPENAI_API") === 'true') {
       // const chatResponse = await azureClient.chat.completions.create({
       //     model: envVar('AZURE_OPENAI_DEPLOYMENT'),
       //     temperature: 0.1,
