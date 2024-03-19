@@ -6,11 +6,16 @@
     "apps/*"
   ],
   "scripts": {
-    "build:assistant-lib": "tsc -p ./packages/assistant-lib/",
+    "clean": "rimraf packages/assistant-lib/dist/ && rimraf apps/slack-app/dist/",
+    "build:assistant-lib": " tsc -p ./packages/assistant-lib/",
     "build:slack-app": "tsc -p ./apps/slack-app/",
+    "build": "yarn clean && yarn build:assistant-lib && yarn build:slack-app",
     "run:slack-app": "node ./apps/slack-app/dist/src/app.js"
   },
   "devDependencies": {
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "rimraf": "^5.0.5"
   }
 }
