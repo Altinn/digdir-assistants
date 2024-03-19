@@ -8,6 +8,7 @@ export class SlackContext extends Data {
   channel: string = '';
   team: string = '';
   user: string = '';
+  channel_type: string = '';
   time_utc: string = '';
 }
 
@@ -16,6 +17,7 @@ export function getEventContext(evt: GenericMessageEvent): SlackContext {
     ts: evt.ts,
     thread_ts: evt.thread_ts,
     channel: evt.channel,
+    channel_type: evt.channel_type,
     team: evt.team,
     user: evt.user,
     time_utc: tsToTimestamptz(evt.ts),
@@ -43,6 +45,7 @@ export function getThreadResponseContext(item: SlackContext, responseTs: string)
     ts: responseTs,
     thread_ts: item.thread_ts,
     channel: item.channel,
+    channel_type: item.channel_type,
     team: item.team,
     user: item.user,
     time_utc: UtcNowTimestamptz(),
@@ -57,6 +60,7 @@ export function getReactionItemContext(eventBody: any): SlackContext {
     ts: item.ts,
     thread_ts: item.thread_ts,
     channel: item.channel,
+    channel_type: item.channel_type,
     team: item.team,
     user: item.user,
     time_utc: item.event_time_utc,
