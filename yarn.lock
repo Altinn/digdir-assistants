@@ -2539,10 +2539,10 @@ regexp.prototype.flags@^1.5.2:
     es-errors "^1.3.0"
     set-function-name "^2.0.1"
 
-remeda@^1.40.2, remeda@^1.44.1:
-  version "1.46.2"
-  resolved "https://registry.yarnpkg.com/remeda/-/remeda-1.46.2.tgz#611133a25ec8b119deb23246d92882f57b2e5847"
-  integrity sha512-ZpC0t0sAKX+ROyc6tEkbwLBLiURdEgcyDkSTO+CC04CNAsc11z+zjVXZLlAmGHustn4Wo+eAu00OVMqnUj1aOw==
+remeda@^1.54.0:
+  version "1.54.0"
+  resolved "https://registry.yarnpkg.com/remeda/-/remeda-1.54.0.tgz#aec590d31d17d08c2a2604627d3a255808c388d8"
+  integrity sha512-gQ8lazX6VC+/29XTAt7v+ozGpoEg4PYOvZxyCTIhxwGltv4+1yaQvFBUhUzx/POuQ5n1sJvrPGb+q3c8R0bEHg==
 
 resolve-from@^4.0.0:
   version "4.0.0"
