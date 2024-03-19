@@ -65,7 +65,7 @@ export function round(num: number, decimals: number = 1): number {
 // Timer promise factory
 export function timeoutPromise(timeoutMs: number) {
   const timeout = timeoutMs;
-  
+
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       reject(new Error(`Request timed out after ${timeout} ms.`));
