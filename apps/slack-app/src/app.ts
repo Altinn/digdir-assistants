@@ -373,6 +373,16 @@ async function handleReactionEvents(eventBody: any) {
       timestamp: itemContext.ts,
     };
 
+    const botInfo = await app.client.auth.test();
+    const botId = botInfo.user_id;
+
+    if (channelInfo?.channel?.is_member != true) {
+      if (envVar('DEBUG_SLACK') == 'true') {
+        console.log(`Bot is not in the channel ${eventBody?.body?.event?.item?.channel}`);
+      }
+      return;
+    }
+
     const messageInfo = await app.client.reactions.get(context);
     const reactions = messageInfo?.message?.reactions || [];
 
