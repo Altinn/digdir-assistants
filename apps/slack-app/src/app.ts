@@ -15,7 +15,6 @@ import { ragPipeline, RagPipelineResult } from '@digdir/assistant-lib';
 import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import { splitToSections, isNullOrEmpty } from '@digdir/assistant-lib';
 import OpenAI from 'openai';
-import { number } from 'zod';
 import { isNumber } from 'remeda';
 
 const expressReceiver = new ExpressReceiver({
