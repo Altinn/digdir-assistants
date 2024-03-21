@@ -1,3 +1,5 @@
+import { envVar } from "./general";
+
 const blockToken = "```";
 const sectionDelimiter = "\n\n";
 
@@ -20,7 +22,9 @@ export function splitToSections(markdown: string | null): string[] {
     if (hasOpenCodeBlock(sections[i])) {
       let a = i + 1;
       while (hasOpenCodeBlock(sections[i]) && a <= sections.length - 1) {
-        console.log(`Merging section ${i} and ${a}`);
+        if (envVar("LOG_LEVEL") == "debug") {
+          console.log(`Merging section ${i} and ${a}`);
+        }
         sections[i] =
           (sections[i] || "") + sectionDelimiter + (sections[a] || "");
         sections[a] = "";

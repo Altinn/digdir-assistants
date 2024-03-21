@@ -27,7 +27,7 @@ export async function translate(
   if (typeof stream_callback === "function") {
     translated = await chat_stream(messages, stream_callback);
   } else {
-    if (envVar("USE_AZURE_OPENAI_API") === 'true') {
+    if (envVar("USE_AZURE_OPENAI_API") === "true") {
       // query_result = await azureLlm.chat.completions.create({
       //   model: envVar('AZURE_OPENAI_DEPLOYMENT'),
       //   temperature: 0.1,

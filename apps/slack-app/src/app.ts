@@ -2,20 +2,21 @@ import { App, ExpressReceiver, LogLevel, GenericMessageEvent, Block } from '@sla
 import { ChatUpdateResponse } from '@slack/web-api';
 import { SocketModeClient } from '@slack/socket-mode';
 import { createServer } from 'http';
-import { envVar, round, lapTimer, timeoutPromise } from '@digdir/assistant-lib';
 import {
   getEventContext,
   timeSecondsToMs,
   getReactionItemContext,
   getThreadResponseContext,
   getChatUpdateContext,
+  SlackApp,
 } from './utils/slack';
+import { lookupConfig } from './utils/bot-config';
+import { envVar, round, lapTimer, timeoutPromise } from '@digdir/assistant-lib';
 import { userInputAnalysis, UserQueryAnalysis } from '@digdir/assistant-lib';
 import { ragPipeline, RagPipelineResult } from '@digdir/assistant-lib';
-import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import { splitToSections, isNullOrEmpty } from '@digdir/assistant-lib';
+import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import OpenAI from 'openai';
-import { number } from 'zod';
 import { isNumber } from 'remeda';
 
 const expressReceiver = new ExpressReceiver({
@@ -29,12 +30,29 @@ const app = new App({
   logLevel: LogLevel.INFO,
 });
 
+const slackApp: SlackApp = new SlackApp({
+  app_id: '',
+  bot_name: 'docs',
+});
+
+async function ensureBotContext() {
+  if (slackApp.app_id == '') {
+    const appInfo = await app.client.auth.test();
+    slackApp.app_id = appInfo.user_id || '';
+  }
+  if (slackApp.app_id == '') {
+    console.error(`app_id not set!`);
+  }
+}
+
 // Listens to incoming messages
 app.message(async ({ message, say }) => {
   if (envVar('DEBUG_SLACK') == 'true') {
     console.log('-- incoming slack message event payload --');
     console.log(JSON.stringify(message, null, 2));
   }
+
+  await ensureBotContext();
 
   const genericMsg = message as GenericMessageEvent;
   var srcEvtContext = getEventContext(genericMsg);
@@ -59,6 +77,35 @@ app.message(async ({ message, say }) => {
   if (genericMsg.subtype === 'message_deleted') {
     console.log('Ignoring "Message deleted" event.');
     return;
+  }
+
+  // we have eliminated as many message types as we can
+
+  const ignoreWhenNotTagged = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'ignoreWhenNotTagged',
+    true,
+  );
+
+  if (envVar('LOG_LEVEL') == 'debug') {
+    console.log(`slackApp:\n${JSON.stringify(slackApp)}`);
+    console.log(`slackContext:\n${JSON.stringify(srcEvtContext)}`);
+  }
+
+  if (genericMsg.text && genericMsg.text.includes(`<@${slackApp.app_id}>`)) {
+    if (envVar('LOG_LEVEL') == 'debug') {
+      console.log('Bot was mentioned in the message.');
+    }
+  } else {
+    if (ignoreWhenNotTagged == true) {
+      if (envVar('LOG_LEVEL') == 'debug') {
+        console.log(
+          'Bot was not mentioned in the message and ignoreWhenNotTagged is true, ignoring message.',
+        );
+      }
+      return;
+    }
   }
 
   // #1 - Response with "Thinking..."
@@ -364,11 +411,14 @@ async function handleReactionEvents(eventBody: any) {
     return;
   }
 
-  console.log('event:', JSON.stringify(eventBody));
+  if (envVar('LOG_LEVEL') == 'debug') {
+    console.log('event:', JSON.stringify(eventBody));
+  }
 
   try {
     const itemContext = getReactionItemContext(eventBody);
     const context = {
+      team: itemContext.team,
       channel: itemContext.channel,
       timestamp: itemContext.ts,
     };
@@ -389,9 +439,13 @@ async function handleReactionEvents(eventBody: any) {
     const messageInfo = await app.client.reactions.get(context);
     const reactions = messageInfo?.message?.reactions || [];
 
-    const dbLog = await updateReactions(itemContext, reactions);
+    const dbLog = await updateReactions(slackApp, itemContext, reactions);
 
-    // console.log('reactions: ', JSON.stringify(reactions));
+    if (envVar('LOG_LEVEL') == 'info' || envVar('LOG_LEVEL') == 'debug') {
+      console.log(
+        `updated reactions:\ncontext: ${JSON.stringify(itemContext)}\nreactions: ${JSON.stringify(reactions)}`,
+      );
+    }
 
     if (
       eventBody?.body?.event?.type == 'reaction_added' &&
@@ -457,11 +511,13 @@ function updateSlackMsgCallback(
       text: { type: 'mrkdwn', text: paragraph },
     }));
 
-    console.log(
-      `Partial response update for channel '${threadTs.channel}' ts ${
-        threadTs.ts
-      }, time: ${Date.now()}`,
-    );
+    if (envVar('LOG_LEVEL') == 'debug') {
+      console.log(
+        `Partial response update for channel '${threadTs.channel}' ts ${
+          threadTs.ts
+        }, time: ${Date.now()}`,
+      );
+    }
 
     try {
       await slackApp.client.chat.update({

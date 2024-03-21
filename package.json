@@ -7,8 +7,9 @@
   ],
   "scripts": {
     "clean": "rimraf packages/assistant-lib/dist/ && rimraf apps/slack-app/dist/",
-    "build:assistant-lib": " tsc -p ./packages/assistant-lib/",
-    "build:slack-app": "tsc -p ./apps/slack-app/",
+    "prettier": "prettier packages/assistant-lib/src/ --write && prettier ./apps/slack-app/src/ --write",
+    "build:assistant-lib": "prettier ./packages/assistant-lib/src/ --write && tsc -p ./packages/assistant-lib/",
+    "build:slack-app": "prettier ./apps/slack-app/src/ --write && tsc -p ./apps/slack-app/",
     "build": "yarn clean && yarn build:assistant-lib && yarn build:slack-app",
     "run:slack-app": "node ./apps/slack-app/dist/src/app.js"
   },
@@ -16,6 +17,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "prettier": "^3.2.5",
     "rimraf": "^5.0.5"
   }
 }
