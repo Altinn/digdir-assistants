@@ -38,6 +38,9 @@ export async function lookupConfig<T>(
 
   if (matching) {
     for (let value of matching) {
+      if (envVar('LOG_LEVEL') == 'debug') {
+        console.log(`before merge:\n${JSON.stringify(merged)}\nmerging with:\n${JSON.stringify(value)}`);
+      }
       merged = { ...merged, ...value.config };
     }
   }
@@ -90,22 +93,30 @@ function matchingConfigDbRows(
 
   configDbRows.sort(sortBotConfig);
 
+  if (envVar('LOG_LEVEL') == 'debug') {
+    console.log(`matching config db rows for app: ${JSON.stringify(app)}, context: ${JSON.stringify(context)}`);
+  }
+
   for (let configDbRow of configDbRows) {
-    if (
-      (isNullOrEmpty(configDbRow.slack_app?.app_id) ||
-        configDbRow.slack_app?.app_id === app.app_id) &&
-      (isNullOrEmpty(configDbRow.slack_context?.channel) ||
-        configDbRow.slack_context?.channel === context.channel) &&
-      (isNullOrEmpty(configDbRow.slack_context?.team) ||
-        configDbRow.slack_context?.team === context.team) &&
-      (isNullOrEmpty(configDbRow.slack_app?.bot_name) ||
-        configDbRow.slack_app?.bot_name == app.bot_name)
-    ) {
+    const app_id_matches = (isNullOrEmpty(configDbRow.slack_app?.app_id) ||
+      configDbRow.slack_app?.app_id == app.app_id);
+    const channel_matches = (isNullOrEmpty(configDbRow.slack_context?.channel) ||
+    configDbRow.slack_context?.channel == context.channel);
+    const team_matches = (isNullOrEmpty(configDbRow.slack_context?.team) ||
+    configDbRow.slack_context?.team == context.team)
+    const bot_name_matches = (isNullOrEmpty(configDbRow.slack_app?.bot_name) ||
+    configDbRow.slack_app?.bot_name == app.bot_name);
+
+    if (app_id_matches && channel_matches && team_matches && bot_name_matches) {
       matching.push(configDbRow);
+      if (envVar('LOG_LEVEL') == 'debug') {
+        console.log(`Matching ConfigDbRow ID: ${configDbRow.id}, app: ${JSON.stringify(configDbRow.slack_app)}, 
+          context: ${JSON.stringify(configDbRow.slack_context)}}\n--> config: ${JSON.stringify(configDbRow.config)}`)        
+      }
     }
   }
 
-  return configDbRows;
+  return matching;
 }
 
 function sortBotConfig(a: BotConfigDbRow, b: BotConfigDbRow) {
