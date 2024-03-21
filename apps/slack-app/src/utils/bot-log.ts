@@ -1,10 +1,11 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { SlackContext } from './slack';
+import { SlackApp, SlackContext } from './slack';
 import { envVar } from '@digdir/assistant-lib';
 import { Data } from 'dataclass';
 
 export class BotLogEntry extends Data {
   slack_context?: SlackContext | null = null;
+  slack_app?: SlackApp | null = null;
   elapsed_ms: number = 0;
   step_name: string = '';
   payload?: any | null = null;
@@ -35,10 +36,16 @@ export async function botLog(entry: BotLogEntry) {
   return insertResponse;
 }
 
-export async function updateReactions(slackContext: SlackContext, reactions: any) {
+export async function updateReactions(
+  slackApp: SlackApp,
+  slackContext: SlackContext,
+  reactions: any,
+) {
   const ts = slackContext.ts;
   const channel = slackContext.channel;
   // retrieve the correct row, looking for slackContext.ts in the slackContext column, which is jsonb type
+
+  // TODO: match on slack_app as well
   const resultSet = await supabase
     .from('bot_log')
     .select('*')

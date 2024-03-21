@@ -1,19 +1,41 @@
 import { GenericMessageEvent } from '@slack/bolt';
 import { ChatUpdateResponse } from '@slack/web-api';
 import { Data } from 'dataclass';
+import { z } from 'zod';
+import { ZSchema } from '@digdir/assistant-lib';
 
-export class SlackContext extends Data {
-  ts: string = '';
-  thread_ts: string = '';
-  channel: string = '';
-  team: string = '';
-  user: string = '';
-  channel_type: string = '';
-  time_utc: string = '';
+export const SlackContextSchema = z.object({
+  ts: z.string(),
+  thread_ts: z.string().optional(),
+  channel: z.string(),
+  channel_type: z.string().optional(),
+  team: z.string().optional(),
+  user: z.string().optional(),
+  time_utc: z.string().optional(),
+});
+export type SlackContextType = z.infer<typeof SlackContextSchema>;
+
+export class SlackContext extends ZSchema(SlackContextSchema) {
+  private __strictUserOnly() {}
+}
+export class SlackContextPartial extends ZSchema(SlackContextSchema.partial()) {
+  private __strictUserPartialOnly() {}
+}
+
+export const SlackAppSchema = z.object({
+  app_id: z.string(),
+  bot_name: z.string().optional(),
+});
+export type SlackAppType = z.infer<typeof SlackAppSchema>;
+export class SlackApp extends ZSchema(SlackAppSchema) {
+  private __strictUserOnly() {}
+}
+export class SlackAppPartial extends ZSchema(SlackAppSchema.partial()) {
+  private __strictUserPartialOnly() {}
 }
 
 export function getEventContext(evt: GenericMessageEvent): SlackContext {
-  const context = SlackContext.create({
+  const context = new SlackContext({
     ts: evt.ts,
     thread_ts: evt.thread_ts,
     channel: evt.channel,
@@ -29,10 +51,10 @@ export function getChatUpdateContext(
   threadStart: SlackContext,
   evt: ChatUpdateResponse,
 ): SlackContext {
-  const context = SlackContext.create({
-    ts: evt.ts,
+  const context = new SlackContext({
+    ts: evt.ts || '',
     thread_ts: threadStart.ts,
-    channel: evt.channel,
+    channel: evt.channel || '',
     team: threadStart.team,
     user: threadStart.user,
     time_utc: UtcNowTimestamptz(),
@@ -41,7 +63,7 @@ export function getChatUpdateContext(
 }
 
 export function getThreadResponseContext(item: SlackContext, responseTs: string): SlackContext {
-  const context = SlackContext.create({
+  const context = new SlackContext({
     ts: responseTs,
     thread_ts: item.thread_ts,
     channel: item.channel,
@@ -56,7 +78,7 @@ export function getThreadResponseContext(item: SlackContext, responseTs: string)
 
 export function getReactionItemContext(eventBody: any): SlackContext {
   const item = eventBody?.event?.item || {};
-  const context = SlackContext.create({
+  const context = new SlackContext({
     ts: item.ts,
     thread_ts: item.thread_ts,
     channel: item.channel,
