@@ -98,10 +98,10 @@ app.message(async ({ message, say }) => {
       console.log('Bot was mentioned in the message.');
     }
   } else {
-    if (ignoreWhenNotTagged == true) {
+    if (ignoreWhenNotTagged == true && genericMsg.channel_type != 'im') {
       if (envVar('LOG_LEVEL') == 'debug') {
         console.log(
-          'Bot was not mentioned in the message and ignoreWhenNotTagged is true, ignoring message.',
+          'Bot was not mentioned in channel message and ignoreWhenNotTagged is true, ignoring message.',
         );
       }
       return;
