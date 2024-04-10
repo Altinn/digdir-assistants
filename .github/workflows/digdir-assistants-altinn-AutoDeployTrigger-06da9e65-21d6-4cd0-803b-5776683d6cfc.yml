@@ -19,10 +19,10 @@ jobs:
 
     steps:
       - name: Checkout to the branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Azure Login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.DIGDIRASSISTANTSALTINN_AZURE_CREDENTIALS }}
 
