@@ -11,7 +11,7 @@ export const SlackContextSchema = z.object({
   thread_ts_time: z.number().optional(),
   channel_id: z.string(),
   channel_type: z.string().optional(),
-  channel_name: z.string(),
+  channel_name: z.string().optional(),
   team_id: z.string().optional(),
   team_name: z.string().optional(),
   user_id: z.string().optional(),
@@ -44,15 +44,14 @@ export async function getEventContext(
   client: WebClient,
   evt: GenericMessageEvent,
 ): Promise<SlackContext> {
-  let channel_name = await client.conversations.info({ channel: evt.channel }).then((res) => {
-    const channel_name: string =
-      ramda.pathOr(null, ['channel', 'latest', 'bot_profile', 'name'], res) ||
-      ramda.pathOr(null, ['message', 'bot_profile', 'name'], res) ||
-      res.channel?.name ||
-      '';
 
-    return channel_name;
-  });
+  let conversations_info = await client.conversations.info({ channel: evt.channel });
+
+  const channel_name: string =
+    ramda.pathOr(null, ['channel', 'latest', 'bot_profile', 'name'], conversations_info) ||
+    ramda.pathOr(null, ['message', 'bot_profile', 'name'], conversations_info) ||
+    conversations_info.channel?.name ||
+    '';
 
   let team_name = '';
 
@@ -64,15 +63,16 @@ export async function getEventContext(
 
   var user_name = '';
   if (evt.user) {
-    user_name = await client.users
-      .info({ user: evt.user })
-      .then((res) => res.user?.real_name || res.user?.name || '');
+    const user_info = await client.users.info({ user: evt.user });
+    user_name = user_info.user?.real_name || user_info.user?.name || '';
   }
 
   const { date: thread_ts_date, time: thread_ts_time } = parseSlackTs(evt.thread_ts || '0.0');
   const { date: ts_date, time: ts_time } = parseSlackTs(evt.ts || '0.0');
 
-  console.log(`getEventContext: ${evt.channel_type}`);
+  console.log(
+    `getEventContext: channel_type: ${evt.channel_type}. channel_name: ${channel_name}, team_name: ${team_name}`,
+  );
 
   const context = new SlackContext({
     ts_date,
@@ -80,7 +80,7 @@ export async function getEventContext(
     thread_ts_date,
     thread_ts_time,
     channel_id: evt.channel,
-    channel_name,
+    channel_name: channel_name,
     channel_type: evt.channel_type,
     team_id: evt.team,
     team_name: team_name,
@@ -105,8 +105,6 @@ export async function getChatUpdateContext(
     thread_ts_date: threadStart.ts_date,
     thread_ts_time: threadStart.ts_time,
     channel_id: evt.channel || '',
-    channel_name: '',
-    channel_type: '',
     team_id: threadStart.team_id,
     user_id: threadStart.user_id,
     user_type: 'human',
@@ -128,8 +126,6 @@ export async function getThreadResponseContext(
     thread_ts_date: item.thread_ts_date,
     thread_ts_time: item.thread_ts_time,
     channel_id: item.channel_id,
-    channel_name: '',
-    channel_type: '',
     team_id: item.team_id,
     user_id: item.user_id,
     time_utc: UtcNowTimestamptz(),

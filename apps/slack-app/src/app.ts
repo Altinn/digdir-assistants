@@ -57,7 +57,8 @@ app.message(async ({ message, say }) => {
 
   const genericMsg = message as GenericMessageEvent;
   var srcEvtContext = await getEventContext(app.client, genericMsg);
-  var userInput = ((genericMsg as GenericMessageEvent).text || '').trim();
+
+  var userInput = (genericMsg.text || '').trim();
 
   if (genericMsg.subtype == 'message_changed') {
     // ignoring message changes in channels
@@ -136,9 +137,11 @@ app.message(async ({ message, say }) => {
   }
   const stage1Duration = round(lapTimer(start));
 
+  srcEvtContext = await getEventContext(app.client, genericMsg);
+
   if (analysisError != null) {
-    const error_logEntry = {
-      slack_context: await getEventContext(app.client, genericMsg as GenericMessageEvent),
+    const error_logEntry: BotLogEntry = {
+      slack_context: srcEvtContext,
       slack_app: slackApp,
       elapsed_ms: timeSecondsToMs(stage1Duration),
       step_name: 'stage1_analyze',
@@ -191,6 +194,8 @@ app.message(async ({ message, say }) => {
     },
     content_type: 'docs_user_query',
   };
+
+  console.log(`analyze_logEntry: ${JSON.stringify(analyze_logEntry)}`);
 
   botLog(analyze_logEntry);
 

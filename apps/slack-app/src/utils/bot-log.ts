@@ -1,28 +1,11 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { SlackApp, SlackContext } from './slack';
+import { SlackApp, SlackAppSchema, SlackContext, SlackContextSchema } from './slack';
 import { envVar } from '@digdir/assistant-lib';
 import { z } from 'zod';
 
 export const BotLogEntrySchema = z.object({
-  slack_context: z.object({
-    ts_date: z.number(),
-    ts_time: z.number(),
-    thread_ts_date: z.number().optional(),
-    thread_ts_time: z.number().optional(),
-    channel_id: z.string(),
-    channel_type: z.string().optional(),
-    channel_name: z.string(),
-    team_id: z.string().optional(),
-    team_name: z.string().optional(),
-    user_id: z.string().optional(),
-    user_name: z.string().optional(),
-    user_type: z.string().default('human').optional(),
-    time_utc: z.string().optional(),
-  }),
-  slack_app: z.object({
-    app_id: z.string(),
-    bot_name: z.string().optional(),
-  }),
+  slack_context: SlackContextSchema,
+  slack_app: SlackAppSchema,
   elapsed_ms: z.number(),
   step_name: z.string(),
   content: z.any().optional(),
