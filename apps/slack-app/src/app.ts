@@ -1,5 +1,5 @@
 import { App, ExpressReceiver, LogLevel, GenericMessageEvent, Block } from '@slack/bolt';
-import { ChatUpdateResponse } from '@slack/web-api';
+import { ChatUpdateResponse, ReactionsGetResponse } from '@slack/web-api';
 import { SocketModeClient } from '@slack/socket-mode';
 import { createServer } from 'http';
 import {
@@ -9,6 +9,7 @@ import {
   getThreadResponseContext,
   getChatUpdateContext,
   SlackApp,
+  SlackContext,
 } from './utils/slack';
 import { lookupConfig } from './utils/bot-config';
 import { envVar, round, lapTimer, timeoutPromise } from '@digdir/assistant-lib';
@@ -55,7 +56,7 @@ app.message(async ({ message, say }) => {
   await ensureBotContext();
 
   const genericMsg = message as GenericMessageEvent;
-  var srcEvtContext = getEventContext(genericMsg);
+  var srcEvtContext = await getEventContext(app.client, genericMsg);
   var userInput = ((genericMsg as GenericMessageEvent).text || '').trim();
 
   if (genericMsg.subtype == 'message_changed') {
@@ -136,16 +137,17 @@ app.message(async ({ message, say }) => {
   const stage1Duration = round(lapTimer(start));
 
   if (analysisError != null) {
-    const error_logEntry = BotLogEntry.create({
-      slack_context: getEventContext(genericMsg as GenericMessageEvent),
+    const error_logEntry = {
+      slack_context: await getEventContext(app.client, genericMsg as GenericMessageEvent),
+      slack_app: slackApp,
       elapsed_ms: timeSecondsToMs(stage1Duration),
       step_name: 'stage1_analyze',
-      payload: {
+      content: {
         bot_name: 'docs',
         original_user_query: userInput,
         error: analysisError,
       },
-    });
+    };
     try {
       await botLog(error_logEntry);
     } catch (dblog_error) {
@@ -171,11 +173,15 @@ app.message(async ({ message, say }) => {
   }
 
   const stage1Result = (queryAnalysisResult as UserQueryAnalysis)!;
-  let analyze_logEntry = BotLogEntry.create({
-    slack_context: srcEvtContext,
+  let analyze_logEntry = {
+    slack_context: {
+      ...srcEvtContext,
+      user_type: 'human',
+    },
+    slack_app: slackApp,
     elapsed_ms: timeSecondsToMs(stage1Duration),
     step_name: 'stage1_analyze',
-    payload: {
+    content: {
       bot_name: 'docs',
       english_user_query: stage1Result.questionTranslatedToEnglish,
       original_user_query: userInput,
@@ -183,7 +189,8 @@ app.message(async ({ message, say }) => {
       user_query_language_name: stage1Result.userInputLanguageName,
       content_category: stage1Result.contentCategory,
     },
-  });
+    content_type: 'docs_user_query',
+  };
 
   botLog(analyze_logEntry);
 
@@ -193,7 +200,7 @@ app.message(async ({ message, say }) => {
     );
   }
 
-  let threadTs = srcEvtContext.ts;
+  let threadTs = srcEvtContext.ts_date + '.' + srcEvtContext.ts_time;
 
   const busyReadingMsg = 'Reading Altinn Studio docs...';
   let willTranslateMsg = '';
@@ -287,17 +294,19 @@ app.message(async ({ message, say }) => {
       rag_success: false,
     };
 
-    const error_logEntry = BotLogEntry.create({
-      slack_context: getEventContext(genericMsg as GenericMessageEvent),
+    const error_logEntry = {
+      slack_context: await getEventContext(app.client, genericMsg as GenericMessageEvent),
+      slack_app: slackApp,
       elapsed_ms: timeSecondsToMs(lapTimer(ragStart)),
       step_name: 'rag_with_typesense',
-      payload: payload,
-    });
+      content: payload,
+      content_type: 'docs_bot_reply',
+    };
     await botLog(error_logEntry);
 
     await app.client.chat.postMessage({
-      thread_ts: srcEvtContext.ts,
-      channel: srcEvtContext.channel,
+      thread_ts: srcEvtContext.ts_date + '.' + srcEvtContext.ts_time,
+      channel: srcEvtContext.channel_id,
       text: ragWithTypesenseError,
     });
 
@@ -329,29 +338,33 @@ app.message(async ({ message, say }) => {
 
   if (finalizeError != null) {
     // Log the bot operation
-    rag_logEntry = BotLogEntry.create({
-      slack_context: getThreadResponseContext(srcEvtContext, firstThreadTs.ts),
+    rag_logEntry = {
+      slack_context: await getThreadResponseContext(app.client, srcEvtContext, firstThreadTs.ts),
+      slack_app: slackApp,
       elapsed_ms: timeSecondsToMs(
         ragResponse.durations.total + stage1Duration - ragResponse.durations.translation,
       ),
       durations: ragResponse.durations,
       step_name: 'rag_with_typesense',
-      payload: {
+      content: {
         error: finalizeError,
         ...payload,
       },
-    });
+      content_type: 'docs_bot_error',
+    };
   } else if (finalResponse != undefined) {
     // Log the bot operation
-    rag_logEntry = BotLogEntry.create({
-      slack_context: getChatUpdateContext(srcEvtContext, finalResponse),
+    rag_logEntry = {
+      slack_context: await getChatUpdateContext(app.client, srcEvtContext, finalResponse),
+      slack_app: slackApp,
       elapsed_ms: timeSecondsToMs(
         ragResponse.durations.total + stage1Duration - ragResponse.durations.translation,
       ),
       durations: ragResponse.durations,
       step_name: 'rag_with_typesense',
-      payload: payload,
-    });
+      content: payload,
+      content_type: 'docs_bot_reply',
+    };
   }
   if (rag_logEntry != undefined) botLog(rag_logEntry);
 
@@ -373,25 +386,29 @@ app.message(async ({ message, say }) => {
 
     if (finalizeError != null) {
       // Log the bot operation
-      rag_logEntry = BotLogEntry.create({
-        slack_context: getThreadResponseContext(srcEvtContext, firstThreadTs.ts),
+      rag_logEntry = {
+        slack_context: await getThreadResponseContext(app.client, srcEvtContext, firstThreadTs.ts),
+        slack_app: slackApp,
         elapsed_ms: timeSecondsToMs(ragResponse.durations.translation),
         durations: ragResponse.durations,
         step_name: 'rag_translate',
-        payload: {
+        content: {
           error: finalizeError,
           ...payload,
         },
-      });
+        content_type: 'docs_bot_error',
+      };
     } else if (finalResponse != undefined) {
       // Log the bot operation
-      rag_logEntry = BotLogEntry.create({
-        slack_context: getChatUpdateContext(srcEvtContext, finalResponse),
+      rag_logEntry = {
+        slack_context: await getChatUpdateContext(app.client, srcEvtContext, finalResponse),
+        slack_app: slackApp,
         elapsed_ms: timeSecondsToMs(ragResponse.durations.translation),
         durations: ragResponse.durations,
         step_name: 'rag_translate',
-        payload: payload,
-      });
+        content: payload,
+        content_type: 'docs_bot_reply',
+      };
     }
     if (rag_logEntry != undefined) botLog(rag_logEntry);
   }
@@ -415,12 +432,15 @@ async function handleReactionEvents(eventBody: any) {
     console.log('event:', JSON.stringify(eventBody));
   }
 
+  var itemContext: SlackContext;
+  var messageInfo: ReactionsGetResponse;
+
   try {
-    const itemContext = getReactionItemContext(eventBody);
+    itemContext = await getReactionItemContext(app.client, eventBody);
     const context = {
-      team: itemContext.team,
-      channel: itemContext.channel,
-      timestamp: itemContext.ts,
+      team: itemContext.team_id,
+      channel: itemContext.channel_id,
+      timestamp: itemContext.ts_date + '.' + itemContext.ts_time,
     };
 
     const botInfo = await app.client.auth.test();
@@ -436,14 +456,26 @@ async function handleReactionEvents(eventBody: any) {
       }
     }
 
-    const messageInfo = await app.client.reactions.get(context);
+    messageInfo = await app.client.reactions.get(context);
+  } catch (e) {
+    console.log(`Error fetching reactions: ${e}`);
+  }
+
+  if (messageInfo! == null || itemContext! == null) {
+    console.log(
+      `Error fetching reactions - messageInfo: ${JSON.stringify(messageInfo!)}\nitemContext: ${JSON.stringify(itemContext!)}.`,
+    );
+    return;
+  }
+
+  try {
     const reactions = messageInfo?.message?.reactions || [];
 
     const dbLog = await updateReactions(slackApp, itemContext, reactions);
 
     if (envVar('LOG_LEVEL') == 'info' || envVar('LOG_LEVEL') == 'debug') {
       console.log(
-        `updated reactions:\ncontext: ${JSON.stringify(itemContext)}\nreactions: ${JSON.stringify(reactions)}`,
+        `updated reactions:\ncontext: ${JSON.stringify(itemContext!)}\nreactions: ${JSON.stringify(reactions)}`,
       );
     }
 
@@ -453,15 +485,15 @@ async function handleReactionEvents(eventBody: any) {
     ) {
       // Send a debug message
       await app.client.chat.postEphemeral({
-        channel: itemContext.channel,
-        thread_ts: itemContext.ts,
+        channel: itemContext.channel_id,
+        thread_ts: itemContext.ts_date + '.' + itemContext.ts_time,
         user: eventBody?.body?.event?.user,
         text: 'Performance data',
-        blocks: debugMessageBlocks(dbLog),
+        blocks: debugMessageBlocks(dbLog!),
       });
     }
   } catch (e) {
-    console.log(`Error fetching reactions: ${e}`);
+    console.log(`Error updating reactions in db: ${e}`);
   }
 }
 
@@ -591,13 +623,13 @@ async function finalizeAnswer(
 }
 
 function debugMessageBlocks(botLog: BotLogEntry): Array<Block> {
-  const payload = botLog.payload;
+  const content = botLog.content as any;
   // Process and format source documents and not loaded URLs for debug messages
   let sourceList = '*Retrieved articles*\n';
   let notLoadedList = '';
   const knownPathSegment = 'https://docs.altinn.studio';
 
-  payload.source_urls.forEach((url: string, i: number) => {
+  content.source_urls.forEach((url: string, i: number) => {
     const pathSegmentIndex = url.indexOf(knownPathSegment);
     if (pathSegmentIndex >= 0) {
       url =
@@ -607,7 +639,7 @@ function debugMessageBlocks(botLog: BotLogEntry): Array<Block> {
     sourceList += `#${i + 1}: <${url}|${url.replace('https://docs.altinn.studio/', '')}>\n`;
   });
 
-  payload.not_loaded_urls.forEach((url: string, i: number) => {
+  content.not_loaded_urls.forEach((url: string, i: number) => {
     notLoadedList += `#${i + 1}: <${url}|${url.replace('https://docs.altinn.studio/', '')}>\n`;
   });
 
@@ -616,7 +648,7 @@ function debugMessageBlocks(botLog: BotLogEntry): Array<Block> {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `Phrases generated for retrieval:\n> ${payload.search_queries.join('\n> ')}`,
+        text: `Phrases generated for retrieval:\n> ${content.search_queries.join('\n> ')}`,
       },
     },
     {
