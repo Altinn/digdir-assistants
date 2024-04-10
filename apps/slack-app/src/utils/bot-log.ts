@@ -95,21 +95,6 @@ export async function botLog(entry: BotLogEntry) {
   }
 
   return;
-
-  // var insertResponse;
-
-  // try {
-  //   insertResponse = await supabase.from('bot_log').insert([entry]);
-  // } catch (supabaseEx) {
-  //   console.log(`Supabase error occurred when attempting to log:\n${supabaseEx}`);
-  //   return null;
-  // }
-
-  // if (envVar('LOG_LEVEL') === 'debug') {
-  //   console.log(`insertResponse: ${JSON.stringify(insertResponse)}`);
-  // }
-
-  // return insertResponse;
 }
 
 export async function updateReactions(

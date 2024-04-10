@@ -54,7 +54,13 @@ export async function getEventContext(
     return channel_name;
   });
 
-  const team_name = await client.team.info().then((res) => res.team?.name || '');
+  let team_name = '';
+
+  try {
+    team_name = await client.team.info().then((res) => res.team?.name || '');
+  } catch (err) {
+    console.error(`Error retrieving the team name. Error: ${err}`);
+  }
 
   var user_name = '';
   if (evt.user) {
