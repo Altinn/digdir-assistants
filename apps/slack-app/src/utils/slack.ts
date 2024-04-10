@@ -1,6 +1,5 @@
 import { GenericMessageEvent } from '@slack/bolt';
 import { ChatUpdateResponse, WebClient } from '@slack/web-api';
-import { Data } from 'dataclass';
 import { z } from 'zod';
 import { ZSchema } from '@digdir/assistant-lib';
 import ramda from 'ramda';
@@ -45,31 +44,29 @@ export async function getEventContext(
   client: WebClient,
   evt: GenericMessageEvent,
 ): Promise<SlackContext> {
-  // console.log(`getEventContext: ${JSON.stringify(evt)}`);
-
   let channel_name = await client.conversations.info({ channel: evt.channel }).then((res) => {
-    // console.log(`conversations.info 1: ${JSON.stringify(res)}`);
     const channel_name: string =
       ramda.pathOr(null, ['channel', 'latest', 'bot_profile', 'name'], res) ||
       ramda.pathOr(null, ['message', 'bot_profile', 'name'], res) ||
       res.channel?.name ||
       '';
-    // console.log(`channel_name: ${channel_name}`);
+
     return channel_name;
   });
 
-  const team_name = 'TEST';
-  // const team_name = await client.team.info()
-  //   .then((res) => res.team?.name || '');
+  const team_name = await client.team.info().then((res) => res.team?.name || '');
 
   var user_name = '';
-
   if (evt.user) {
-    user_name = await client.users.info({ user: evt.user }).then((res) => res.user?.name || '');
+    user_name = await client.users
+      .info({ user: evt.user })
+      .then((res) => res.user?.real_name || res.user?.name || '');
   }
 
   const { date: thread_ts_date, time: thread_ts_time } = parseSlackTs(evt.thread_ts || '0.0');
   const { date: ts_date, time: ts_time } = parseSlackTs(evt.ts || '0.0');
+
+  console.log(`getEventContext: ${evt.channel_type}`);
 
   const context = new SlackContext({
     ts_date,
@@ -77,8 +74,8 @@ export async function getEventContext(
     thread_ts_date,
     thread_ts_time,
     channel_id: evt.channel,
-    channel_type: evt.channel_type || 'channel',
     channel_name,
+    channel_type: evt.channel_type,
     team_id: evt.team,
     team_name: team_name,
     user_id: evt.user,
@@ -94,19 +91,6 @@ export async function getChatUpdateContext(
   threadStart: SlackContext,
   evt: ChatUpdateResponse,
 ): Promise<SlackContext> {
-  const channel_name = evt.channel
-    ? await client.conversations.info({ channel: evt.channel }).then((res) => {
-        // console.log(`conversations.info 2: ${JSON.stringify(res)}`);
-        const channel_name =
-          ramda.pathOr(null, ['channel', 'latest', 'bot_profile', 'name'], res) ||
-          ramda.pathOr(null, ['message', 'bot_profile', 'name'], res) ||
-          res.channel?.name ||
-          '';
-        // console.log(`channel_name: ${channel_name}`);
-        return channel_name;
-      })
-    : '';
-
   const { date: ts_date, time: ts_time } = parseSlackTs(evt.ts || '');
 
   const context = new SlackContext({
@@ -115,9 +99,9 @@ export async function getChatUpdateContext(
     thread_ts_date: threadStart.ts_date,
     thread_ts_time: threadStart.ts_time,
     channel_id: evt.channel || '',
-    channel_name: channel_name,
+    channel_name: '',
+    channel_type: '',
     team_id: threadStart.team_id,
-    team_name: 'TEST',
     user_id: threadStart.user_id,
     user_type: 'human',
     time_utc: UtcNowTimestamptz(),
@@ -130,18 +114,6 @@ export async function getThreadResponseContext(
   item: SlackContext,
   responseTs: string,
 ): Promise<SlackContext> {
-  const channel_name = item.channel_id
-    ? await client.conversations.info({ channel: item.channel_id }).then((res) => {
-        // console.log(`conversations.info 3: ${JSON.stringify(res)}`);
-        const channel_name =
-          ramda.pathOr(null, ['latest', 'bot_profile', 'name'], res) ||
-          ramda.pathOr(null, ['message', 'bot_profile', 'name'], res) ||
-          res.channel?.name ||
-          '';
-        // console.log(`channel_name: ${channel_name}`);
-        return channel_name;
-      })
-    : '';
   const { date: ts_date, time: ts_time } = parseSlackTs(responseTs || '');
 
   const context = new SlackContext({
@@ -150,8 +122,8 @@ export async function getThreadResponseContext(
     thread_ts_date: item.thread_ts_date,
     thread_ts_time: item.thread_ts_time,
     channel_id: item.channel_id,
-    channel_name: channel_name,
-    channel_type: item.channel_type,
+    channel_name: '',
+    channel_type: '',
     team_id: item.team_id,
     user_id: item.user_id,
     time_utc: UtcNowTimestamptz(),
@@ -164,18 +136,6 @@ export async function getReactionItemContext(
   eventBody: any,
 ): Promise<SlackContext> {
   const item = eventBody?.event?.item || {};
-  const channel_name = item.channel
-    ? await client.conversations.info({ channel: item.channel }).then((res) => {
-        // console.log(`conversations.info 4: ${JSON.stringify(res)}`);
-        const channel_name =
-          ramda.pathOr(null, ['latest', 'bot_profile', 'name'], res) ||
-          ramda.pathOr(null, ['message', 'bot_profile', 'name'], res) ||
-          res.channel?.name ||
-          '';
-        // console.log(`channel_name: ${channel_name}`);
-        return channel_name;
-      })
-    : '';
 
   console.log(`reactionItemContext: ${JSON.stringify(item)}`);
   const { date: ts_date, time: ts_time } = parseSlackTs(item.ts || '0.0');
@@ -187,12 +147,13 @@ export async function getReactionItemContext(
     thread_ts_date,
     thread_ts_time,
     channel_id: item.channel,
-    channel_name: channel_name,
-    channel_type: item.channel_type,
+    channel_name: '',
+    channel_type: '',
     team_id: item.team,
     user_id: item.user,
     time_utc: item.event_time_utc,
   });
+
   return context;
 }
 
