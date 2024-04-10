@@ -39,7 +39,9 @@ export async function lookupConfig<T>(
   if (matching) {
     for (let value of matching) {
       if (envVar('LOG_LEVEL') == 'debug') {
-        console.log(`before merge:\n${JSON.stringify(merged)}\nmerging with:\n${JSON.stringify(value)}`);
+        console.log(
+          `before merge:\n${JSON.stringify(merged)}\nmerging with:\n${JSON.stringify(value)}`,
+        );
       }
       merged = { ...merged, ...value.config };
     }
@@ -94,24 +96,29 @@ function matchingConfigDbRows(
   configDbRows.sort(sortBotConfig);
 
   if (envVar('LOG_LEVEL') == 'debug') {
-    console.log(`matching config db rows for app: ${JSON.stringify(app)}, context: ${JSON.stringify(context)}`);
+    console.log(
+      `matching config db rows for app: ${JSON.stringify(app)}, context: ${JSON.stringify(context)}`,
+    );
   }
 
   for (let configDbRow of configDbRows) {
-    const app_id_matches = (isNullOrEmpty(configDbRow.slack_app?.app_id) ||
-      configDbRow.slack_app?.app_id == app.app_id);
-    const channel_matches = (isNullOrEmpty(configDbRow.slack_context?.channel) ||
-    configDbRow.slack_context?.channel == context.channel);
-    const team_matches = (isNullOrEmpty(configDbRow.slack_context?.team) ||
-    configDbRow.slack_context?.team == context.team)
-    const bot_name_matches = (isNullOrEmpty(configDbRow.slack_app?.bot_name) ||
-    configDbRow.slack_app?.bot_name == app.bot_name);
+    const app_id_matches =
+      isNullOrEmpty(configDbRow.slack_app?.app_id) || configDbRow.slack_app?.app_id == app.app_id;
+    const channel_matches =
+      isNullOrEmpty(configDbRow.slack_context?.channel_id) ||
+      configDbRow.slack_context?.channel_id == context.channel_id;
+    const team_matches =
+      isNullOrEmpty(configDbRow.slack_context?.team_id) ||
+      configDbRow.slack_context?.team_id == context.team_id;
+    const bot_name_matches =
+      isNullOrEmpty(configDbRow.slack_app?.bot_name) ||
+      configDbRow.slack_app?.bot_name == app.bot_name;
 
     if (app_id_matches && channel_matches && team_matches && bot_name_matches) {
       matching.push(configDbRow);
       if (envVar('LOG_LEVEL') == 'debug') {
         console.log(`Matching ConfigDbRow ID: ${configDbRow.id}, app: ${JSON.stringify(configDbRow.slack_app)}, 
-          context: ${JSON.stringify(configDbRow.slack_context)}}\n--> config: ${JSON.stringify(configDbRow.config)}`)        
+          context: ${JSON.stringify(configDbRow.slack_context)}}\n--> config: ${JSON.stringify(configDbRow.config)}`);
       }
     }
   }
@@ -123,8 +130,8 @@ function sortBotConfig(a: BotConfigDbRow, b: BotConfigDbRow) {
   if (
     (isNullOrEmpty(a?.slack_app?.bot_name) && !isNullOrEmpty(b?.slack_app?.bot_name)) ||
     (isNullOrEmpty(a?.slack_app?.app_id) && !isNullOrEmpty(b?.slack_app?.app_id)) ||
-    (isNullOrEmpty(a?.slack_context?.channel) && !isNullOrEmpty(b?.slack_context?.channel)) ||
-    (isNullOrEmpty(a?.slack_context?.team) && !isNullOrEmpty(b?.slack_context?.team))
+    (isNullOrEmpty(a?.slack_context?.channel_id) && !isNullOrEmpty(b?.slack_context?.channel_id)) ||
+    (isNullOrEmpty(a?.slack_context?.team_id) && !isNullOrEmpty(b?.slack_context?.team_id))
   ) {
     return -1;
   }
@@ -132,8 +139,8 @@ function sortBotConfig(a: BotConfigDbRow, b: BotConfigDbRow) {
   if (
     (isNullOrEmpty(b?.slack_app?.bot_name) && !isNullOrEmpty(a?.slack_app?.bot_name)) ||
     (isNullOrEmpty(b?.slack_app?.app_id) && !isNullOrEmpty(a?.slack_app?.app_id)) ||
-    (isNullOrEmpty(b?.slack_context?.channel) && !isNullOrEmpty(a?.slack_context?.channel)) ||
-    (isNullOrEmpty(b?.slack_context?.team) && !isNullOrEmpty(a?.slack_context?.team))
+    (isNullOrEmpty(b?.slack_context?.channel_id) && !isNullOrEmpty(a?.slack_context?.channel_id)) ||
+    (isNullOrEmpty(b?.slack_context?.team_id) && !isNullOrEmpty(a?.slack_context?.team_id))
   ) {
     return 1;
   }
