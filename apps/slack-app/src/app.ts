@@ -1,6 +1,8 @@
+import express from 'express';
+import path from 'path';
 import { App, ExpressReceiver, LogLevel, GenericMessageEvent, Block } from '@slack/bolt';
 import { ChatUpdateResponse, ReactionsGetResponse } from '@slack/web-api';
-import { SocketModeClient } from '@slack/socket-mode';
+// import { SocketModeClient } from '@slack/socket-mode';
 import { createServer } from 'http';
 import {
   getEventContext,
@@ -694,17 +696,21 @@ function debugMessageBlocks(botLog: BotLogEntry): Array<Block> {
     throw new Error('_LLM_TIMEOUT must be at least 6000 ms.');
   }
 
-  const server = createServer(expressReceiver.app);
+  const rootApp = express();
+  rootApp.use('/bolt', expressReceiver.app);
+  rootApp.use('/', express.static(path.join(__dirname, '../../../admin/dist/')));
+
+  const server = createServer(rootApp);
 
   server.listen(process.env.PORT || 3000, () => {
     console.log(`Server is running on port ${process.env.PORT || 3000}`);
   });
 
-  const socketModeHandler = new SocketModeClient({
-    appToken: envVar('SLACK_APP_TOKEN'),
-    logLevel: LogLevel.WARN,
-  });
-  await socketModeHandler.start();
+  // const socketModeHandler = new SocketModeClient({
+  //   appToken: envVar('SLACK_APP_TOKEN'),
+  //   logLevel: LogLevel.WARN,
+  // });
+  // await socketModeHandler.start();
 
   console.log('⚡️ Bolt app is running!');
 })();

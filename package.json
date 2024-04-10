@@ -6,11 +6,11 @@
     "apps/*"
   ],
   "scripts": {
-    "clean": "rimraf packages/assistant-lib/dist/ && rimraf apps/slack-app/dist/",
-    "prettier": "prettier packages/assistant-lib/src/ --write && prettier ./apps/slack-app/src/ --write",
-    "build:assistant-lib": "prettier ./packages/assistant-lib/src/ --write && tsc -p ./packages/assistant-lib/",
-    "build:slack-app": "prettier ./apps/slack-app/src/ --write && tsc -p ./apps/slack-app/",
-    "build": "yarn clean && yarn build:assistant-lib && yarn build:slack-app",
+    "clean": "rimraf packages/assistant-lib/dist/ && rimraf apps/slack-app/dist/ && rimraf apps/admin/dist/",
+    "build:assistant-lib": "pushd packages/assistant-lib && yarn codestyle:fix && yarn build",
+    "build:slack-app": "pushd apps/slack-app && yarn codestyle:fix && yarn build",
+    "build:admin": "pushd apps/admin && yarn codestyle:fix && yarn build",
+    "build": "yarn clean && yarn build:assistant-lib && yarn build:admin && yarn build:slack-app",
     "run:slack-app": "node ./apps/slack-app/dist/src/app.js"
   },
   "devDependencies": {

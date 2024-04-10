@@ -6,6 +6,7 @@
   "main": "dist/src/app.js",
   "license": "MIT",
   "scripts": {
+    "clean": "rimraf dist/",
     "codestyle:check": "prettier src/ --check",
     "codestyle:fix": "prettier src/ --write",
     "build": "tsc -p .",
