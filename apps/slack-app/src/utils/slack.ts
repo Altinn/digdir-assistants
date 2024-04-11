@@ -44,7 +44,6 @@ export async function getEventContext(
   client: WebClient,
   evt: GenericMessageEvent,
 ): Promise<SlackContext> {
-
   let conversations_info = await client.conversations.info({ channel: evt.channel });
 
   const channel_name: string =
