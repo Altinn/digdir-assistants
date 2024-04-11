@@ -1,0 +1,18 @@
+{
+  "name": "cli",
+  "version": "1.0.0",
+  "description": "CLI interface to run tasks and configure Altinn Assistant",
+  "main": "main.ts",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p ."
+  },
+  "dependencies": {
+    "@instructor-ai/instructor": "^1.1.1",
+    "openai": "^4.33.0",
+    "typescript": "^5.1.6",
+    "typesense": "^1.8.2",
+    "zod": "^3.22.4"
+  }
+}
