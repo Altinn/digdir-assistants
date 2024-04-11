@@ -80,11 +80,11 @@ async function main() {
 
   let page = 1;
   const pageSize = 10;
-  const jobPageSize = 2;
+  const jobPageSize = -1;
 
   const totalStart = Date.now();
 
-  while (page <= jobPageSize) {
+  while (jobPageSize < 0 || page <= jobPageSize) {
     console.log(
       `Retrieving content_markdown for all urls, page ${page} (page_size=${pageSize})`
     );
