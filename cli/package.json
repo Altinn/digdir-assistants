@@ -6,12 +6,17 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "tsc -p ."
+    "clean": "rimraf ./dist/",
+    "build": "tsc -p .",
+    "run:generate-search-phrases": "node ./dist/generate-search-phrases/index.js"
   },
   "dependencies": {
-    "@instructor-ai/instructor": "^1.1.1",
+    "@instructor-ai/instructor": "^0.0.7",
     "openai": "^4.33.0",
-    "typescript": "^5.1.6",
+    "prettier": "^3.2.5",
+    "rimraf": "^5.0.5",
+    "sha1": "^1.1.1",
+    "typescript": "^5.3.3",
     "typesense": "^1.8.2",
     "zod": "^3.22.4"
   }

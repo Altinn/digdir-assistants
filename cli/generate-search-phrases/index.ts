@@ -1,16 +1,17 @@
 import { SearchPhraseEntry } from "../lib/typesense-search";
 import { SearchResponse } from "typesense/lib/Typesense/Documents";
 import { MultiSearchResponse } from "typesense/lib/Typesense/MultiSearch";
+import Instructor from "@instructor-ai/instructor";
 
 // Assuming use of CommonJS modules
-const Typesense = require("typesense");
-const { config } = require("../lib/config.ts");
-const typesenseSearch = require("../lib/typesense-search.ts");
+import {Client, Errors} from 'typesense'
+const { config } = require("../lib/config");
+const typesenseSearch = require("../lib/typesense-search");
 const OpenAI = require("openai");
-const Instructor = require("@instructor-ai/instructor");
-const z = require("zod");
+import {z} from "zod"
+import { TypesenseError } from "typesense/lib/Typesense/Errors";
 // const dotenv = require("dotenv");
-const sha1 = require("sha1");
+import sha1 from "sha1";
 
 // dotenv.config();
 
@@ -34,6 +35,14 @@ const SearchPhraseListSchema = z.object({
   searchPhrases: z.array(SearchPhraseSchema),
 });
 
+type SearchPhraseList = z.infer<typeof SearchPhraseListSchema>;
+
+type SearchHit = {
+  id: string;
+  url: string;
+  contentMarkdown: string;
+}
+
 const generatePrompt = `Please analyze the contents of the following documentation article and generate a list of English phrases that you would expect to match the following document. 
 DO NOT include the phrases "Altinn Studio", "Altinn 3" or "Altinn apps".
 
@@ -50,7 +59,7 @@ async function main() {
 
   let collectionNameTmp = args[0];
 
-  const client = new Typesense.TypesenseClient(cfg.TYPESENSE_CONFIG);
+  const client = new Client(cfg.TYPESENSE_CONFIG);
 
   // TODO: create a new Typesense collection
 
@@ -86,7 +95,7 @@ async function main() {
     );
     durations.queryDocs += Date.now() - totalStart;
 
-    const searchHits = searchResponse.results.flatMap((result: any) =>
+    const searchHits: SearchHit[] = searchResponse.results.flatMap((result: any) =>
       result.grouped_hits.flatMap((hit: any) =>
         hit.hits.map((document: any) => ({
           id: document.document.id,
@@ -109,7 +118,11 @@ async function main() {
       const searchHit = searchHits[docIndex];
       const url = searchHit.url;
 
+      // console.log(`searchHit: ${JSON.stringify(searchHit)}`);
+
       const existingPhrases = await lookupSearchPhrases(url, collectionNameTmp);
+
+      // console.log(`existing phrases:\n${JSON.stringify(existingPhrases)}`);
 
       const contentMd = searchHit.contentMarkdown;
       const checksumMd = contentMd ? sha1(contentMd) : null; // Ensure you have a function or library to compute SHA1
@@ -134,17 +147,16 @@ async function main() {
       const start = performance.now();
 
       const result = await generateSearchPhrases(searchHit);
-
+      
       durations.generatePhrases += performance.now() - start;
       durations.total += Math.round(performance.now() - totalStart);
+      
 
-      let search_phrases = [];
-      if (result.function !== null) {
-        search_phrases = result.function.search_phrases.map((context: any) => ({
-          search_phrase: context.search_phrase,
-        }));
+      let searchPhrases: string[] = [];
+      if (result !== null) {
+        searchPhrases = result.searchPhrases.map((context: any) => context.searchPhrase);
       } else {
-        search_phrases = [];
+        searchPhrases = [];
       }
 
       console.log(`Generated search phrases for: ${url}\n`);
@@ -160,7 +172,7 @@ async function main() {
               .delete();
             console.log(`Search phrase ID ${docId} deleted for url: ${url}`);
           } catch (error) {
-            if (error instanceof Typesense.exceptions.ObjectNotFound) {
+            if (error instanceof Errors.ObjectNotFound) {
               console.log(
                 `Search phrase ID ${docId} not found in collection "${collectionNameTmp}"`
               );
@@ -171,22 +183,23 @@ async function main() {
 
       const uploadBatch: SearchPhraseEntry[] = [];
 
-      for (const [index, phrase] of search_phrases.entries()) {
+      for (const [index, phrase] of searchPhrases.entries()) {
         console.log(phrase);
         const batch: SearchPhraseEntry = {
           doc_id: searchHit.id || "",
           url: url,
-          search_phrase: phrase.search_phrase || "",
+          search_phrase: phrase,
           sort_order: index,
           item_priority: 1,
           updated_at: Math.floor(new Date().getTime() / 1000),
           checksum: checksumMd,
         };
-        uploadBatch.push(batch);
+        if (batch.search_phrase) {
+          uploadBatch.push(batch);
+        }
       }
 
-      const results = await client.collections(collectionNameTmp)
-                                  .documents
+      const results = await client.collections(collectionNameTmp).documents()
                                   .import(uploadBatch, { action: "upsert", return_id: true });
       const failedResults = results.filter((result: any) => !result.success);
       if (failedResults.length > 0) {
@@ -233,15 +246,15 @@ async function lookupSearchPhrases(
   }
 }
 
-async function generateSearchPhrases(searchHit: any): Promise<any> {
+async function generateSearchPhrases(searchHit: SearchHit): Promise<SearchPhraseList> {
   let retryCount = 0;
 
   while (true) {
     try {
-      const content = searchHit.content_markdown || "";
+      const content = searchHit.contentMarkdown || "";
 
       let queryResult = await openaiClientInstance.chat.completions.create({
-        model: process.env.OPENAI_API_MODEL_NAME,
+        model: 'gpt-4-turbo-preview',        
         response_model: {
           schema: SearchPhraseListSchema,
           name: "RagPromptReplySchema",
@@ -249,7 +262,7 @@ async function generateSearchPhrases(searchHit: any): Promise<any> {
         temperature: 0.1,
         messages: [
           { role: "system", content: "You are a helpful assistant." },
-          { role: "human", content: prompt + content },
+          { role: "user", content: generatePrompt + content },
         ],
         max_retries: 0,
       });
