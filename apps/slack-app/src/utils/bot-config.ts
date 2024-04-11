@@ -74,6 +74,8 @@ async function fetchConfig(app: SlackApp, context: SlackContext): Promise<BotCon
         return null;
       }
       cachedConfigDb = data as BotConfigDbRow[];
+
+      console.log(`db config fetched. Here are all the rows:\n${JSON.stringify(cachedConfigDb)}`);
     }
     if (cachedConfigDb) {
       const matching = matchingConfigDbRows(cachedConfigDb, app, context);
