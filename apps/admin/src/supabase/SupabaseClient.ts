@@ -3,7 +3,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 console.log("Initializing Supabase client with provided URL and Anon Key.");
 
 // Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SLACK_APP_SUPABASE_URL;
+const supabaseUrl = import.meta.env.VITE_SLACK_APP_SUPABASE_API_URL;
 const supabaseAnonKey = import.meta.env.VITE_SLACK_APP_SUPABASE_ANON_KEY;
 
 const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
