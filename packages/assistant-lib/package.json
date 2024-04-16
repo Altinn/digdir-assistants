@@ -6,8 +6,10 @@
   "main": "dist/src/index.js",
   "license": "MIT",
   "scripts": {
+    "clean": "rimraf dist/",
     "codestyle:check": "prettier src/ --check",
-    "codestyle:fix": "prettier src/ --write"
+    "codestyle:fix": "prettier src/ --write",
+    "build": "tsc -p ."
   },
   "dependencies": {
     "@azure/openai": "^1.0.0-beta.11",
