@@ -9,7 +9,7 @@ COPY apps/ ./apps/
 COPY packages/ ./packages/
 
 RUN yarn install --frozen-lockfile 
-RUN yarn build:assistant-lib && yarn build:slack-app
+RUN yarn build
 
 FROM node:slim as runner
 
