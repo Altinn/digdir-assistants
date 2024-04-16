@@ -37,8 +37,8 @@ interface SlackMessage {
 
 // create single supabase client
 const supabase: SupabaseClient = createClient(
-  envVar('SLACK_BOT_SUPABASE_URL'),
-  envVar('SLACK_BOT_SUPABASE_API_KEY'),
+  envVar('SLACK_APP_SUPABASE_API_URL'),
+  envVar('SLACK_APP_SUPABASE_ANON_KEY'),
 );
 
 export async function botLog(entry: BotLogEntry) {
@@ -62,13 +62,12 @@ export async function botLog(entry: BotLogEntry) {
     durations: entry.durations,
   };
 
-  // log to new function endpoint first
-  const functionUrl = envVar('SLACK_BOT_SUPABASE_URL') + '/functions/v1/log_slack_message';
+  const functionUrl = envVar('SLACK_APP_SUPABASE_API_URL') + '/functions/v1/log_slack_message';
   const functionResponse = await fetch(functionUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      apikey: envVar('SLACK_BOT_SUPABASE_API_KEY'),
+      apikey: envVar('SLACK_APP_SUPABASE_ANON_KEY'),
     },
     body: JSON.stringify(slackMessage),
   });
