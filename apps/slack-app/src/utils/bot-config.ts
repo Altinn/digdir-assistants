@@ -22,7 +22,7 @@ let configFetchTimestamp: number | null = null;
 
 // create single supabase client
 const supabase: SupabaseClient = createClient(
-  envVar('SLACK_APP_SUPABASE_URL'),
+  envVar('SLACK_APP_SUPABASE_API_URL'),
   envVar('SLACK_APP_SUPABASE_ANON_KEY'),
 );
 
