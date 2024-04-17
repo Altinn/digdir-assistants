@@ -11,8 +11,8 @@ COPY apps/ ./apps/
 COPY packages/ ./packages/
 
 # important to preview env var with VITE so that is included in the build artifact
-ENV VITE_SLACK_APP_SUPABASE_API_URL=${SLACK_APP_SUPABASE_API_URL}
-ENV VITE_SLACK_APP_SUPABASE_ANON_KEY=${SLACK_APP_SUPABASE_ANON_KEY}
+ENV VITE_SLACK_APP_SUPABASE_API_URL=$SLACK_APP_SUPABASE_API_URL
+ENV VITE_SLACK_APP_SUPABASE_ANON_KEY=$SLACK_APP_SUPABASE_ANON_KEY
 
 # verify environment vars
 RUN export
