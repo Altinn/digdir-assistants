@@ -1,4 +1,4 @@
-name: Trigger auto deployment for digdir-assistants-test
+name: test-slack-digdir - Auto deploy
 
 # When this action will be executed
 on:
@@ -8,7 +8,7 @@ on:
       [ main ]
     paths:
     - '**'
-    - '.github/workflows/digdir-assistants-test-AutoDeployTrigger-219d7bf4-be08-4d50-8074-9c2bc8dfba13.yml'
+    - '.github/workflows/test-slack-digdir-AutoDeployTrigger-219d7bf4-be08-4d50-8074-9c2bc8dfba13.yml'
 
   # Allow manual trigger 
   workflow_dispatch:
@@ -16,7 +16,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: test
+    environment: test-slack-digdir
 
     steps:
       - name: Checkout to the branch

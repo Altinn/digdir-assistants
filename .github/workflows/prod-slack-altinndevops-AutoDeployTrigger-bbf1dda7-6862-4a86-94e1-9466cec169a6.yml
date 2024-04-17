@@ -1,4 +1,4 @@
-name: Trigger auto deployment for digdir-assistants
+name: prod-slack-altinndevops - Auto deploy
 
 # When this action will be executed
 on:
@@ -8,7 +8,7 @@ on:
       [ release ]
     paths:
     - '**'
-    - '.github/workflows/digdir-assistants-AutoDeployTrigger-bbf1dda7-6862-4a86-94e1-9466cec169a6.yml'
+    - '.github/workflows/prod-slack-altinndevops-AutoDeployTrigger-bbf1dda7-6862-4a86-94e1-9466cec169a6.yml'
 
   # Allow manual trigger 
   workflow_dispatch:
@@ -16,6 +16,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: prod-slack-altinndevops
 
     steps:
       - name: Checkout to the branch
