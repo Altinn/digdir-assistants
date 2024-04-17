@@ -37,7 +37,7 @@ jobs:
           containerAppName: digdir-assistants-test
           resourceGroup: altinn-ai-assistant
           imageToBuild: altinnaicontainers.azurecr.io/digdir-assistants:${{ github.sha }}
-          environmentVariables: VITE_SLACK_APP_SUPABASE_API_URL=${{env.VITE_SLACK_APP_SUPABASE_API_URL}} VITE_SLACK_APP_SUPABASE_ANON_KEY=${{env.VITE_SLACK_APP_SUPABASE_ANON_KEY}}
+          environmentVariables: VITE_SLACK_APP_SUPABASE_API_URL=${{secrets.VITE_SLACK_APP_SUPABASE_API_URL}} VITE_SLACK_APP_SUPABASE_ANON_KEY=${{secrets.VITE_SLACK_APP_SUPABASE_ANON_KEY}}
           
             
 
