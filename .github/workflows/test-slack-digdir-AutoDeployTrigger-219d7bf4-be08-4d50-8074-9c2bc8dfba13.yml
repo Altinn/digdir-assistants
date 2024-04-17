@@ -40,14 +40,14 @@ jobs:
           buildArguments: |
             "VITE_SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
             "VITE_SLACK_APP_SUPABASE_ANON_KEY=${{secrets.SLACK_APP_SUPABASE_ANON_KEY}}"
-          environmentVariables: |
-            "OPENAI_API_KEY=secretref:openai-api-key"
-            "AZURE_OPENAI_API_KEY=secretref:azure-openai-api-key"
-            "SLACK_APP_TOKEN=secretref:slack-app-token"
-            "SLACK_BOT_TOKEN=secretref:slack-bot-token"
-            "SLACK_BOT_SIGNING_SECRET=secretref:slack-bot-signing-secret"
-            "TYPESENSE_API_KEY=secretref:typesense-api-key"
-            "SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
+          environmentVariables: >
+            "OPENAI_API_KEY=secretref:openai-api-key" 
+            "AZURE_OPENAI_API_KEY=secretref:azure-openai-api-key" 
+            "SLACK_APP_TOKEN=secretref:slack-app-token" 
+            "SLACK_BOT_TOKEN=secretref:slack-bot-token" 
+            "SLACK_BOT_SIGNING_SECRET=secretref:slack-bot-signing-secret" 
+            "TYPESENSE_API_KEY=secretref:typesense-api-key" 
+            "SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}" 
             "SLACK_APP_SUPABASE_ANON_KEY=${{ secrets.SLACK_APP_SUPABASE_ANON_KEY }}"
             "USE_AZURE_OPENAI_API=${{ vars.USE_AZURE_OPENAI_API}}"
             "OPENAI_API_URL=${{ vars.OPENAI_API_URL }}"
