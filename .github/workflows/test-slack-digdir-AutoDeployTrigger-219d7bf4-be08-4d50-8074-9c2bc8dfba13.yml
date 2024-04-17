@@ -38,8 +38,8 @@ jobs:
           resourceGroup: altinn-ai-assistant
           imageToBuild: altinnaicontainers.azurecr.io/digdir-assistants:${{ github.sha }}
           buildArguments: |
-            "SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
-            "SLACK_APP_SUPABASE_ANON_KEY=${{secrets.SLACK_APP_SUPABASE_ANON_KEY}}"
+            "VITE_SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
+            "VITE_SLACK_APP_SUPABASE_ANON_KEY=${{secrets.SLACK_APP_SUPABASE_ANON_KEY}}"
           environmentVariables: >
             "OPENAI_API_KEY=secretref:openai-api-key" 
             "AZURE_OPENAI_API_KEY=secretref:azure-openai-api-key" 
