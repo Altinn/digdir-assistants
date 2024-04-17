@@ -16,6 +16,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: test
 
     steps:
       - name: Checkout to the branch
