@@ -1,5 +1,6 @@
 # args without default values
-ARG VITE_SLACK_APP_SUPABASE_API_URL VITE_SLACK_APP_SUPABASE_ANON_KEY
+ARG VITE_SLACK_APP_SUPABASE_API_URL=default \
+    VITE_SLACK_APP_SUPABASE_ANON_KEY=default
 FROM node as builder
 
 # Create app directory
