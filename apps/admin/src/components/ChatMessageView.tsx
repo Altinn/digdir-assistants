@@ -7,9 +7,13 @@ import { useMessages } from "../hooks/useMessages";
 
 interface Props {
   selectedChannel: string;
+  selectedTeam: string;
 }
 
-const ChatMessageView: React.FC<Props> = ({ selectedChannel }) => {
+const ChatMessageView: React.FC<Props> = ({
+  selectedChannel,
+  selectedTeam,
+}) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { messages, error, isLoading, setCurrentMessageId, currentMessageId } =
@@ -38,6 +42,7 @@ const ChatMessageView: React.FC<Props> = ({ selectedChannel }) => {
             {message.content_type === "docs_user_query" && (
               <ChatMessageItemView
                 message={message}
+                selectedTeam={selectedTeam}
                 onClick={() => {
                   setCurrentMessageId({
                     ts_date: message.ts_date,
