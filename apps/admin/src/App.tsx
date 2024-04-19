@@ -69,7 +69,10 @@ function App() {
         mainContent={
           <>
             {selectedChannel && (
-              <ChatMessageView selectedChannel={selectedChannel} />
+              <ChatMessageView
+                selectedChannel={selectedChannel}
+                selectedTeam={selectedTeam}
+              />
             )}
           </>
         }

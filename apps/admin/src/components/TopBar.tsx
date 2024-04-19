@@ -12,6 +12,7 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 interface TopBarProps {
   selectedTeam: string;
   onTeamChange: (teamId: string) => void;
+  selectedChannel: string;
   onChannelSelect: (channelId: string) => void;
 }
 
@@ -32,7 +33,7 @@ const TopBar: React.FC<TopBarProps> = ({
 
   return (
     <StyledAppBar position="fixed">
-      <Toolbar sx={{ justifyContent: "space-evenly" }}>
+      <Toolbar sx={{ gap: "30px" }}>
         <Typography variant="h6" noWrap component="div">
           Digdir Assistants
         </Typography>
