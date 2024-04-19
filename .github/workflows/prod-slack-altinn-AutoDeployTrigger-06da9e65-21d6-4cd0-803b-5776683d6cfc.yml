@@ -1,4 +1,4 @@
-name: Trigger auto deployment for digdir-assistants
+name: prod-slack-altinn - Auto deploy
 
 # When this action will be executed
 on:
@@ -8,7 +8,7 @@ on:
       [ release ]
     paths:
     - '**'
-    - '.github/workflows/digdir-assistants-AutoDeployTrigger-bbf1dda7-6862-4a86-94e1-9466cec169a6.yml'
+    - '.github/workflows/prod-slack-altinn-AutoDeployTrigger-06da9e65-21d6-4cd0-803b-5776683d6cfc.yml'
 
   # Allow manual trigger 
   workflow_dispatch:
@@ -16,6 +16,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: prod-slack-altinn
 
     steps:
       - name: Checkout to the branch
@@ -24,18 +25,19 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.DIGDIRASSISTANTS_AZURE_CREDENTIALS }}
+          creds: ${{ secrets.DIGDIRASSISTANTSALTINN_AZURE_CREDENTIALS }}
 
       - name: Build and push container image to registry
         uses: azure/container-apps-deploy-action@v2
         with:
           appSourcePath: ${{ github.workspace }} 
           registryUrl: altinnaicontainers.azurecr.io
-          registryUsername: ${{ secrets.DIGDIRASSISTANTS_REGISTRY_USERNAME }}
-          registryPassword: ${{ secrets.DIGDIRASSISTANTS_REGISTRY_PASSWORD }}
-          containerAppName: digdir-assistants
+          registryUsername: ${{ secrets.DIGDIRASSISTANTSALTINN_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.DIGDIRASSISTANTSALTINN_REGISTRY_PASSWORD }}
+          containerAppName: digdir-assistants-altinn
           resourceGroup: altinn-ai-assistant
           imageToBuild: altinnaicontainers.azurecr.io/digdir-assistants-prod:${{ github.sha }}
+          environmentVariables: VITE_SLACK_APP_SUPABASE_API_URL=${{secrets.VITE_SLACK_APP_SUPABASE_API_URL}} VITE_SLACK_APP_SUPABASE_ANON_KEY=${{secrets.VITE_SLACK_APP_SUPABASE_ANON_KEY}}
           
             
 
