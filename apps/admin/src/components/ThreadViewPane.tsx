@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Link, List, ListItem, Box, Tab } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Props, Message } from "../models/Models";
-import ThreadStart from "./ThreadStart";
+import BotReplyContent from "./BotReplyContent";
 import { useThreadReplies } from "../hooks/useThreadReplies";
 import { RagPipelineResult } from "@digdir/assistants";
-import BotReplyDetails from './BotReplyDetails';
+import BotReplyDetails from './BotReplyMetadata';
 
 const ThreadViewPane: React.FC<Props> = ({
   channelId,
@@ -47,7 +47,7 @@ const ThreadViewPane: React.FC<Props> = ({
   }
 
   return (
-    <>
+    <Box sx={{ overflowY: 'auto', maxHeight: 'calc(100vh - 70px)' }}>
       <TabContext value={currentTab}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <TabList onChange={handleChange} aria-label="view_language">
@@ -63,13 +63,13 @@ const ThreadViewPane: React.FC<Props> = ({
         {threadMessages?.map((message) => (
           <>
             <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
-              <ThreadStart message={message} displayLanguage={currentTab} />
+              <BotReplyContent message={message} displayLanguage={currentTab} />
             </ListItem>
             {message.content_type == "docs_bot_reply" && <BotReplyDetails message={message} />}
           </>
         ))}
       </List>
-    </>
+    </Box>
   );
 };
 

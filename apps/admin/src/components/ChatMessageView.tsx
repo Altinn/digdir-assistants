@@ -29,11 +29,12 @@ const ChatMessageView: React.FC<Props> = ({
   }, [selectedChannel, error, isLoading]);
 
   return (
+
     <Box display="flex" flexDirection="row" width="100%">
-      <List
+      <List id="messageList"
         style={{
           width: isSmallScreen ? "100%" : "50%",
-          maxHeight: "calc(100vh - 64px)",
+          maxHeight: "calc(100vh - 80px)",
           overflowY: "auto",
         }}
       >

@@ -26,7 +26,7 @@ export type Params = (DocsBotReplyMessage | DocsUserQueryMessage) & {
   displayLanguage: DisplayLanguage;
 };
 
-const ThreadStart: React.FC<Params> = ({ message, displayLanguage }) => {
+const BotReplyContent: React.FC<Params> = ({ message, displayLanguage }) => {
   const components = {
     code({ node, inline, className, children, ...props }) {
       const match = /language-(\w+)/.exec(className || "");
@@ -62,4 +62,4 @@ const ThreadStart: React.FC<Params> = ({ message, displayLanguage }) => {
   );
 };
 
-export default ThreadStart;
+export default BotReplyContent;

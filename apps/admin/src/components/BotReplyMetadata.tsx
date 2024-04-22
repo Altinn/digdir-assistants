@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ListItem, Link, Box, Tab } from "@mui/material";
+import { Link, Box, Tab } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Message, RagPipelineResult } from "../models/Models";
 
@@ -8,9 +8,9 @@ interface BotReplyDetailsProps {
 }
 
 const BotReplyDetails: React.FC<BotReplyDetailsProps> = ({ message }) => {
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState("sources");
 
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const handleChange = (event: React.ChangeEvent<{}>, newValue: string) => {
     setSelectedTab(newValue);
   };
 
@@ -29,41 +29,38 @@ const BotReplyDetails: React.FC<BotReplyDetailsProps> = ({ message }) => {
             onChange={handleChange}
             aria-label="bot reply details tabs"
           >
-            <Tab label="Sources" />
-            <Tab label="Phrases" />
-            <Tab label="Processing times" />
+            <Tab label="Sources" value="sources" />
+            <Tab label="Phrases" value="phrases" />
+            <Tab label={"Durations (" + message?.durations?.total.toFixed(1) + ")"} value="durations" />
           </TabList>
         </Box>
-        {selectedTab === 0 && (
-          <ListItem style={{ flexWrap: "wrap" }}>
-            <h5 style={{ flexBasis: "100%" }}>Sources</h5>
+
+        <TabPanel value="sources">
+          <Box sx={{ flexWrap: "wrap" }}>
             <ul>
-              {details?.source_urls.map((url: string) => (
-                <li key={url}>
+              {details?.source_urls.map((url: string, index: number) => (
+                <li key={"source_" + index}>
                   <Link href={url} target="_new" rel="noopener noreferrer">
                     {url.replace("https://docs.altinn.studio/", "")}
                   </Link>
                 </li>
               ))}
             </ul>
-          </ListItem>
-        )}
-        {selectedTab === 1 && (
-          <ListItem style={{ flexWrap: "wrap" }}>
-            <h5 style={{ flexBasis: "100%" }}>
-              Phrases generated for retrieval:
-            </h5>
+          </Box>
+        </TabPanel>
+
+        <TabPanel value="phrases">
+          <Box sx={{ flexWrap: "wrap" }}>
             <ul>
               {details?.search_queries.map((query: any, index: number) => (
-                <li key={index}>{query}</li>
+                <li key={"query" + index}>{query}</li>
               ))}
             </ul>
-          </ListItem>
-        )}
-        
-        {selectedTab === 2 && (
-          <ListItem style={{ flexWrap: "wrap" }}>
-            <h5 style={{ flexBasis: "100%" }}>Processing times</h5>
+          </Box>
+        </TabPanel>
+
+        <TabPanel value="durations">
+          <Box sx={{ flexWrap: "wrap" }}>
             <p style={{ flexBasis: "100%" }}>
               Total: {message?.durations?.total.toFixed(1)}
             </p>
@@ -75,8 +72,8 @@ const BotReplyDetails: React.FC<BotReplyDetailsProps> = ({ message }) => {
                 </li>
               ))}
             </ul>
-          </ListItem>
-        )}
+          </Box>
+        </TabPanel>
       </Box>
     </TabContext>
   );
