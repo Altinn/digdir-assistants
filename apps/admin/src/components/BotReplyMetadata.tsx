@@ -24,10 +24,7 @@ const BotReplyDetails: React.FC<BotReplyDetailsProps> = ({ message }) => {
     <TabContext value={selectedTab}>
       <Box sx={{ width: "100%" }}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <TabList
-            value={selectedTab}
-            onChange={handleChange}
-            aria-label="bot reply details tabs"
+          <TabList onChange={handleChange} aria-label="bot reply details tabs"
           >
             <Tab label="Sources" value="sources" />
             <Tab label="Phrases" value="phrases" />
