@@ -1,11 +1,11 @@
-name: Trigger auto deployment for assistants-slack-altinndevops
+name: prod-slack-altinndevops - Auto deploy
 
 # When this action will be executed
 on:
   # Automatically trigger it when detected changes in repo
   push:
     branches: 
-      [ main ]
+      [ release ]
     paths:
     - '**'
     - '.github/workflows/assistants-slack-altinndevops-AutoDeployTrigger-b3f5dbde-b8af-4b5f-94e9-d2eb110abe37.yml'
