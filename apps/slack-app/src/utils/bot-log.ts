@@ -87,33 +87,28 @@ export async function updateReactions(
   // console.log(`updating reactions:\nts: ${slackContext.ts_date + '.' + slackContext.ts_time}`);
   // console.log(`reactions: \n${JSON.stringify(reactions)}`)
 
-  // Only update existing db rows
-  const { data, error } = await supabase
-    .from('slack_message')
-    .update({ reactions: reactions })
-    .eq('ts_date', slackContext.ts_date)
-    .eq('ts_time', slackContext.ts_time)
-    .eq('channel_id', slackContext.channel_id);
+  const payload = {
+    slackApp,
+    slackContext,
+    reactions
+  }
 
-  if (error) {
-    console.error(`Error updating reactions: ${error.message}`);
+  const functionUrl = envVar('SLACK_APP_SUPABASE_API_URL') + '/functions/v1/update_slack_reactions';
+  const functionResponse = await fetch(functionUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: envVar('SLACK_APP_SUPABASE_ANON_KEY'),
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!functionResponse.ok) {
+    console.error(`Function call failed with status ${functionResponse.status}`);
     return null;
   }
-  if (envVar('LOG_LEVEL') === 'debug') {
-    console.log(`Update reactions response: ${JSON.stringify(data)}`);
-  }
+  const result = await functionResponse.json();
 
-  // Retrieve the same message again from the db
-  const { data: updatedData, error: retrieveError } = await supabase
-    .from('slack_message')
-    .select('*')
-    .eq('ts_date', slackContext.ts_date)
-    .eq('ts_time', slackContext.ts_time)
-    .eq('channel_id', slackContext.channel_id);
+  console.log(`Updated slack reactions, result:\n${JSON.stringify(result)}`);
 
-  if (retrieveError) {
-    console.error(`Error updating reactions after update: ${retrieveError.message}`);
-    return null;
-  }
-  return updatedData.length > 0 ? updatedData[0] : null;
+  return result as BotLogEntry;
 }
