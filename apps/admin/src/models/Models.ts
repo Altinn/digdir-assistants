@@ -71,3 +71,17 @@ const ThreadReplySchema = z.object({
 });
 
 export type ThreadReply = z.infer<typeof ThreadReplySchema>;
+
+
+export interface DocsUserQueryMessage {
+  message: Message & {
+    content: DocsUserQuery;
+  };
+}
+
+export interface DocsBotReplyMessage {
+  message: Message & {
+    content: RagPipelineResult;
+  };
+}
+

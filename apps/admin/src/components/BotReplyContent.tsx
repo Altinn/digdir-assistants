@@ -3,19 +3,8 @@ import { ListItemText } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import { LightAsync as SyntaxHighlighter } from "react-syntax-highlighter";
 import { github } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import { RagPipelineResult, Message, DocsUserQuery } from "../models/Models";
+import { DocsBotReplyMessage, DocsUserQueryMessage } from "../models/Models";
 
-export interface DocsUserQueryMessage {
-  message: Message & {
-    content: DocsUserQuery;
-  };
-}
-
-export interface DocsBotReplyMessage {
-  message: Message & {
-    content: RagPipelineResult;
-  };
-}
 
 enum DisplayLanguage {
   English = "english",

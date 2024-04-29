@@ -70,7 +70,7 @@ const BotReplyDetails: React.FC<BotReplyDetailsProps> = ({ message }) => {
               ))}
             </ul>
           </Box>
-        </TabPanel>
+        </TabPanel>        
       </Box>
     </TabContext>
   );
