@@ -30,7 +30,7 @@ const RagSourceView: React.FC<Params> = ({ message }) => {
   return (
     <Box sx={{ flexWrap: "wrap" }}>
       <ul>
-        {message.content?.source_docs?.map((docObj: object, index: number) => (
+        {message.content?.source_documents?.map((docObj: object, index: number) => (
           <li>
             <Box flexDirection="column">
               <span>
