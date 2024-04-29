@@ -231,6 +231,8 @@ export async function ragPipeline(
     loadedUrls.push(uniqueUrl);
     loadedSearchHits.push(searchHit);
 
+    // TODO: add actual doc length, loaded doc length to dedicated lists and return
+
     if (
       docsLength >= envVar("MAX_CONTEXT_LENGTH") ||
       loadedDocs.length >= envVar("MAX_CONTEXT_DOC_COUNT")

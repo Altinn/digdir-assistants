@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Link, List, ListItem, Box, Tab } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Props, Message } from "../models/Models";
-import BotReplyContent from "./BotReplyContent";
 import { useThreadReplies } from "../hooks/useThreadReplies";
 import { RagPipelineResult } from "@digdir/assistants";
-import BotReplyDetails from './BotReplyMetadata';
+import BotReplyContent from "./BotReplyContent";
+import BotReplyMetadata from "./BotReplyMetadata";
+import RagSourceView from "./RagSourceView";
 
 const ThreadViewPane: React.FC<Props> = ({
   channelId,
@@ -47,28 +48,53 @@ const ThreadViewPane: React.FC<Props> = ({
   }
 
   return (
-    <Box sx={{ overflowY: 'auto', maxHeight: 'calc(100vh - 70px)' }}>
+    <Box sx={{ overflowY: "auto", maxHeight: "calc(100vh - 70px)" }}>
       <TabContext value={currentTab}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <TabList onChange={handleChange} aria-label="view_language">
             <Tab label="English" value="english" />
             <Tab label="Original" value="original" />
+            <Tab label="Sources" value="sources" />
           </TabList>
         </Box>
-        {/* <TabPanel value="english">English</TabPanel>
-        <TabPanel value="original">Original</TabPanel> */}
+        <TabPanel value="english">
+          <List>
+            {threadMessages?.map((message) => (
+              <>
+                <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
+                  <BotReplyContent
+                    message={message}
+                    displayLanguage={currentTab}
+                  />
+                </ListItem>
+                {message.content_type == "docs_bot_reply" && (
+                  <BotReplyMetadata message={message} />
+                )}
+              </>
+            ))}
+          </List>
+        </TabPanel>
+        <TabPanel value="original">
+          <List>
+            {threadMessages?.map((message) => (
+              <>
+                <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
+                  <BotReplyContent
+                    message={message}
+                    displayLanguage={currentTab}
+                  />
+                </ListItem>
+                {message.content_type == "docs_bot_reply" && (
+                  <BotReplyMetadata message={message} />
+                )}
+              </>
+            ))}
+          </List>
+        </TabPanel>
+        <TabPanel value="sources">
+          <RagSourceView message={threadMessages[0]} />
+        </TabPanel>
       </TabContext>
-
-      <List>
-        {threadMessages?.map((message) => (
-          <>
-            <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
-              <BotReplyContent message={message} displayLanguage={currentTab} />
-            </ListItem>
-            {message.content_type == "docs_bot_reply" && <BotReplyDetails message={message} />}
-          </>
-        ))}
-      </List>
     </Box>
   );
 };
