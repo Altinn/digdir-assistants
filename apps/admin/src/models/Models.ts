@@ -1,16 +1,26 @@
 import { z } from "zod";
 
-export interface Message {
-  ts: string;
-  ts_date: number;
-  ts_time: number;
-  thread_ts_date: number;
-  thread_ts_time: number;
-  content: object | Array<object>;
-  content_type: string;
-  created_at: string;
-  user_name: string;
-}
+const UserSchema = z.object({
+  user_id: z.string(),
+  name: z.string(),
+  type: z.string(),
+  team_id: z.string(),
+});
+export type User = z.infer<typeof UserSchema>;
+
+const MessageSchema = z.object({
+  ts: z.string(),
+  ts_date: z.number(),
+  ts_time: z.number(),
+  thread_ts_date: z.number(),
+  thread_ts_time: z.number(),
+  content: z.union([z.object({}), z.array(z.object({}))]),
+  content_type: z.string(),
+  created_at: z.string(),
+  user_id: z.string(),
+  durations: z.object({}).optional(),
+});
+export type Message = z.infer<typeof MessageSchema>;
 
 const DocsUserQuerySchema = z.object({
   bot_name: z.string(),
@@ -61,3 +71,17 @@ const ThreadReplySchema = z.object({
 });
 
 export type ThreadReply = z.infer<typeof ThreadReplySchema>;
+
+
+export interface DocsUserQueryMessage {
+  message: Message & {
+    content: DocsUserQuery;
+  };
+}
+
+export interface DocsBotReplyMessage {
+  message: Message & {
+    content: RagPipelineResult;
+  };
+}
+

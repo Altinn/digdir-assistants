@@ -275,6 +275,7 @@ app.message(async ({ message, say }) => {
       translated_answer: ragResponse.translated_answer || '',
       search_queries: ragResponse.search_queries,
       source_urls: ragResponse.source_urls,
+      source_documents: ragResponse.source_documents || [],
       relevant_urls: ragResponse.relevant_urls,
       not_loaded_urls: ragResponse.not_loaded_urls || [],
       rag_success: !!ragResponse.rag_success,

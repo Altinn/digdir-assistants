@@ -1,9 +1,12 @@
-import React, { useEffect } from "react";
-import { Link, List, ListItem } from "@mui/material";
-import { Props } from "../models/Models";
-import ThreadStart from "./ThreadStart";
+import React, { useEffect, useState } from "react";
+import { Link, List, ListItem, Box, Tab } from "@mui/material";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
+import { Props, Message } from "../models/Models";
 import { useThreadReplies } from "../hooks/useThreadReplies";
 import { RagPipelineResult } from "@digdir/assistants";
+import BotReplyContent from "./BotReplyContent";
+import BotReplyMetadata from "./BotReplyMetadata";
+import RagSourceView from "./RagSourceView";
 
 const ThreadViewPane: React.FC<Props> = ({
   channelId,
@@ -16,57 +19,11 @@ const ThreadViewPane: React.FC<Props> = ({
     isLoading,
   } = useThreadReplies({ channelId, thread_ts_date, thread_ts_time });
 
-  const botReplyDetails = (message) => {
-    if (message?.content_type != "docs_bot_reply") {
-      return "";
-    }
-    const details = message?.content as RagPipelineResult;
-    return (
-      <>
-        <ListItem style={{ flexWrap: "wrap" }}>
-          <h5 style={{ flexBasis: "100%" }}>
-            Phrases generated for retrieval:
-          </h5>
-          <ul>{details?.search_queries.map((query) => <li>{query}</li>)}</ul>
-        </ListItem>
-        <ListItem style={{ flexWrap: "wrap" }}>
-          <h5 style={{ flexBasis: "100%" }}>Sources</h5>
-          <ul>
-            {details?.source_urls.map((url) => (
-              <li>
-                <Link href={url} target="_new" rel="noopener noreferrer">
-                  {url.replace("https://docs.altinn.studio/", "")}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </ListItem>
-        <ListItem style={{ flexWrap: "wrap" }}>
-          <h5 style={{ flexBasis: "100%" }}>Processing times</h5>
-          <p style={{ flexBasis: "100%" }}>
-            Total: {message?.durations?.total.toFixed(1)}
-          </p>
-          <ul>
-            <li>Analyze: {message?.durations?.analyze.toFixed(1)}</li>
-            <li>
-              Generate searches:{" "}
-              {message?.durations?.generate_searches.toFixed(1)}
-            </li>
-            <li>
-              Phrase similarity:{" "}
-              {message?.durations?.phrase_similarity_search.toFixed(1)}
-            </li>
-            <li>
-              Execute searches:{" "}
-              {message?.durations?.execute_searches.toFixed(1)}
-            </li>
-            <li>Re-rank: {message?.durations?.colbert_rerank.toFixed(1)}</li>
-            <li>Generate answer: {message?.durations?.rag_query.toFixed(1)}</li>
-            <li>Translate: {message?.durations?.translation.toFixed(1)}</li>
-          </ul>
-        </ListItem>
-      </>
-    );
+  const [currentTab, setCurrentTab] = useState("original");
+
+  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+    console.log(`Tab changed to: ${newValue}`);
+    setCurrentTab(newValue);
   };
 
   useEffect(() => {
@@ -74,7 +31,7 @@ const ThreadViewPane: React.FC<Props> = ({
       console.error(
         "Error fetching thread messages:",
         error.message,
-        error.stack,
+        error.stack
       );
     }
     if (isLoading) {
@@ -91,16 +48,54 @@ const ThreadViewPane: React.FC<Props> = ({
   }
 
   return (
-    <List>
-      {threadMessages?.map((message) => (
-        <>
-          <ListItem key={message.ts_date + "." + message.ts_time}>
-            <ThreadStart message={message} />
-          </ListItem>
-          {message.content_type == "docs_bot_reply" && botReplyDetails(message)}
-        </>
-      ))}
-    </List>
+    <Box sx={{ overflowY: "auto", maxHeight: "calc(100vh - 70px)" }}>
+      <TabContext value={currentTab}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <TabList onChange={handleChange} aria-label="view_language">
+            <Tab label="English" value="english" />
+            <Tab label="Original" value="original" />
+            <Tab label="Sources" value="sources" />
+          </TabList>
+        </Box>
+        <TabPanel value="english">
+          <List>
+            {threadMessages?.map((message) => (
+              <>
+                <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
+                  <BotReplyContent
+                    message={message}
+                    displayLanguage={currentTab}
+                  />
+                </ListItem>
+                {message.content_type == "docs_bot_reply" && (
+                  <BotReplyMetadata message={message} />
+                )}
+              </>
+            ))}
+          </List>
+        </TabPanel>
+        <TabPanel value="original">
+          <List>
+            {threadMessages?.map((message) => (
+              <>
+                <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
+                  <BotReplyContent
+                    message={message}
+                    displayLanguage={currentTab}
+                  />
+                </ListItem>
+                {message.content_type == "docs_bot_reply" && (
+                  <BotReplyMetadata message={message} />
+                )}
+              </>
+            ))}
+          </List>
+        </TabPanel>
+        <TabPanel value="sources">
+          <RagSourceView message={threadMessages[0]} />
+        </TabPanel>
+      </TabContext>
+    </Box>
   );
 };
 

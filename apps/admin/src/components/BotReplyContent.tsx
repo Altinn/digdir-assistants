@@ -1,25 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { ListItemText } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import { LightAsync as SyntaxHighlighter } from "react-syntax-highlighter";
 import { github } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import { RagPipelineResult, Message, DocsUserQuery } from "../models/Models";
+import { DocsBotReplyMessage, DocsUserQueryMessage } from "../models/Models";
 
-export interface DocsUserQueryMessage {
-  message: Message & {
-    content: DocsUserQuery;
-  };
+
+enum DisplayLanguage {
+  English = "english",
+  Original = "original",
 }
 
-export interface DocsBotReplyMessage {
-  message: Message & {
-    content: RagPipelineResult;
-  };
-}
+export type Params = (DocsBotReplyMessage | DocsUserQueryMessage) & {
+  displayLanguage: DisplayLanguage;
+};
 
-const ThreadStart: React.FC<DocsBotReplyMessage | DocsUserQueryMessage> = ({
-  message,
-}) => {
+const BotReplyContent: React.FC<Params> = ({ message, displayLanguage }) => {
   const components = {
     code({ node, inline, className, children, ...props }) {
       const match = /language-(\w+)/.exec(className || "");
@@ -39,15 +35,20 @@ const ThreadStart: React.FC<DocsBotReplyMessage | DocsUserQueryMessage> = ({
     },
   };
 
+  const conditionalContent = (params: Params) => {
+    return params.displayLanguage == "original" &&
+      "translated_answer" in params.message.content
+      ? params.message.content.translated_answer
+      : params.message.content.english_answer;
+  };
+
   return (
     <ListItemText>
       <ReactMarkdown components={components}>
-        {"content" in message && "english_answer" in message.content
-          ? message.content.english_answer
-          : ""}
+        {conditionalContent({message, displayLanguage})}        
       </ReactMarkdown>
     </ListItemText>
   );
 };
 
-export default ThreadStart;
+export default BotReplyContent;
