@@ -34,7 +34,7 @@ const MainRoutes = () => {
         />
 
         {/* Route for the Slack authentication callback */}
-        <Route path="/auth" element={<SlackAuth />} />
+        <Route path="/auth/slack" element={<SlackAuth />} />
 
         {/* Route for email authentication */}
         <Route path="/auth/email" element={<EmailAuth />} />
