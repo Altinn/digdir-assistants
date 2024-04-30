@@ -29,7 +29,7 @@ const EmailAuth = () => {
       setError("Sign up failed: " + error.message);
     } else {
       console.log(
-        "Sign up successful, storing session and navigating to home page."
+        "Sign up successful, storing session and navigating to home page.",
       );
       localStorage.setItem("authToken", JSON.stringify(session)); // Store the entire session object as 'authToken'
       navigate("/");
@@ -46,7 +46,7 @@ const EmailAuth = () => {
       setError("Sign in failed: " + error.message);
     } else {
       console.log(
-        "Sign in successful, storing session and navigating to home page."
+        "Sign in successful, storing session and navigating to home page.",
       );
       console.log("Navigating to site root...");
       navigate("/");

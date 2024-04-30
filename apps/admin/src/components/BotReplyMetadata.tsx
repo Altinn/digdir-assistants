@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, Box, Tab } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Message, RagPipelineResult } from "../models/Models";
+import { Message, RagPipelineResult, Reaction } from "../models/Models";
 
 interface BotReplyDetailsProps {
   message: Message;
@@ -24,11 +24,14 @@ const BotReplyDetails: React.FC<BotReplyDetailsProps> = ({ message }) => {
     <TabContext value={selectedTab}>
       <Box sx={{ width: "100%" }}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <TabList onChange={handleChange} aria-label="bot reply details tabs"
-          >
+          <TabList onChange={handleChange} aria-label="bot reply details tabs">
             <Tab label="Sources" value="sources" />
             <Tab label="Phrases" value="phrases" />
-            <Tab label={"Durations (" + message?.durations?.total.toFixed(1) + ")"} value="durations" />
+            <Tab
+              label={"Durations (" + message?.durations?.total.toFixed(1) + ")"}
+              value="durations"
+            />
+            <Tab label="Reactions" value="reactions" />
           </TabList>
         </Box>
 
@@ -70,7 +73,21 @@ const BotReplyDetails: React.FC<BotReplyDetailsProps> = ({ message }) => {
               ))}
             </ul>
           </Box>
-        </TabPanel>        
+        </TabPanel>
+
+        <TabPanel value="reactions">
+          <Box sx={{ flexWrap: "wrap" }}>
+            <ul>
+              {message?.reactions?.map((query: Reaction, index: number) => (
+                <li key={query.name}>
+                  <pre>
+                  {query.name}  ({query.count})
+                  </pre>
+                </li>
+              ))}
+            </ul>
+          </Box>
+        </TabPanel>
       </Box>
     </TabContext>
   );
