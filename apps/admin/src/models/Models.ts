@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+const ReactionSchema = z.object({
+  name: z.string(),
+  count: z.number(),
+  users: z.array(z.string()).optional(),
+});
+export type Reaction = z.infer<typeof ReactionSchema>;
+
 const UserSchema = z.object({
   user_id: z.string(),
   name: z.string(),
@@ -18,6 +25,7 @@ const MessageSchema = z.object({
   content_type: z.string(),
   created_at: z.string(),
   user_id: z.string(),
+  reactions: z.array(ReactionSchema),
   durations: z.object({}).optional(),
 });
 export type Message = z.infer<typeof MessageSchema>;
@@ -72,7 +80,6 @@ const ThreadReplySchema = z.object({
 
 export type ThreadReply = z.infer<typeof ThreadReplySchema>;
 
-
 export interface DocsUserQueryMessage {
   message: Message & {
     content: DocsUserQuery;
@@ -84,4 +91,3 @@ export interface DocsBotReplyMessage {
     content: RagPipelineResult;
   };
 }
-

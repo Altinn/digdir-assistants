@@ -47,7 +47,7 @@ const RagSourceView: React.FC<Params> = ({ message }) => {
                       >
                         {message.content?.source_urls[index].replace(
                           "https://docs.altinn.studio/",
-                          ""
+                          "",
                         )}
                       </Link>
                     </span>
@@ -58,7 +58,7 @@ const RagSourceView: React.FC<Params> = ({ message }) => {
 
                   <hr />
                 </li>
-              )
+              ),
             )}
           </ul>
         </ErrorBoundary>

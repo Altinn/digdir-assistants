@@ -90,8 +90,8 @@ export async function updateReactions(
   const payload = {
     slackApp,
     slackContext,
-    reactions
-  }
+    reactions,
+  };
 
   const functionUrl = envVar('SLACK_APP_SUPABASE_API_URL') + '/functions/v1/update_slack_reactions';
   const functionResponse = await fetch(functionUrl, {

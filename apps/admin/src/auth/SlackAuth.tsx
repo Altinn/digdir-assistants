@@ -5,8 +5,8 @@ import { isLoggedIn } from "./authUtils";
 
 async function signInWithSlack() {
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'slack',
-  })
+    provider: "slack",
+  });
 }
 
 const SlackAuth = () => {
