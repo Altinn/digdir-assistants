@@ -92,6 +92,20 @@ app.message(async ({ message, say }) => {
     true,
   );
 
+  const channelQueryRelaxPrompt = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'channelQueryRelaxPrompt',
+    '',
+  );
+
+  const channelRagPrompt = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'channelRagPrompt',
+    '',
+  );
+
   if (envVar('LOG_LEVEL') == 'debug') {
     console.log(`slackApp:\n${JSON.stringify(slackApp)}`);
     console.log(`slackContext:\n${JSON.stringify(srcEvtContext)}`);
@@ -259,6 +273,8 @@ app.message(async ({ message, say }) => {
     ragResponse = await ragPipeline(
       stage1Result.questionTranslatedToEnglish,
       stage1Result.userInputLanguageName,
+      channelQueryRelaxPrompt || '',
+      channelRagPrompt || '',
       updateSlackMsgCallback(app, firstThreadTs),
       translatedMsgCallback,
     );

@@ -50,6 +50,8 @@ export type RagPipelineResult = z.infer<typeof RagPipelineResultSchema>;
 export async function ragPipeline(
   user_input: string,
   user_query_language_name: string,
+  channelQueryRelaxPrompt?: string,
+  channelRagPrompt?: string,
   stream_callback_msg1: any = null,
   stream_callback_msg2: any = null,
 ): Promise<RagPipelineResult> {
@@ -70,7 +72,10 @@ export async function ragPipeline(
   const total_start = performance.now();
   var start = total_start;
 
-  const extract_search_queries = await queryRelaxation(user_input);
+  const extract_search_queries = await queryRelaxation(
+    user_input,
+    channelQueryRelaxPrompt,
+  );
   durations.generate_searches = round(lapTimer(total_start));
 
   if (envVar("LOG_LEVEL") === "debug") {
@@ -260,9 +265,14 @@ export async function ragPipeline(
   let relevant_sources: string[] = [];
 
   const contextYaml = yaml.dump(loadedDocs);
-  const fullPrompt = qaTemplate()
+  const partialPrompt = qaTemplate(channelRagPrompt);
+  const fullPrompt = partialPrompt
     .replace("{context}", contextYaml)
     .replace("{question}", user_input);
+
+  if (envVar("LOG_LEVEL") == "debug") {
+    console.log(`rag prompt:\n${partialPrompt}`);
+  }
 
   if (typeof stream_callback_msg1 !== "function") {
     if (envVar("USE_AZURE_OPENAI_API") === "true") {
