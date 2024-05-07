@@ -2,18 +2,14 @@ import { SearchPhraseEntry } from "../lib/typesense-search";
 import { SearchResponse } from "typesense/lib/Typesense/Documents";
 import { MultiSearchResponse } from "typesense/lib/Typesense/MultiSearch";
 import Instructor from "@instructor-ai/instructor";
+import { Command } from "commander";
 
-// Assuming use of CommonJS modules
 import {Client, Errors} from 'typesense'
-const { config } = require("../lib/config");
-const typesenseSearch = require("../lib/typesense-search");
-const OpenAI = require("openai");
-import {z} from "zod"
-import { TypesenseError } from "typesense/lib/Typesense/Errors";
-// const dotenv = require("dotenv");
+import { config } from "../lib/config";
+import * as typesenseSearch from "../lib/typesense-search";
+import OpenAI from "openai"
+import { z } from "zod"
 import sha1 from "sha1";
-import { get_encoding } from "tiktoken";
-
 
 const cfg = config();
 
@@ -32,7 +28,6 @@ const SearchPhraseSchema = z.object({
 });
 
 const SearchPhraseListSchema = z.object({
-  sourceLanguage: z.string().describe("ISO 639-1 language code for the user query"),
   searchPhrases: z.array(SearchPhraseSchema),
 });
 
@@ -52,17 +47,28 @@ Document:
 `;
 
 async function main() {
-  const args = process.argv.slice(2);
-  if (args.length === 0) {
-    console.log("Usage: node index.js <collectionNameTmp>");
-    process.exit(1);
-  }
 
-  let collectionNameTmp = args[0];
+  const program = new Command();
+  program.name('generate-search-phrases')
+    .description('Use LLMs to generate search phrases for markdown content')
+    .version('0.1.0');
+
+
+  program
+    .option('--prompt <string>, ', 'prompt name', 'original')
+    .option('-c, --collection <string>', 'collection to update (or -n for new)')
+    .option('-n', 'create new collection based on TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION env var')
+    ;
+
+  program.parse(process.argv);
+  const opts = program.opts();
+  
+  let promptName = opts.prompt;
+  let collectionNameTmp = opts.collection;
 
   const client = new Client(cfg.TYPESENSE_CONFIG);
 
-  if (collectionNameTmp == '-n') {
+  if (opts.n) {
     collectionNameTmp = `${
       process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION
     }_${Date.now()}`;
@@ -86,7 +92,6 @@ async function main() {
 
   const totalStart = Date.now();
 
-  const encoding = get_encoding("cl100k_base");
 
   while (jobPageSize < 0 || page <= jobPageSize) {
     console.log(
@@ -133,10 +138,6 @@ async function main() {
 
       const existingPhraseCount = existingPhrases.found || 0;
 
-      let start = performance.now();
-      const tokenCount = encoding.encode(contentMd).length;
-      durations.countTokens += performance.now() - start;
-
       if (existingPhraseCount > 0) {
         const storedChecksum = existingPhrases.hits?.[0]?.document?.checksum || "";
         const checksumMatches = storedChecksum === checksumMd;
@@ -152,9 +153,9 @@ async function main() {
 
       console.log(`Generating search phrases for url: ${url}`);
 
-      start = performance.now();
+      const start = performance.now();
 
-      const result = await generateSearchPhrases(searchHit);
+      const result = await generateSearchPhrases(promptName, searchHit);
       
       durations.generatePhrases += performance.now() - start;
       durations.total += Math.round(performance.now() - totalStart);
@@ -186,7 +187,7 @@ async function main() {
           }
         }
       }
-      console.log(`Results ->  Language code: ${result.sourceLanguage}, token count: ${tokenCount}, search phrases:`);
+      console.log(`Search phrases:`);
 
       const uploadBatch: SearchPhraseEntry[] = [];
 
@@ -200,8 +201,7 @@ async function main() {
           item_priority: 1,
           updated_at: Math.floor(new Date().getTime() / 1000),
           checksum: checksumMd,
-          language: result.sourceLanguage,
-          token_count: tokenCount,
+          prompt: "original"
         };
         if (batch.search_phrase) {
           uploadBatch.push(batch);
@@ -255,8 +255,12 @@ async function lookupSearchPhrases(
   }
 }
 
-async function generateSearchPhrases(searchHit: SearchHit): Promise<SearchPhraseList> {
+async function generateSearchPhrases(prompt: string, searchHit: SearchHit): Promise<SearchPhraseList> {
   let retryCount = 0;
+
+  if (prompt != "original") {
+    throw new Error(`unknown prompt name \'${prompt}\'`);
+  }
 
   while (true) {
     try {

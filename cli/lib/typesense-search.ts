@@ -19,8 +19,7 @@ export interface SearchPhraseEntry {
   item_priority?: number;
   updated_at: number;
   checksum: string;
-  language?: string;
-  token_count?: number;
+  prompt?: string;
 };
 
 type HybridSearchInfo = {
@@ -221,7 +220,7 @@ export async function setupSearchPhraseSchema(
       { "name": "item_priority", "type": "int64" },
       { "name": "updated_at", "type": "int64" },
       { "name": "checksum", "type": "string" },
-      { "name": "token_count", "type": "int64", "optional": true, "sort": true },
+      { "name": "prompt", "type": "string", "optional": true, "sort": true },
     ],
     "default_sorting_field": "sort_order",
     "token_separators": ["_", "-", "/"],

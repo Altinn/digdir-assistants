@@ -43,6 +43,7 @@ export async function searchMultiple(relaxedQueries: QueryRelaxation) {
 
 export async function lookupSearchPhrasesSimilar(
   relaxedQueries: QueryRelaxation,
+  prompt: string,
 ): Promise<RankedUrl[]> {
   if (!relaxedQueries || !relaxedQueries.searchQueries) {
     console.warn(`typesenseSearchMultiple() - search terms not provided`);
@@ -56,6 +57,7 @@ export async function lookupSearchPhrasesSimilar(
       q: query,
       query_by: "search_phrase,phrase_vec",
       include_fields: "search_phrase,url",
+      filter_by: `prompt:=${prompt}`,
       group_by: "url",
       group_limit: 1,
       limit: 20,
