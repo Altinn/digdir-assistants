@@ -1,5 +1,5 @@
 {
-  "name": "cli",
+  "name": "assistants-cli",
   "version": "1.0.0",
   "description": "CLI interface to run tasks and configure Altinn Assistant",
   "main": "main.ts",
@@ -7,11 +7,14 @@
   "private": true,
   "scripts": {
     "clean": "rimraf ./dist/",
-    "build": "tsc -p .",
-    "run:generate-search-phrases": "node ./dist/generate-search-phrases/index.js"
+    "build": "cd ../ && yarn build:assistant-lib && cd cli/ && tsc -p .",
+    "run:generate-search-phrases": "node ./dist/generate-search-phrases/index.js",
+    "run:contentAnalysis": "node ./dist/functions/contentAnalysis.js",
+    "run:listMissingEnDocs": "node ./dist/functions/listMissingEnDocs.js"
   },
   "dependencies": {
-    "@instructor-ai/instructor": "^0.0.7",
+    "@instructor-ai/instructor": "^1.2.1",
+    "groq-sdk": "^0.3.3",
     "openai": "^4.33.0",
     "prettier": "^3.2.5",
     "rimraf": "^5.0.5",

@@ -632,12 +632,12 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/retry/-/retry-0.3.0.tgz#6d86b8cb322660f03d3f0aa94b99bdd8e172d570"
   integrity sha512-d2CGZR2o7fS6sWB7DG/3a95bGKQyHMACZ5aW8qGkkqQpUoZV6C0X7Pc7l4ZNMZkfNBf4VWNe9E1jRsf0G146Ew==
 
-"@instructor-ai/instructor@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@instructor-ai/instructor/-/instructor-0.0.7.tgz#b701d497269edc84107c7f858b0bb3b660e5506e"
-  integrity sha512-Ap9pOlq+GSdQm7Xqnc+Pj04HZCfXk014NJ/TyGbUxUrSdtHacH3zkrLfpfckpZAtpc1KyJhRx0JREC0PmIJ3rg==
+"@instructor-ai/instructor@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@instructor-ai/instructor/-/instructor-1.2.1.tgz#507fe47eaba7db53730a13269a7dc27283941110"
+  integrity sha512-u1Ji7uLmpIU0KmW9mbuthoy8PxvXkjJIamiJiU8xZ1/vXKLhiC3pfsh1ZVPXDzdi714kzZp06lwAmJZQoGstKQ==
   dependencies:
-    zod-stream "0.0.8"
+    zod-stream "1.0.2"
     zod-validation-error "^2.1.0"
 
 "@isaacs/cliui@^8.0.2":
@@ -907,7 +907,7 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.14.1.tgz#299eee74b7d87e116083ac5b1ce8dd9434668294"
   integrity sha512-wQGI+LY/Py20zdUPq+XCem7JcPOyzIJBm3dli+56DJsQOHbnXZFEwgmnC6el1TPAfC8lBT3m+z69RmLykNUbew==
 
-"@slack/bolt@^3.18.0":
+"@slack/bolt@^3.17.1":
   version "3.18.0"
   resolved "https://registry.yarnpkg.com/@slack/bolt/-/bolt-3.18.0.tgz#e19dcee8cc5917569bf0806db8dc0c54c98680bd"
   integrity sha512-A7bDi5kY50fS6/nsmURkQdO3iMxD8aX/rA+m1UXEM2ue2z4KijeQtx2sOZ4YkJQ/h7BsgTQM0CYh3qqmo+m5sQ==
@@ -1087,7 +1087,7 @@
   dependencies:
     "@supabase/node-fetch" "^2.6.14"
 
-"@supabase/supabase-js@^2.43.2":
+"@supabase/supabase-js@^2.39.8", "@supabase/supabase-js@^2.43.2":
   version "2.43.2"
   resolved "https://registry.yarnpkg.com/@supabase/supabase-js/-/supabase-js-2.43.2.tgz#86ee9379d4441c2773b1a84919770ac704c5cfb4"
   integrity sha512-F9CljeJBo5aPucNhrLoMnpEHi5yqNZ0vH0/CL4mGy+/Ggr7FUrYErVJisa1NptViqyhs1HGNzzwjOYG6626h8g==
@@ -1356,12 +1356,12 @@
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.12.tgz#afa96b383a3a6fdc859453a1892d41b607fc7756"
   integrity sha512-bZcOkJ6uWrL0Qb2NAWKa7TBU+mJHPzhx9jjLL1KHF+XpzEcR7EXHvjbHlGtR/IsP1vyPrehuS6XqkmaePy//mg==
 
-"@types/ramda@^0.30.0":
-  version "0.30.0"
-  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.30.0.tgz#59ae27c3bf00036e35b6944dd7f6d283f869f908"
-  integrity sha512-DQtfqUbSB18iM9NHbQ++kVUDuBWHMr6T2FpW1XTiksYRGjq4WnNPZLt712OEHEBJs7aMyJ68Mf2kGMOP1srVVw==
+"@types/ramda@^0.29.12":
+  version "0.29.12"
+  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.29.12.tgz#fd8a23849176c6c1b3510243b64084c067e6a48f"
+  integrity sha512-sgIEjpJhdQPB52gDF4aphs9nl0xe54CR22DPdWqT8gQHjZYmVApgA0R3/CpMbl0Y8az2TEZrPNL2zy0EvjbkLA==
   dependencies:
-    types-ramda "^0.30.0"
+    types-ramda "^0.29.10"
 
 "@types/range-parser@*":
   version "1.2.7"
@@ -1580,11 +1580,6 @@ acorn@^8.11.3, acorn@^8.4.1:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.11.3.tgz#71e0b14e13a4ec160724b38fb7b0f233b1b81d7a"
   integrity sha512-Y9rRfJG5jcKOE0CLisYbojUjIrIEE7AGMzA/Sm4BslANhbS+cDMpgBdcPT91oJ7OuJ9hYJBx59RjbhxVnrF8Xg==
 
-add@^2.0.6:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/add/-/add-2.0.6.tgz#248f0a9f6e5a528ef2295dbeec30532130ae2235"
-  integrity sha512-j5QzrmsokwWWp6kUcJQySpbG+xfOBqqKnup3OIk1pz+kB/80SLorZ9V8zHFLO92Lcd+hbvq8bT+zOGoPkmBV0Q==
-
 agent-base@6:
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-6.0.2.tgz#49fff58577cfee3f37176feab4c22e00f86d7f77"
@@ -1785,7 +1780,7 @@ axios@^1.6.0, axios@^1.6.5:
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
-axios@^1.7.2:
+axios@^1.6.8, axios@^1.7.2:
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.2.tgz#b625db8a7051fbea61c35a3cbb3a1daa7b9c7621"
   integrity sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==
@@ -4803,10 +4798,10 @@ scheduler@^0.23.0:
   dependencies:
     loose-envify "^1.1.0"
 
-schema-stream@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/schema-stream/-/schema-stream-3.0.0.tgz#bd2b47c3412ea3254a496c48225ab2020c779d12"
-  integrity sha512-GmflBc9wXqDnVmsPLq8JQA7nP5VKqkshHzdKbUlMQfvhfWiDvXofYtXXkAfIqsZe4FEHstVC8Uv/Qf0yAZYuHg==
+schema-stream@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/schema-stream/-/schema-stream-3.1.0.tgz#9ab525288f23ff9f893e779a2962f4406170c5cd"
+  integrity sha512-R4PoSFJnMORRGJ5i5BTHRO2Ed3Lf2h8DMofHd5XBU4ZE0lEBCTGRqOXBurjTEO2QntPSYAhv93jLt8PFMqDEPw==
   dependencies:
     ramda "^0.29.0"
 
@@ -5134,6 +5129,11 @@ text-table@^0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==
 
+tiktoken@^1.0.14:
+  version "1.0.14"
+  resolved "https://registry.yarnpkg.com/tiktoken/-/tiktoken-1.0.14.tgz#1263821f4ba0a4ec71604db8608a3accd43001c9"
+  integrity sha512-g5zd5r/DoH8Kw0fiYbYpVhb6WO8BHO1unXqmBBWKwoT17HwSounnDtMDFUKm2Pko8U47sjQarOe+9aUrnqmmTg==
+
 to-fast-properties@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/to-fast-properties/-/to-fast-properties-2.0.0.tgz#dc5e698cbd079265bc73e0377681a4e4e83f616e"
@@ -5283,10 +5283,10 @@ typed-array-length@^1.0.6:
     is-typed-array "^1.1.13"
     possible-typed-array-names "^1.0.0"
 
-types-ramda@^0.30.0:
-  version "0.30.0"
-  resolved "https://registry.yarnpkg.com/types-ramda/-/types-ramda-0.30.0.tgz#d4bae9c2ebaebb3fdbd538094f419ce13454cfde"
-  integrity sha512-oVPw/KHB5M0Du0txTEKKM8xZOG9cZBRdCVXvwHYuNJUVkAiJ9oWyqkA+9Bj2gjMsHgkkhsYevobQBWs8I2/Xvw==
+types-ramda@^0.29.10:
+  version "0.29.10"
+  resolved "https://registry.yarnpkg.com/types-ramda/-/types-ramda-0.29.10.tgz#820432905b820301c74f6396f07aa2359b41cde4"
+  integrity sha512-5PJiW/eiTPyXXBYGZOYGezMl6qj7keBiZheRwfjJZY26QPHsNrjfJnz0mru6oeqqoTHOni893Jfd6zyUXfQRWg==
   dependencies:
     ts-toolbelt "^9.6.0"
 
@@ -5604,12 +5604,12 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-zod-stream@0.0.8:
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/zod-stream/-/zod-stream-0.0.8.tgz#b9610809b000ed55b7f60b4cd5b077ea7207f6ba"
-  integrity sha512-qSvBNsJag7Ox1TRbLwNuJxEJwuDAijAS9aDB/hr9I9e4jI5Ij4Z7u6PC6/Vy3HerkZ0gqBpHLcjNp1yseLulBA==
+zod-stream@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/zod-stream/-/zod-stream-1.0.2.tgz#5c89913617c3d201a009eda721c31d85be3ddb03"
+  integrity sha512-8wPLppLRk7N1AHCtt+WHBUoEGkgssoyQAWN87m5Z9dnueBnzgTYeVWKSRP43tmswhx/Qf8xMt7isJRwc8pFdfw==
   dependencies:
-    schema-stream "^3.0.0"
+    schema-stream "^3.1.0"
     zod-to-json-schema "^3.22.3"
 
 zod-to-json-schema@^3.22.3:

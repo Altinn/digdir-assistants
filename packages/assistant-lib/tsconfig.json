@@ -23,6 +23,9 @@
 
     /* Strict Type-Checking Options */
     "strict": true,                           /* Enable all strict type-checking options. */
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+
     // "noImplicitAny": true,                 /* Raise error on expressions and declarations with an implied 'any' type. */
     // "strictNullChecks": true,              /* Enable strict null checks. */
     // "strictFunctionTypes": true,           /* Enable strict checking of function types. */
@@ -60,8 +63,11 @@
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
   },
   "exclude": [
+    "node_modules",
     "**/dist/",
     "**/*.spec.ts",
-    "src/test-helpers.ts"
+    "**/*.d.ts",
+    "src/test-helpers.ts",
+    "node_modules/@instructor-ai/instructor/"
   ]
 }

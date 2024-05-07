@@ -12,8 +12,8 @@ import {z} from "zod"
 import { TypesenseError } from "typesense/lib/Typesense/Errors";
 // const dotenv = require("dotenv");
 import sha1 from "sha1";
+import { get_encoding } from "tiktoken";
 
-// dotenv.config();
 
 const cfg = config();
 
@@ -32,6 +32,7 @@ const SearchPhraseSchema = z.object({
 });
 
 const SearchPhraseListSchema = z.object({
+  sourceLanguage: z.string().describe("ISO 639-1 language code for the user query"),
   searchPhrases: z.array(SearchPhraseSchema),
 });
 
@@ -61,18 +62,19 @@ async function main() {
 
   const client = new Client(cfg.TYPESENSE_CONFIG);
 
-  // TODO: create a new Typesense collection
-
-  // if (!collectionNameTmp || collectionNameTmp.length === 0) {
-  //   collectionNameTmp = `${
-  //     process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION
-  //   }_${Date.now()}`;
-  //
-  //   await typesenseSearch.setupSearchPhraseSchema(collectionNameTmp);
-  // }
+  if (collectionNameTmp == '-n') {
+    collectionNameTmp = `${
+      process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION
+    }_${Date.now()}`;
+  
+    await typesenseSearch.setupSearchPhraseSchema(collectionNameTmp);
+  } else {
+    console.log(`Will update existing search phrases in collection: '${process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION}'`);
+  }
 
   const durations = {
     total: 0,
+    countTokens: 0,
     queryDocs: 0,
     generatePhrases: 0,
     storePhrases: 0,
@@ -84,9 +86,11 @@ async function main() {
 
   const totalStart = Date.now();
 
+  const encoding = get_encoding("cl100k_base");
+
   while (jobPageSize < 0 || page <= jobPageSize) {
     console.log(
-      `Retrieving content_markdown for all urls, page ${page} (page_size=${pageSize})`
+      `Retrieving content_markdown for all urls from collection '${process.env.TYPESENSE_DOCS_COLLECTION}', page ${page} (page_size=${pageSize})`
     );
 
     const searchResponse = await typesenseSearch.typesenseRetrieveAllUrls(
@@ -125,9 +129,13 @@ async function main() {
       // console.log(`existing phrases:\n${JSON.stringify(existingPhrases)}`);
 
       const contentMd = searchHit.contentMarkdown;
-      const checksumMd = contentMd ? sha1(contentMd) : null; // Ensure you have a function or library to compute SHA1
+      const checksumMd = contentMd ? sha1(contentMd) : null;
 
       const existingPhraseCount = existingPhrases.found || 0;
+
+      let start = performance.now();
+      const tokenCount = encoding.encode(contentMd).length;
+      durations.countTokens += performance.now() - start;
 
       if (existingPhraseCount > 0) {
         const storedChecksum = existingPhrases.hits?.[0]?.document?.checksum || "";
@@ -144,7 +152,7 @@ async function main() {
 
       console.log(`Generating search phrases for url: ${url}`);
 
-      const start = performance.now();
+      start = performance.now();
 
       const result = await generateSearchPhrases(searchHit);
       
@@ -158,8 +166,6 @@ async function main() {
       } else {
         searchPhrases = [];
       }
-
-      console.log(`Generated search phrases for: ${url}\n`);
 
       // delete existing search phrases before uploading new
       for (const document of existingPhrases.hits || []) {
@@ -180,6 +186,7 @@ async function main() {
           }
         }
       }
+      console.log(`Results ->  Language code: ${result.sourceLanguage}, token count: ${tokenCount}, search phrases:`);
 
       const uploadBatch: SearchPhraseEntry[] = [];
 
@@ -193,6 +200,8 @@ async function main() {
           item_priority: 1,
           updated_at: Math.floor(new Date().getTime() / 1000),
           checksum: checksumMd,
+          language: result.sourceLanguage,
+          token_count: tokenCount,
         };
         if (batch.search_phrase) {
           uploadBatch.push(batch);

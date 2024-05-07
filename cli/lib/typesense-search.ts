@@ -2,7 +2,6 @@ import typesense from "typesense";
 import { config } from "./config";
 import { z } from "zod";
 import { CollectionCreateSchema } from "typesense/lib/Typesense/Collections.js";
-
 import { MultiSearchResponse } from "typesense/lib/Typesense/MultiSearch.js";
 
 const cfg = config();
@@ -20,6 +19,8 @@ export interface SearchPhraseEntry {
   item_priority?: number;
   updated_at: number;
   checksum: string;
+  language?: string;
+  token_count?: number;
 };
 
 type HybridSearchInfo = {
@@ -136,6 +137,7 @@ export async function typesenseSearchMultipleVector(
 export async function typesenseRetrieveAllUrls(
   page: number,
   pageSize: number,
+  includeFields: string = "url_without_anchor,content_markdown,id"
 ): Promise<any> {
   const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
 
@@ -144,7 +146,8 @@ export async function typesenseRetrieveAllUrls(
       "collection": process.env.TYPESENSE_DOCS_COLLECTION,
       "q": "*",
       "query_by": "url_without_anchor",
-      "include_fields": "url_without_anchor,content_markdown,id",
+      "include_fields": includeFields,
+      "filter_by": "type:=content",
       "group_by": "url_without_anchor",
       "group_limit": 1,
       "sort_by": "item_priority:asc",
@@ -218,6 +221,7 @@ export async function setupSearchPhraseSchema(
       { "name": "item_priority", "type": "int64" },
       { "name": "updated_at", "type": "int64" },
       { "name": "checksum", "type": "string" },
+      { "name": "token_count", "type": "int64", "optional": true, "sort": true },
     ],
     "default_sorting_field": "sort_order",
     "token_separators": ["_", "-", "/"],

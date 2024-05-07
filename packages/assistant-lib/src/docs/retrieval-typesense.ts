@@ -141,42 +141,6 @@ export async function retrieveAllByUrl(urlList: RankedUrl[]) {
   return response;
 }
 
-async function setupSearchPhraseSchema(collectionNameTmp: string) {
-  const client = new Typesense.Client(typesenseCfg);
-  const schema: CollectionCreateSchema = {
-    name: collectionNameTmp,
-    fields: [
-      { name: "doc_id", type: "string", optional: false },
-      { name: "url", type: "string", optional: false, facet: true, sort: true },
-      { name: "search_phrase", type: "string", optional: false },
-      { name: "sort_order", type: "int32", optional: false, sort: true },
-      {
-        name: "phrase_vec",
-        type: "float[]",
-        optional: true,
-        embed: {
-          from: ["search_phrase"],
-          model_config: {
-            model_name: "ts/all-MiniLM-L12-v2",
-          },
-        },
-      },
-      { name: "language", type: "string", facet: true, optional: true },
-      { name: "item_priority", type: "int64" },
-    ],
-    default_sorting_field: "sort_order",
-    token_separators: ["_", "-", "/"],
-  };
-
-  try {
-    await client.collections(collectionNameTmp).retrieve();
-  } catch (error) {
-    if (error instanceof Typesense.Errors.ObjectNotFound) {
-      await client.collections().create(schema);
-    }
-  }
-}
-
 async function lookupSearchPhrases(url: string, collectionName?: string) {
   const client = new Typesense.Client(typesenseCfg);
   if (!collectionName) {
