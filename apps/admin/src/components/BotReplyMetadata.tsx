@@ -81,7 +81,7 @@ const BotReplyDetails: React.FC<BotReplyDetailsProps> = ({ message }) => {
               {message?.reactions?.map((query: Reaction, index: number) => (
                 <li key={query.name}>
                   <pre>
-                  {query.name}  ({query.count})
+                    {query.name} ({query.count})
                   </pre>
                 </li>
               ))}

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { RagPipelineResult } from "@digdir/assistant-lib"
 
 const ReactionSchema = z.object({
   name: z.string(),
@@ -39,23 +40,6 @@ const DocsUserQuerySchema = z.object({
   content_category: z.string(),
 });
 export type DocsUserQuery = z.infer<typeof DocsUserQuerySchema>;
-
-const RagPipelineResultSchema = z.object({
-  original_user_query: z.string(),
-  english_user_query: z.string(),
-  user_query_language_name: z.string(),
-  english_answer: z.string(),
-  translated_answer: z.string(),
-  rag_success: z.boolean(),
-  search_queries: z.array(z.string()),
-  source_urls: z.array(z.string()),
-  source_documents: z.array(z.any()), // Assuming we don't have a specific structure for documents
-  relevant_urls: z.array(z.string()),
-  not_loaded_urls: z.array(z.string()),
-  durations: z.record(z.string(), z.number()), // Assuming durations is an object with string keys and number values
-});
-
-export type RagPipelineResult = z.infer<typeof RagPipelineResultSchema>;
 
 export type RagPipelineMessage = Message & {
   content: RagPipelineResult;

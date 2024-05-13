@@ -1,4 +1,3 @@
-import { qaTemplate } from "./prompts";
 import { queryRelaxation } from "./query-relaxation";
 import {
   lookupSearchPhrasesSimilar,
@@ -24,11 +23,17 @@ const RagContextRefsSchema = z.object({
   source: z.string().min(1),
 });
 
-const RagPromptReplySchema = z.object({
+const RagGenerateResultSchema = z.object({
   helpful_answer: z.string(),
   i_dont_know: z.boolean(),
   relevant_contexts: z.array(RagContextRefsSchema),
 });
+
+const RagPromptSchema = z.object({
+  queryRelax: z.string(),
+  generate: z.string(),
+});
+export type RagPrompt = z.infer<typeof RagPromptSchema>;
 
 const RagPipelineResultSchema = z.object({
   original_user_query: z.string(),
@@ -39,10 +44,11 @@ const RagPipelineResultSchema = z.object({
   rag_success: z.boolean(),
   search_queries: z.array(z.string()),
   source_urls: z.array(z.string()),
-  source_documents: z.array(z.any()), // Assuming we don't have a specific structure for documents
+  source_documents: z.array(z.any()),
   relevant_urls: z.array(z.string()),
   not_loaded_urls: z.array(z.string()),
-  durations: z.record(z.string(), z.number()), // Assuming durations is an object with string keys and number values
+  durations: z.record(z.string(), z.number()),
+  prompts: RagPromptSchema.optional(),
 });
 
 export type RagPipelineResult = z.infer<typeof RagPipelineResultSchema>;
@@ -50,6 +56,8 @@ export type RagPipelineResult = z.infer<typeof RagPipelineResultSchema>;
 export async function ragPipeline(
   user_input: string,
   user_query_language_name: string,
+  promptRagQueryRelax: string,
+  promptRagGenerate: string,
   stream_callback_msg1: any = null,
   stream_callback_msg2: any = null,
 ): Promise<RagPipelineResult> {
@@ -70,7 +78,10 @@ export async function ragPipeline(
   const total_start = performance.now();
   var start = total_start;
 
-  const extract_search_queries = await queryRelaxation(user_input);
+  const extract_search_queries = await queryRelaxation(
+    user_input,
+    promptRagQueryRelax,
+  );
   durations.generate_searches = round(lapTimer(total_start));
 
   if (envVar("LOG_LEVEL") === "debug") {
@@ -260,9 +271,14 @@ export async function ragPipeline(
   let relevant_sources: string[] = [];
 
   const contextYaml = yaml.dump(loadedDocs);
-  const fullPrompt = qaTemplate()
+  const partialPrompt = promptRagGenerate;
+  const fullPrompt = partialPrompt
     .replace("{context}", contextYaml)
     .replace("{question}", user_input);
+
+  if (envVar("LOG_LEVEL") == "debug") {
+    console.log(`rag prompt:\n${partialPrompt}`);
+  }
 
   if (typeof stream_callback_msg1 !== "function") {
     if (envVar("USE_AZURE_OPENAI_API") === "true") {
@@ -348,6 +364,10 @@ export async function ragPipeline(
     relevant_urls: relevant_sources,
     not_loaded_urls: notLoadedUrls,
     durations,
+    prompts: {
+      queryRelax: promptRagQueryRelax || "",
+      generate: promptRagGenerate || "",
+    },
   };
 
   return response;
