@@ -19,14 +19,14 @@ Catch all category if none of the above categories matches well.
 3. Finally, return the category, original language code and name.
 `;
 
-export function qaTemplate(channelRagPrompt: string = "") {
+export function qaTemplate(promptRagGenerate: string = "") {
   const translate_hint =
     "\nOnly return the helpful answer below, along with relevant source code examples when possible.\n";
 
   const prompt_text =
     `Use the following pieces of information to answer the user's question.
 If you don't know the answer, just say that you don't know, don't try to make up an answer.
-${channelRagPrompt}
+${promptRagGenerate}
 
 Context: {context}
 

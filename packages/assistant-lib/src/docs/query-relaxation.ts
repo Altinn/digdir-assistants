@@ -18,25 +18,18 @@ const openaiClientInstance = Instructor({
 
 const QueryRelaxationSchema = z.object({
   searchQueries: z.array(z.string()),
+  promptUsed: z.string(),
 });
 
 export type QueryRelaxation = z.infer<typeof QueryRelaxationSchema> | null;
 
 export async function queryRelaxation(
   user_input: string,
-  channelQueryRelaxPrompt: string = "",
+  promptRagQueryRelax: string = "",
 ): Promise<QueryRelaxation> {
   let query_result: QueryRelaxation | null = null;
 
-  const prompt = `You have access to a search API that returns relevant documentation.
-
-    Your task is to generate an array of up to 7 search queries that are relevant to this question. 
-    Use a variation of related keywords and synonyms for the queries, trying to be as general as possible.
-    Include as many queries as you can think of, including and excluding terms.
-    For example, include queries like ['keyword_1 keyword_2', 'keyword_1', 'keyword_2'].
-    Be creative. The more queries you include, the more likely you are to find relevant results.
-    
-    ${channelQueryRelaxPrompt}`;
+  const prompt = promptRagQueryRelax;
 
   if (envVar("USE_AZURE_OPENAI_API", false) == "true") {
     //         query_result = await azureClient.chat.completions.create({
@@ -56,7 +49,7 @@ export async function queryRelaxation(
       `${stage_name} model name: ${envVar("OPENAI_API_MODEL_NAME", "")}`,
     );
     if (envVar("LOG_LEVEL") == "debug") {
-      console.log(`query relax prompt: \n${prompt}`);
+      console.log(`prompt.rag.queryRelax: \n${prompt}`);
     }
     query_result = await openaiClientInstance.chat.completions.create({
       model: envVar("OPENAI_API_MODEL_NAME"),

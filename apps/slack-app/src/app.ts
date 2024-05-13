@@ -16,11 +16,12 @@ import {
 import { lookupConfig } from './utils/bot-config';
 import { envVar, round, lapTimer, timeoutPromise } from '@digdir/assistant-lib';
 import { userInputAnalysis, UserQueryAnalysis } from '@digdir/assistant-lib';
-import { ragPipeline, RagPipelineResult } from '@digdir/assistant-lib';
+import { ragPipeline, qaTemplate } from '@digdir/assistant-lib';
 import { splitToSections, isNullOrEmpty } from '@digdir/assistant-lib';
 import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import OpenAI from 'openai';
 import { isNumber } from 'remeda';
+import { RagPipelineResult } from '@digdir/assistant-lib';
 
 const expressReceiver = new ExpressReceiver({
   signingSecret: envVar('SLACK_BOT_SIGNING_SECRET'),
@@ -92,19 +93,26 @@ app.message(async ({ message, say }) => {
     true,
   );
 
-  const channelQueryRelaxPrompt = await lookupConfig(
-    slackApp,
-    srcEvtContext,
-    'channelQueryRelaxPrompt',
-    '',
-  );
+  const queryRelaxCustom = await lookupConfig(slackApp, srcEvtContext, 'prompt.rag.queryRelax', '');
 
-  const channelRagPrompt = await lookupConfig(
+  const promptRagQueryRelax =
+    `You have access to a search API that returns relevant documentation.
+
+    Your task is to generate an array of up to 7 search queries that are relevant to this question. 
+    Use a variation of related keywords and synonyms for the queries, trying to be as general as possible.
+    Include as many queries as you can think of, including and excluding terms.
+    For example, include queries like ['keyword_1 keyword_2', 'keyword_1', 'keyword_2'].
+    Be creative. The more queries you include, the more likely you are to find relevant results.
+    
+  ` + queryRelaxCustom;
+
+  const promptRagGenerateCustom = await lookupConfig(
     slackApp,
     srcEvtContext,
-    'channelRagPrompt',
+    'prompt.rag.generate',
     '',
   );
+  const promptRagGenerate = qaTemplate(promptRagGenerateCustom || '');
 
   if (envVar('LOG_LEVEL') == 'debug') {
     console.log(`slackApp:\n${JSON.stringify(slackApp)}`);
@@ -273,8 +281,8 @@ app.message(async ({ message, say }) => {
     ragResponse = await ragPipeline(
       stage1Result.questionTranslatedToEnglish,
       stage1Result.userInputLanguageName,
-      channelQueryRelaxPrompt || '',
-      channelRagPrompt || '',
+      promptRagQueryRelax || '',
+      promptRagGenerate || '',
       updateSlackMsgCallback(app, firstThreadTs),
       translatedMsgCallback,
     );
@@ -295,6 +303,10 @@ app.message(async ({ message, say }) => {
       relevant_urls: ragResponse.relevant_urls,
       not_loaded_urls: ragResponse.not_loaded_urls || [],
       rag_success: !!ragResponse.rag_success,
+      prompts: {
+        queryRelax: promptRagQueryRelax || '',
+        generate: promptRagGenerate || '',
+      },
     };
   } catch (e) {
     if (e instanceof OpenAI.APIConnectionError) {
@@ -371,8 +383,8 @@ app.message(async ({ message, say }) => {
       durations: ragResponse.durations,
       step_name: 'rag_with_typesense',
       content: {
-        error: finalizeError,
         ...payload,
+        error: finalizeError,
       },
       content_type: 'docs_bot_error',
     };
@@ -466,7 +478,7 @@ async function handleReactionEvents(eventBody: any) {
       channel: itemContext.channel_id,
       timestamp: itemContext.ts_date + '.' + itemContext.ts_time,
     };
-
+  
     const botInfo = await app.client.auth.test();
     const botId = botInfo.user_id;
 
@@ -475,7 +487,7 @@ async function handleReactionEvents(eventBody: any) {
       if (botId === eventUserId) {
         console.log('Reaction on message from Assistant, will update reactions in DB');
       } else {
-        console.log('Reaction was for something else, ignoring.');
+        console.log(`Reaction was for something else, ignoring. Bot ID: ${botId}, reaction was on item with item_user: ${eventUserId}`);
         return;
       }
     }

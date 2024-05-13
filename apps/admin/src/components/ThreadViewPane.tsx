@@ -3,10 +3,10 @@ import { Link, List, ListItem, Box, Tab } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Props, Message } from "../models/Models";
 import { useThreadReplies } from "../hooks/useThreadReplies";
-import { RagPipelineResult } from "@digdir/assistants";
 import BotReplyContent from "./BotReplyContent";
 import BotReplyMetadata from "./BotReplyMetadata";
 import RagSourceView from "./RagSourceView";
+import RagPromptView from "./RagPromptView";
 
 const ThreadViewPane: React.FC<Props> = ({
   channelId,
@@ -55,6 +55,7 @@ const ThreadViewPane: React.FC<Props> = ({
             <Tab label="English" value="english" />
             <Tab label="Original" value="original" />
             <Tab label="Sources" value="sources" />
+            <Tab label="Prompts" value="prompts" />
           </TabList>
         </Box>
         <TabPanel value="english" style={{ padding: "0px 8px" }}>
@@ -93,6 +94,9 @@ const ThreadViewPane: React.FC<Props> = ({
         </TabPanel>
         <TabPanel value="sources" style={{ padding: "0px 8px" }}>
           <RagSourceView message={threadMessages[0]} />
+        </TabPanel>
+        <TabPanel value="prompts" style={{ padding: "0px 8px" }}>
+          <RagPromptView message={threadMessages[0]} />
         </TabPanel>
       </TabContext>
     </Box>

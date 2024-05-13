@@ -10,7 +10,7 @@
     "build:assistant-lib": "cd packages/assistant-lib && yarn codestyle:fix && yarn build && cd ../..",
     "build:slack-app": "cd apps/slack-app && yarn codestyle:fix && yarn build && cd ../..",
     "build:admin": "cd apps/admin && yarn codestyle:fix && yarn build && cd ../..",
-    "build": "export && yarn clean && yarn build:assistant-lib && yarn build:admin && yarn build:slack-app",
+    "build": "yarn clean && yarn build:assistant-lib && yarn build:admin && yarn build:slack-app",
     "run:slack-app": "node ./apps/slack-app/dist/src/app.js"
   },
   "devDependencies": {

@@ -10,7 +10,7 @@
     "codestyle:check": "prettier src/ --check",
     "codestyle:fix": "prettier src/ --write",
     "build": "tsc -p .",
-    "watch": "nodemon src/app.ts",
+    "dev": "nodemon src/app.ts",
     "start": "node dist/src/app.js",
     "go": "yarn run build && yarn start"
   },
