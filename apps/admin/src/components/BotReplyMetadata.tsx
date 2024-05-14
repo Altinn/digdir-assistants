@@ -28,10 +28,15 @@ const BotReplyDetails: React.FC<BotReplyDetailsProps> = ({ message }) => {
             <Tab label="Sources" value="sources" />
             <Tab label="Phrases" value="phrases" />
             <Tab
-              label={"Durations (" + message?.durations?.total?.toFixed(1) + ")"}
+              label={
+                "Durations (" + message?.durations?.total?.toFixed(1) + ")"
+              }
               value="durations"
             />
-            <Tab label={"Reactions (" + message?.reactions?.length + ")"} value="reactions" />
+            <Tab
+              label={"Reactions (" + message?.reactions?.length || 0 + ")"}
+              value="reactions"
+            />
           </TabList>
         </Box>
 
