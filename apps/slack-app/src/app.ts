@@ -594,7 +594,7 @@ async function finalizeAnswer(
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `Svartid: ${duration?.toFixed(1)} sek.\nGi gjerne tilbakemelding med :+1: or :-1:`,
+        text: `Svartid: ${duration?.toFixed(1)} sek.\nGi gjerne tilbakemelding med :+1: :-1: eller :stopwatch: for info om kilder.`,
       },
     });
   } else {
@@ -602,7 +602,7 @@ async function finalizeAnswer(
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `Generated in ${duration?.toFixed(1)} seconds.\nPlease give us your feedback with a :+1: or :-1:`,
+        text: `Generated in ${duration?.toFixed(1)} seconds.\nPlease give us your feedback with :+1: :-1:, or :stopwatch: for more info.`,
       },
     });
   }
