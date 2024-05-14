@@ -352,6 +352,8 @@ app.message(async ({ message, say }) => {
   let finalizeError = null;
   let finalResponse: ChatUpdateResponse | undefined;
 
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
   try {
     finalResponse = await finalizeAnswer(
       app,
