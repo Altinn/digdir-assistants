@@ -67,7 +67,7 @@ export async function lookupSearchPhrasesSimilar(
 
   const response = await client.multiSearch.perform(multiSearchArgs, {});
 
-  if (envVar("LOG_LEVEL") === "debug") {
+  if (envVar("LOG_LEVEL") === "debug-relaxation") {
     console.log(
       `lookupSearchPhraseSimilar results:\n${JSON.stringify(response)}`,
     );

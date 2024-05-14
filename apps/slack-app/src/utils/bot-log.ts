@@ -74,7 +74,7 @@ export async function botLog(entry: BotLogEntry) {
     });
     if (!functionResponse.ok) {
       console.error(
-        `Call to 'log_slack_message' failed with status ${functionResponse.status}, message: ${functionResponse.statusText}\nPayload:\n${JSON.stringify(entry)}`,
+        `ERROR: Call to 'log_slack_message' failed with status ${functionResponse.status}, message: ${functionResponse.statusText}\nPayload:\n${JSON.stringify(entry)}`,
       );
       return;
     }

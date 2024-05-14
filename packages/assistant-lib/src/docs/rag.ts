@@ -84,7 +84,7 @@ export async function ragPipeline(
   );
   durations.generate_searches = round(lapTimer(total_start));
 
-  if (envVar("LOG_LEVEL") === "debug") {
+  if (envVar("LOG_LEVEL") === "debug-relaxation") {
     console.log(
       "Extracted search queries:",
       JSON.stringify(extract_search_queries),
@@ -96,7 +96,7 @@ export async function ragPipeline(
   );
   durations["phrase_similarity_search"] = round(lapTimer(start));
 
-  if (envVar("LOG_LEVEL") === "debug") {
+  if (envVar("LOG_LEVEL") === "debug-relaxation") {
     console.log(
       "Phrase similarity search:",
       JSON.stringify(search_phrase_hits),
@@ -106,7 +106,7 @@ export async function ragPipeline(
   const search_response = await retrieveAllByUrl(search_phrase_hits);
   durations["execute_searches"] = round(lapTimer(start));
 
-  if (envVar("LOG_LEVEL") === "debug") {
+  if (envVar("LOG_LEVEL") === "debug-relaxation") {
     console.log("Search response:", JSON.stringify(search_response));
   }
   const searchHits = flatMap(search_response.results, (result: any) =>
@@ -182,7 +182,7 @@ export async function ragPipeline(
     ),
   };
 
-  if (envVar("LOG_LEVEL") === "debug") {
+  if (envVar("LOG_LEVEL") === "debug-rerank") {
     console.log(
       `Calling ${rerankUrl}, sending:\n${JSON.stringify(rerankData)}`,
     );
@@ -190,7 +190,7 @@ export async function ragPipeline(
   const rerankResponse = await axios.post(rerankUrl, rerankData);
   reranked = rerankResponse.data;
 
-  if (envVar("LOG_LEVEL") === "debug") {
+  if (envVar("LOG_LEVEL") === "debug-rerank") {
     console.log("ColBERT re-ranking results:");
     console.log(reranked);
   }
