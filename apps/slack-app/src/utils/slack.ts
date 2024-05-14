@@ -73,7 +73,7 @@ export async function getEventContext(
     `getEventContext: channel_type: ${evt.channel_type}. channel_name: ${channel_name}, team_name: ${team_name}`,
   );
 
-  const context = new SlackContext({
+  const slackContext = {
     ts_date,
     ts_time,
     thread_ts_date,
@@ -87,8 +87,8 @@ export async function getEventContext(
     user_name,
     user_type: 'human',
     time_utc: tsToTimestamptz(evt.ts),
-  });
-  return context;
+  };
+  return SlackContext.parse(slackContext);
 }
 
 export async function getChatUpdateContext(

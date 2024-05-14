@@ -16,11 +16,12 @@ import {
 import { lookupConfig } from './utils/bot-config';
 import { envVar, round, lapTimer, timeoutPromise } from '@digdir/assistant-lib';
 import { userInputAnalysis, UserQueryAnalysis } from '@digdir/assistant-lib';
-import { ragPipeline, RagPipelineResult } from '@digdir/assistant-lib';
+import { ragPipeline, qaTemplate } from '@digdir/assistant-lib';
 import { splitToSections, isNullOrEmpty } from '@digdir/assistant-lib';
 import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import OpenAI from 'openai';
 import { isNumber } from 'remeda';
+import { RagPipelineResult } from '@digdir/assistant-lib';
 
 const expressReceiver = new ExpressReceiver({
   signingSecret: envVar('SLACK_BOT_SIGNING_SECRET'),
@@ -91,6 +92,27 @@ app.message(async ({ message, say }) => {
     'ignoreWhenNotTagged',
     true,
   );
+
+  const queryRelaxCustom = await lookupConfig(slackApp, srcEvtContext, 'prompt.rag.queryRelax', '');
+
+  const promptRagQueryRelax =
+    `You have access to a search API that returns relevant documentation.
+
+    Your task is to generate an array of up to 7 search queries that are relevant to this question. 
+    Use a variation of related keywords and synonyms for the queries, trying to be as general as possible.
+    Include as many queries as you can think of, including and excluding terms.
+    For example, include queries like ['keyword_1 keyword_2', 'keyword_1', 'keyword_2'].
+    Be creative. The more queries you include, the more likely you are to find relevant results.
+    
+  ` + queryRelaxCustom;
+
+  const promptRagGenerateCustom = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'prompt.rag.generate',
+    '',
+  );
+  const promptRagGenerate = qaTemplate(promptRagGenerateCustom || '');
 
   if (envVar('LOG_LEVEL') == 'debug') {
     console.log(`slackApp:\n${JSON.stringify(slackApp)}`);
@@ -209,13 +231,14 @@ app.message(async ({ message, say }) => {
 
   let threadTs = srcEvtContext.ts_date + '.' + srcEvtContext.ts_time;
 
-  const busyReadingMsg = 'Reading Altinn Studio docs...';
-  let willTranslateMsg = '';
+  let busyReadingMsg = '';
 
-  if (stage1Result.userInputLanguageCode === 'no') {
-    willTranslateMsg = 'Oversetter til norsk snart...';
+  if (stage1Result.userInputLanguageCode === 'en') {
+    busyReadingMsg = 'Reading Altinn 3 documentation...';
+  } else if (stage1Result.userInputLanguageCode === 'no') {
+    busyReadingMsg = 'Leser Altinn 3 dokumentasjon...';
   } else {
-    willTranslateMsg = `We will also translate this message to ${stage1Result.userInputLanguageName}.`;
+    busyReadingMsg = `Reading Altinn 3 documentation. The reply will be translated to ${stage1Result.userInputLanguageName}.`;
   }
 
   if (firstThreadTs != null) {
@@ -233,21 +256,14 @@ app.message(async ({ message, say }) => {
     firstThreadTs = await say({ text: busyReadingMsg, thread_ts: threadTs });
   }
 
+  let originalMsgCallback: any = null;
   let translatedMsgCallback: any = null;
-  let secThreadSayResult;
-  let secondThreadTs = null;
   let payload = {};
 
   if (willTranslate(stage1Result)) {
-    secThreadSayResult = await say({
-      text: willTranslateMsg,
-      thread_ts: threadTs,
-    });
-    secondThreadTs = {
-      channel: secThreadSayResult.channel,
-      ts: secThreadSayResult.ts,
-    };
-    translatedMsgCallback = updateSlackMsgCallback(app, secondThreadTs);
+    translatedMsgCallback = updateSlackMsgCallback(app, firstThreadTs);
+  } else {
+    originalMsgCallback = updateSlackMsgCallback(app, firstThreadTs);
   }
 
   let ragWithTypesenseError: string | null = null;
@@ -259,7 +275,9 @@ app.message(async ({ message, say }) => {
     ragResponse = await ragPipeline(
       stage1Result.questionTranslatedToEnglish,
       stage1Result.userInputLanguageName,
-      updateSlackMsgCallback(app, firstThreadTs),
+      promptRagQueryRelax || '',
+      promptRagGenerate || '',
+      originalMsgCallback,
       translatedMsgCallback,
     );
 
@@ -279,6 +297,10 @@ app.message(async ({ message, say }) => {
       relevant_urls: ragResponse.relevant_urls,
       not_loaded_urls: ragResponse.not_loaded_urls || [],
       rag_success: !!ragResponse.rag_success,
+      prompts: {
+        queryRelax: promptRagQueryRelax || '',
+        generate: promptRagGenerate || '',
+      },
     };
   } catch (e) {
     if (e instanceof OpenAI.APIConnectionError) {
@@ -297,7 +319,7 @@ app.message(async ({ message, say }) => {
 
     payload = {
       bot_name: 'docs',
-      original_user_query: userInput, // Assuming `userInput` is the variable holding the original user query
+      original_user_query: userInput,
       error: ragWithTypesenseError,
       rag_success: false,
     };
@@ -330,13 +352,15 @@ app.message(async ({ message, say }) => {
   let finalizeError = null;
   let finalResponse: ChatUpdateResponse | undefined;
 
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
   try {
     finalResponse = await finalizeAnswer(
       app,
-      firstThreadTs,
-      ragResponse.english_answer || '',
       ragResponse,
-      ragResponse.durations.total + stage1Duration - ragResponse.durations.translation,
+      firstThreadTs,
+      ragResponse.durations.total,
+      willTranslate(stage1Result),
     );
   } catch (e) {
     finalizeError = e;
@@ -349,14 +373,12 @@ app.message(async ({ message, say }) => {
     rag_logEntry = {
       slack_context: await getThreadResponseContext(app.client, srcEvtContext, firstThreadTs.ts),
       slack_app: slackApp,
-      elapsed_ms: timeSecondsToMs(
-        ragResponse.durations.total + stage1Duration - ragResponse.durations.translation,
-      ),
+      elapsed_ms: timeSecondsToMs(ragResponse.durations.total),
       durations: ragResponse.durations,
       step_name: 'rag_with_typesense',
       content: {
-        error: finalizeError,
         ...payload,
+        error: finalizeError,
       },
       content_type: 'docs_bot_error',
     };
@@ -365,9 +387,7 @@ app.message(async ({ message, say }) => {
     rag_logEntry = {
       slack_context: await getChatUpdateContext(app.client, srcEvtContext, finalResponse),
       slack_app: slackApp,
-      elapsed_ms: timeSecondsToMs(
-        ragResponse.durations.total + stage1Duration - ragResponse.durations.translation,
-      ),
+      elapsed_ms: timeSecondsToMs(ragResponse.durations.total),
       durations: ragResponse.durations,
       step_name: 'rag_with_typesense',
       content: payload,
@@ -375,51 +395,6 @@ app.message(async ({ message, say }) => {
     };
   }
   if (rag_logEntry != undefined) botLog(rag_logEntry);
-
-  // translation has already completed when we get here
-  if (willTranslate(stage1Result)) {
-    let translationResponse: ChatUpdateResponse | undefined;
-
-    try {
-      translationResponse = await finalizeAnswer(
-        app,
-        secondThreadTs,
-        ragResponse.translated_answer || '',
-        ragResponse,
-        ragResponse.durations.translation,
-      );
-    } catch (e) {
-      finalizeError = e;
-    }
-
-    if (finalizeError != null) {
-      // Log the bot operation
-      rag_logEntry = {
-        slack_context: await getThreadResponseContext(app.client, srcEvtContext, firstThreadTs.ts),
-        slack_app: slackApp,
-        elapsed_ms: timeSecondsToMs(ragResponse.durations.translation),
-        durations: ragResponse.durations,
-        step_name: 'rag_translate',
-        content: {
-          error: finalizeError,
-          ...payload,
-        },
-        content_type: 'docs_bot_error',
-      };
-    } else if (finalResponse != undefined) {
-      // Log the bot operation
-      rag_logEntry = {
-        slack_context: await getChatUpdateContext(app.client, srcEvtContext, finalResponse),
-        slack_app: slackApp,
-        elapsed_ms: timeSecondsToMs(ragResponse.durations.translation),
-        durations: ragResponse.durations,
-        step_name: 'rag_translate',
-        content: payload,
-        content_type: 'docs_bot_reply',
-      };
-    }
-    if (rag_logEntry != undefined) botLog(rag_logEntry);
-  }
 });
 
 async function handleReactionEvents(eventBody: any) {
@@ -459,7 +434,9 @@ async function handleReactionEvents(eventBody: any) {
       if (botId === eventUserId) {
         console.log('Reaction on message from Assistant, will update reactions in DB');
       } else {
-        console.log('Reaction was for something else, ignoring.');
+        console.log(
+          `Reaction was for something else, ignoring. Bot ID: ${botId}, reaction was on item with item_user: ${eventUserId}`,
+        );
         return;
       }
     }
@@ -513,8 +490,8 @@ app.event('reaction_removed', async (event) => {
   await handleReactionEvents(event);
 });
 
-function willTranslate(stage1_result: UserQueryAnalysis) {
-  return stage1_result && stage1_result.userInputLanguageCode != 'en';
+function willTranslate(stage1_result: UserQueryAnalysis): boolean {
+  return stage1_result?.userInputLanguageCode != 'en';
 }
 
 function updateSlackMsgCallback(
@@ -577,10 +554,10 @@ function updateSlackMsgCallback(
 
 async function finalizeAnswer(
   app: App,
+  ragResponse: RagPipelineResult,
   threadTs: { channel?: string; ts?: string } | null,
-  answer: string,
-  ragResponse: any,
   duration: number,
+  translation: boolean,
 ): Promise<ChatUpdateResponse> {
   if (!threadTs?.channel || !threadTs.ts) {
     throw new Error('Slack message callback cannot be initialized without a valid channel or ts.');
@@ -588,7 +565,9 @@ async function finalizeAnswer(
 
   const relevantSources = ragResponse.relevant_urls;
 
-  const sections = splitToSections(answer);
+  const sections = splitToSections(
+    translation ? ragResponse.translated_answer : ragResponse.english_answer,
+  );
 
   const blocks: any[] = sections
     .filter((section) => !isNullOrEmpty(section))
@@ -610,15 +589,23 @@ async function finalizeAnswer(
     });
   }
 
-  blocks.push({
-    type: 'section',
-    text: {
-      type: 'mrkdwn',
-      text: `Generated in ${duration.toFixed(
-        1,
-      )} seconds.\nPlease give us your feedback with a :+1: or :-1:`,
-    },
-  });
+  if (translation && ragResponse.user_query_language_name == 'Norwegian') {
+    blocks.push({
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `Svartid: ${duration?.toFixed(1)} sek.\nGi gjerne tilbakemelding med :+1: or :-1:`,
+      },
+    });
+  } else {
+    blocks.push({
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `Generated in ${duration?.toFixed(1)} seconds.\nPlease give us your feedback with a :+1: or :-1:`,
+      },
+    });
+  }
 
   const responseTs = await app.client.chat.update({
     channel: threadTs.channel,

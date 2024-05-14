@@ -42,7 +42,9 @@ const MainRoutes = () => {
         {/* Redirect based on authentication status */}
         <Route
           path="*"
-          element={isAuthenticated ? <Navigate to="/" /> : <Navigate to="/auth" />}
+          element={
+            isAuthenticated ? <Navigate to="/" /> : <Navigate to="/auth" />
+          }
         />
       </Routes>
     </BrowserRouter>

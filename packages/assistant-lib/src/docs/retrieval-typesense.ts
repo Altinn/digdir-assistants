@@ -2,7 +2,7 @@ import Typesense from "typesense";
 import { CollectionCreateSchema } from "typesense/lib/Typesense/Collections";
 import { QueryRelaxation } from "./query-relaxation";
 import { typesenseConfig } from "../config/typesense";
-import { envVar as env_var } from "../general";
+import { envVar } from "../general";
 import { flatMap } from "remeda";
 
 const typesenseCfg = typesenseConfig();
@@ -23,7 +23,7 @@ export async function searchMultiple(relaxedQueries: QueryRelaxation) {
 
   const multiSearchArgs = {
     searches: relaxedQueries.searchQueries.map((query) => ({
-      collection: env_var("TYPESENSE_DOCS_COLLECTION"),
+      collection: envVar("TYPESENSE_DOCS_COLLECTION"),
       q: query,
       query_by: "content,embedding",
       include_fields:
@@ -52,7 +52,7 @@ export async function lookupSearchPhrasesSimilar(
 
   const multiSearchArgs = {
     searches: relaxedQueries.searchQueries.map((query) => ({
-      collection: env_var("TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION"),
+      collection: envVar("TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION"),
       q: query,
       query_by: "search_phrase,phrase_vec",
       include_fields: "search_phrase,url",
@@ -66,6 +66,12 @@ export async function lookupSearchPhrasesSimilar(
   };
 
   const response = await client.multiSearch.perform(multiSearchArgs, {});
+
+  if (envVar("LOG_LEVEL") === "debug-relaxation") {
+    console.log(
+      `lookupSearchPhraseSimilar results:\n${JSON.stringify(response)}`,
+    );
+  }
 
   const searchPhraseHits = flatMap(response.results, (result: any) =>
     flatMap(result.grouped_hits, (group: any) => group.hits),
@@ -96,7 +102,7 @@ export async function retrieveAllUrls(page: number, pageSize: number) {
   const multiSearchArgs = {
     searches: [
       {
-        collection: env_var("TYPESENSE_DOCS_COLLECTION"),
+        collection: envVar("TYPESENSE_DOCS_COLLECTION"),
         q: "*",
         query_by: "url_without_anchor",
         include_fields: "url_without_anchor,content_markdown,id",
@@ -117,7 +123,7 @@ export async function retrieveAllByUrl(urlList: RankedUrl[]) {
   const client = new Typesense.Client(typesenseCfg);
 
   const urlSearches = urlList.slice(0, 20).map((rankedUrl) => ({
-    collection: env_var("TYPESENSE_DOCS_COLLECTION"),
+    collection: envVar("TYPESENSE_DOCS_COLLECTION"),
     q: rankedUrl["url"],
     query_by: "url_without_anchor",
     include_fields:
@@ -174,7 +180,7 @@ async function setupSearchPhraseSchema(collectionNameTmp: string) {
 async function lookupSearchPhrases(url: string, collectionName?: string) {
   const client = new Typesense.Client(typesenseCfg);
   if (!collectionName) {
-    collectionName = env_var("TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION");
+    collectionName = envVar("TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION");
   }
 
   const multiSearchArgs = {

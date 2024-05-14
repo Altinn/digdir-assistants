@@ -5,7 +5,6 @@ import { LightAsync as SyntaxHighlighter } from "react-syntax-highlighter";
 import { github } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { DocsBotReplyMessage, DocsUserQueryMessage } from "../models/Models";
 
-
 enum DisplayLanguage {
   English = "english",
   Original = "original",
@@ -45,7 +44,7 @@ const BotReplyContent: React.FC<Params> = ({ message, displayLanguage }) => {
   return (
     <ListItemText>
       <ReactMarkdown components={components}>
-        {conditionalContent({message, displayLanguage})}        
+        {conditionalContent({ message, displayLanguage })}
       </ReactMarkdown>
     </ListItemText>
   );

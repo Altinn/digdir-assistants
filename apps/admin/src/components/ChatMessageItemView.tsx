@@ -51,12 +51,12 @@ const ChatMessageItemView: React.FC<ChatMessageItemViewProps> = ({
             </span>
 
             <span style={{ color: "gray" }}>
-              {
-                new Date(message.ts_date * 1000)
-                  .toLocaleDateString("en-US", { day: "2-digit", month: "short" })
-                  + ' ' 
-                  + new Date(message.ts_date * 1000).toTimeString().slice(0, 5)
-              }
+              {new Date(message.ts_date * 1000).toLocaleDateString("en-US", {
+                day: "2-digit",
+                month: "short",
+              }) +
+                " " +
+                new Date(message.ts_date * 1000).toTimeString().slice(0, 5)}
             </span>
           </Box>
           <div>{(message.content as DocsUserQuery).original_user_query}</div>

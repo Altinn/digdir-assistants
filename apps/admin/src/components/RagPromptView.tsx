@@ -34,28 +34,17 @@ const RagSourceView: React.FC<Params> = ({ message }) => {
         <ErrorBoundary>
           {" "}
           <ul>
-            {message?.content?.source_documents?.map(
-              (docObj: object, index: number) => (
-                <li>
+            {Object.entries(message?.content?.prompts || {}).map(
+              ([key, value], index) => (
+                <li key={key}>
                   <Box flexDirection="column">
                     <span>
-                      Result #{index + 1}:&nbsp;
-                      <Link
-                        href={message.content?.source_urls[index]}
-                        target="_new"
-                        rel="noopener noreferrer"
-                      >
-                        {message.content?.source_urls[index].replace(
-                          "https://docs.altinn.studio/",
-                          "",
-                        )}
-                      </Link>
+                      Prompt #{index + 1}: {key}
                     </span>
                     <ReactMarkdown components={components}>
-                      {docObj.page_content}
+                      {value}
                     </ReactMarkdown>
                   </Box>
-
                   <hr />
                 </li>
               ),
