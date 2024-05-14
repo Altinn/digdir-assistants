@@ -42,38 +42,44 @@ const supabase: SupabaseClient = createClient(
 );
 
 export async function botLog(entry: BotLogEntry) {
-  const slackMessage: SlackMessage = {
-    team_id: entry.slack_context?.team_id || '',
-    team_name: entry.slack_context?.team_name || '',
-    channel_id: entry.slack_context?.channel_id || '',
-    channel_name: entry.slack_context?.channel_name || '',
-    channel_type: entry.slack_context?.channel_type || '',
-    user_id: entry.slack_context?.user_id || '',
-    user_name: entry.slack_context?.user_name || '',
-    user_type: entry.slack_context?.user_type || '',
-    ts_date: entry.slack_context?.ts_date || 0,
-    ts_time: entry.slack_context?.ts_time || 0,
-    thread_ts_date: entry.slack_context?.thread_ts_date,
-    thread_ts_time: entry.slack_context?.thread_ts_time,
-    content: entry.content,
-    content_type: entry.content_type,
-    bot_name: entry.slack_app?.bot_name || '',
-    step_name: entry.step_name || '',
-    durations: entry.durations,
-  };
+  try {
+    const slackMessage: SlackMessage = {
+      team_id: entry.slack_context?.team_id || '',
+      team_name: entry.slack_context?.team_name || '',
+      channel_id: entry.slack_context?.channel_id || '',
+      channel_name: entry.slack_context?.channel_name || '',
+      channel_type: entry.slack_context?.channel_type || '',
+      user_id: entry.slack_context?.user_id || '',
+      user_name: entry.slack_context?.user_name || '',
+      user_type: entry.slack_context?.user_type || '',
+      ts_date: entry.slack_context?.ts_date || 0,
+      ts_time: entry.slack_context?.ts_time || 0,
+      thread_ts_date: entry.slack_context?.thread_ts_date,
+      thread_ts_time: entry.slack_context?.thread_ts_time,
+      content: entry.content,
+      content_type: entry.content_type,
+      bot_name: entry.slack_app?.bot_name || '',
+      step_name: entry.step_name || '',
+      durations: entry.durations,
+    };
 
-  const functionUrl = envVar('SLACK_APP_SUPABASE_API_URL') + '/functions/v1/log_slack_message';
-  const functionResponse = await fetch(functionUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: envVar('SLACK_APP_SUPABASE_ANON_KEY'),
-    },
-    body: JSON.stringify(slackMessage),
-  });
-  if (!functionResponse.ok) {
-    console.error(`Function call failed with status ${functionResponse.status}`);
-    return null;
+    const functionUrl = envVar('SLACK_APP_SUPABASE_API_URL') + '/functions/v1/log_slack_message';
+    const functionResponse = await fetch(functionUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: envVar('SLACK_APP_SUPABASE_ANON_KEY'),
+      },
+      body: JSON.stringify(slackMessage),
+    });
+    if (!functionResponse.ok) {
+      console.error(
+        `Call to 'log_slack_message' failed with status ${functionResponse.status}, message: ${functionResponse.statusText}\nPayload:\n${JSON.stringify(entry)}`,
+      );
+      return;
+    }
+  } catch (error) {
+    console.error('Error in botLog:', error);
   }
 
   return;

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { RagPipelineResult } from "@digdir/assistant-lib"
+import { RagPipelineResult } from "@digdir/assistant-lib";
 
 const ReactionSchema = z.object({
   name: z.string(),
