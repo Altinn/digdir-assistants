@@ -18,7 +18,6 @@ const openaiClientInstance = Instructor({
 
 const QueryRelaxationSchema = z.object({
   searchQueries: z.array(z.string()),
-  promptUsed: z.string(),
 });
 
 export type QueryRelaxation = z.infer<typeof QueryRelaxationSchema> | null;
