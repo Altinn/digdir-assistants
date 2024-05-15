@@ -21,6 +21,7 @@
     "@instructor-ai/instructor": "^0.0.7",
     "@slack/bolt": "^3.17.1",
     "@supabase/supabase-js": "^2.39.8",
+    "@tryfabric/mack": "^1.2.1",
     "@types/ramda": "^0.30.0",
     "axios": "^1.6.8",
     "dataclass": "^2.1.1",
