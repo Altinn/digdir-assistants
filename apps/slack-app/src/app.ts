@@ -22,6 +22,7 @@ import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import OpenAI from 'openai';
 import { isNumber } from 'remeda';
 import { RagPipelineResult } from '@digdir/assistant-lib';
+import {markdownToBlocks} from '@tryfabric/mack';
 
 const expressReceiver = new ExpressReceiver({
   signingSecret: envVar('SLACK_BOT_SIGNING_SECRET'),
@@ -521,12 +522,14 @@ function updateSlackMsgCallback(
 
     contentChunks.push(partialResponse);
 
-    const sections = splitToSections(contentChunks.join(''));
+    const blocks = await markdownToBlocks(contentChunks.join(''));
 
-    const blocks = sections.map((paragraph, i) => ({
-      type: 'section',
-      text: { type: 'mrkdwn', text: paragraph },
-    }));
+
+    // const sections = splitToSections(contentChunks.join(''));
+
+    // const blocks = sections.map((paragraph, i) => {
+    //   return markdownToBlocks(paragraph);
+    // });
 
     if (envVar('LOG_LEVEL') == 'debug') {
       console.log(
@@ -565,16 +568,18 @@ async function finalizeAnswer(
 
   const relevantSources = ragResponse.relevant_urls;
 
-  const sections = splitToSections(
-    translation ? ragResponse.translated_answer : ragResponse.english_answer,
-  );
+  const blocks = await markdownToBlocks(translation ? ragResponse.translated_answer : ragResponse.english_answer);
 
-  const blocks: any[] = sections
-    .filter((section) => !isNullOrEmpty(section))
-    .map((paragraph, i) => ({
-      type: 'section',
-      text: { type: 'mrkdwn', text: paragraph },
-    }));
+  // const sections = splitToSections(
+  //   translation ? ragResponse.translated_answer : ragResponse.english_answer,
+  // );
+
+  // const blocks: any[] = sections
+  //   .filter((section) => !isNullOrEmpty(section))
+  //   .map((paragraph, i) => ({
+  //     type: 'section',
+  //     text: { type: 'mrkdwn', text: paragraph },
+  //   }));
 
   if (relevantSources.length > 0) {
     const linksMarkdown = relevantSources
