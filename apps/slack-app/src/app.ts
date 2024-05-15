@@ -524,13 +524,6 @@ function updateSlackMsgCallback(
 
     const blocks = await markdownToBlocks(contentChunks.join(''));
 
-
-    // const sections = splitToSections(contentChunks.join(''));
-
-    // const blocks = sections.map((paragraph, i) => {
-    //   return markdownToBlocks(paragraph);
-    // });
-
     if (envVar('LOG_LEVEL') == 'debug') {
       console.log(
         `Partial response update for channel '${threadTs.channel}' ts ${
@@ -569,17 +562,6 @@ async function finalizeAnswer(
   const relevantSources = ragResponse.relevant_urls;
 
   const blocks = await markdownToBlocks(translation ? ragResponse.translated_answer : ragResponse.english_answer);
-
-  // const sections = splitToSections(
-  //   translation ? ragResponse.translated_answer : ragResponse.english_answer,
-  // );
-
-  // const blocks: any[] = sections
-  //   .filter((section) => !isNullOrEmpty(section))
-  //   .map((paragraph, i) => ({
-  //     type: 'section',
-  //     text: { type: 'mrkdwn', text: paragraph },
-  //   }));
 
   if (relevantSources.length > 0) {
     const linksMarkdown = relevantSources
