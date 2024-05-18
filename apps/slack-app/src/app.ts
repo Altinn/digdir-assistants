@@ -22,7 +22,7 @@ import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import OpenAI from 'openai';
 import { isNumber } from 'remeda';
 import { RagPipelineResult } from '@digdir/assistant-lib';
-import {markdownToBlocks} from '@tryfabric/mack';
+import { markdownToBlocks } from '@tryfabric/mack';
 
 const expressReceiver = new ExpressReceiver({
   signingSecret: envVar('SLACK_BOT_SIGNING_SECRET'),
@@ -561,7 +561,9 @@ async function finalizeAnswer(
 
   const relevantSources = ragResponse.relevant_urls;
 
-  const blocks = await markdownToBlocks(translation ? ragResponse.translated_answer : ragResponse.english_answer);
+  const blocks = await markdownToBlocks(
+    translation ? ragResponse.translated_answer : ragResponse.english_answer,
+  );
 
   if (relevantSources.length > 0) {
     const linksMarkdown = relevantSources

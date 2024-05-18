@@ -55,7 +55,9 @@ export const useChannels = ({ selectedTeam }: UseChannelsProps) => {
         const { data, error } = await supabase
           .from("slack_channel")
           .select("*")
-          .eq("team_id", selectedTeam);
+          .eq("team_id", selectedTeam)
+          .order("name", {ascending: true});
+          
         if (error) {
           console.error("Error fetching channels:", error.message, error.stack);
           throw new Error(error.message);

@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { RagPipelineResult } from "@digdir/assistant-lib";
 
+const ChannelSchema = z.object({
+  channel_id: z.string(),
+  name: z.string(),
+});
+export type Channel = z.infer<typeof ChannelSchema>;
+
 const ReactionSchema = z.object({
   name: z.string(),
   count: z.number(),
@@ -75,3 +81,5 @@ export interface DocsBotReplyMessage {
     content: RagPipelineResult;
   };
 }
+
+export type SelectedThreadView = "english" | "original" | "sources" | "prompts";

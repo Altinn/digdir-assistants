@@ -3,18 +3,13 @@ import { ListItemText } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import { LightAsync as SyntaxHighlighter } from "react-syntax-highlighter";
 import { github } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import { DocsBotReplyMessage, DocsUserQueryMessage } from "../models/Models";
-
-enum DisplayLanguage {
-  English = "english",
-  Original = "original",
-}
+import { DocsBotReplyMessage, DocsUserQueryMessage, SelectedThreadView } from "../models/Models";
 
 export type Params = (DocsBotReplyMessage | DocsUserQueryMessage) & {
-  displayLanguage: DisplayLanguage;
+  selectedThreadView: SelectedThreadView;
 };
 
-const BotReplyContent: React.FC<Params> = ({ message, displayLanguage }) => {
+const BotReplyContent: React.FC<Params> = ({ message, selectedThreadView }) => {
   const components = {
     code({ node, inline, className, children, ...props }) {
       const match = /language-(\w+)/.exec(className || "");
@@ -35,7 +30,7 @@ const BotReplyContent: React.FC<Params> = ({ message, displayLanguage }) => {
   };
 
   const conditionalContent = (params: Params) => {
-    return params.displayLanguage == "original" &&
+    return params.selectedThreadView == "original" &&
       "translated_answer" in params.message.content
       ? params.message.content.translated_answer
       : params.message.content.english_answer;
@@ -44,7 +39,7 @@ const BotReplyContent: React.FC<Params> = ({ message, displayLanguage }) => {
   return (
     <ListItemText>
       <ReactMarkdown components={components}>
-        {conditionalContent({ message, displayLanguage })}
+        {conditionalContent({ message, selectedThreadView })}
       </ReactMarkdown>
     </ListItemText>
   );

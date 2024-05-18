@@ -7,6 +7,7 @@ import { RealtimeChannel } from "@supabase/supabase-js";
 export const useMessages = (channelId: string) => {
   const queryClient = useQueryClient();
   const subscription = useRef<RealtimeChannel | null>(null);
+  const previousChannelId = useRef<string | null>(null);
   const [currentMessageId, setCurrentMessageId] = useState<{
     ts_date: number;
     ts_time: number;
@@ -34,7 +35,7 @@ export const useMessages = (channelId: string) => {
       console.error(
         "Error in fetchMessages:",
         error instanceof Error ? error.message : "An unknown error occurred",
-        error instanceof Error ? error.stack : "",
+        error instanceof Error ? error.stack : ""
       );
       throw error;
     }
@@ -52,7 +53,7 @@ export const useMessages = (channelId: string) => {
 
   useEffect(() => {
     const subscribeToMessages = async () => {
-      if (!channelId) return;
+      if (!channelId || previousChannelId.current === channelId) return;
 
       console.log(`Subscribing to real-time updates for channel: ${channelId}`);
       subscription.current = await supabase
@@ -61,47 +62,46 @@ export const useMessages = (channelId: string) => {
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "slack_message" },
           (payload) => {
-            console.log(
-              `New message received for channel ${channelId}:`,
-              payload.new,
-            );
             queryClient.setQueryData(
               ["messages", channelId],
               (oldMessages: Message[] | undefined) => {
                 if (payload.new.thread_ts_date === 0) {
+                  console.log(
+                    `New chat message received for channel ${channelId}:`,
+                    payload.new
+                  );                
                   return oldMessages
                     ? [...oldMessages, payload.new]
                     : [payload.new];
                 }
                 return oldMessages;
-              },
+              }
             );
-          },
+          }
         )
-        .subscribe(
-          (status) => {
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED") {
             console.log(`Subscription status: ${status}`);
-          },
-          (error) => {
-            console.error(
-              "Error subscribing to message updates:",
-              error.message,
-              error.stack,
-            );
-          },
-        );
+          } else {
+            console.error(`Subscription error: ${status}`);
+          }
+        });
+
+      previousChannelId.current = channelId;
     };
 
     subscribeToMessages();
 
     return () => {
-      if (subscription.current) {
-        console.log(`Removing subscription for channel: ${channelId}.`);
+      if (subscription.current && previousChannelId.current !== channelId) {
+        console.log(
+          `Removing subscription for channel: ${previousChannelId.current}.`
+        );
         supabase.removeChannel(subscription.current);
         subscription.current = null;
       }
     };
-  }, [channelId, queryClient, subscription.current]);
+  }, [channelId, queryClient, currentMessageId]);
 
   return { messages, error, isLoading, setCurrentMessageId, currentMessageId };
 };

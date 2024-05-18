@@ -36,7 +36,7 @@ const RagSourceView: React.FC<Params> = ({ message }) => {
           <ul>
             {message?.content?.source_documents?.map(
               (docObj: object, index: number) => (
-                <li>
+                <li key={index}>
                   <Box flexDirection="column">
                     <span>
                       Result #{index + 1}:&nbsp;
