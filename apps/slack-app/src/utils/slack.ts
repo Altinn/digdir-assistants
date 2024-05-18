@@ -1,8 +1,11 @@
+declare module '@bdb-dd/mack';
+
 import { GenericMessageEvent } from '@slack/bolt';
 import { ChatUpdateResponse, WebClient } from '@slack/web-api';
 import { z } from 'zod';
 import { ZSchema } from '@digdir/assistant-lib';
 import ramda from 'ramda';
+import {markdownToBlocks} from '@bdb-dd/mack';
 
 export const SlackContextSchema = z.object({
   ts_date: z.number(),
@@ -261,3 +264,11 @@ export function parseSlackTs(ts: string): { date: number; time: number } {
   const [date, time] = ts.split('.');
   return { date: parseInt(date), time: parseInt(time) };
 }
+
+
+const testMarkdown = "In the context of Altinn Authorization, the term \"org\" refers to an organization. It is used to specify the entity that owns or is associated with an application or instance within the Altinn platform. For example, in the authorization rules, `[ORG]` is a placeholder that should be replaced with the actual organization identifier.\n\nHere are some relevant source code examples:\n\n1. **Instantiation Rule:**\n    ```xml\n    <xacml:Rule RuleId=\"urn:altinn:example:ruleid:[RULE_ID]\" Effect=\"Permit\">\n     <xacml:Description>[ORG_2] can instantiate an instance of [ORG_1]/[APP]</xacml:Description>\n     <xacml:Target>\n     <xacml:AnyOf>\n     <xacml:AllOf>\n     <xacml:Match MatchId=\"urn:oasis:names:tc:xacml:1.0:function:string-equal\">\n     <xacml:AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">[ORG_2]</xacml:AttributeValue>\n     <xacml:AttributeDesignator AttributeId=\"urn:altinn:org\" Category=\"urn:oasis:names:tc:xacml:1.0:subject-category:access-subject\" DataType=\"http://www.w3.org/2001/XMLSchema#string\" MustBePresent=\"false\"/>\n     </xacml:Match>\n     </xacml:AllOf>\n     </xacml:AnyOf>\n     <xacml:AnyOf>\n     <xacml:AllOf>\n     <xacml:Match MatchId=\"urn:oasis:names:tc:xacml:1.0:function:string-equal\">\n     <xacml:AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">[ORG_1]</xacml:AttributeValue>\n     <xacml:AttributeDesignator AttributeId=\"urn:altinn:org\" Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"http://www.w3.org/2001/XMLSchema#string\" MustBePresent=\"false\"/>\n     </xacml:Match>\n     <xacml:Match MatchId=\"urn:oasis:names:tc:xacml:1.0:function:string-equal\">\n     <xacml:AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">[APP]</xacml:AttributeValue>\n     <xacml:AttributeDesignator AttributeId=\"urn:altinn:app\" Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"http://www.w3.org/2001/XMLSchema#string\" MustBePresent=\"false\"/>\n     </xacml:Match>\n     </xacml:AllOf>\n     </xacml:AnyOf>\n     <xacml:AnyOf>\n     <xacml:AllOf>\n     <xacml:Match MatchId=\"urn:oasis:names:tc:xacml:1.0:function:string-equal\">\n     <xacml:AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">instantiate</xacml:AttributeValue>\n     <xacml:AttributeDesignator AttributeId=\"urn:oasis:names:tc:xacml:1.0:action:action-id\" Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:action\" DataType=\"http://www.w3.org/2001/XMLSchema#string\" MustBePresent=\"false\"/>\n     </xacml:Match>\n     </xacml:AllOf>\n     </xacml:AnyOf>\n     </xacml:Target>\n    </xacml:Rule>\n    ```\n\n2. **JSON Example:**\n    ```json\n    {\n     \"$schema\": \"https://altinncdn.no/schemas/json/policy/policy.schema.v1.json\",\n     \"Policy\": {\n     \"Rules\": [\n     {\n     \"Effect\": \"Permit\",\n     \"Description\": \"[ORG_2] can instantiate an instance of [ORG_1]/[APP]\",\n     \"Subjects\": [\n     \"org:[ORG_2]\"\n     ],\n     \"Resources\": [\n     \"app:[ORG_1]/[APP]\"\n     ],\n     \"Actions\": [\n     \"instantiate\"\n     ]\n     }\n     ]\n     }\n    }\n    ```\n\nIn these examples, `[ORG_1]` and `[ORG_2]` are placeholders for the organization identifiers.";
+
+
+(async () => {
+  console.log(await markdownToBlocks(testMarkdown));
+})();

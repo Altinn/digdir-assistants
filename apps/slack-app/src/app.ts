@@ -17,12 +17,12 @@ import { lookupConfig } from './utils/bot-config';
 import { envVar, round, lapTimer, timeoutPromise } from '@digdir/assistant-lib';
 import { userInputAnalysis, UserQueryAnalysis } from '@digdir/assistant-lib';
 import { ragPipeline, qaTemplate } from '@digdir/assistant-lib';
-import { splitToSections, isNullOrEmpty } from '@digdir/assistant-lib';
+import { stripCodeBlockLang, isNullOrEmpty } from '@digdir/assistant-lib';
 import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import OpenAI from 'openai';
 import { isNumber } from 'remeda';
 import { RagPipelineResult } from '@digdir/assistant-lib';
-import {markdownToBlocks} from '@tryfabric/mack';
+import {markdownToBlocks} from '@bdb-dd/mack';
 
 const expressReceiver = new ExpressReceiver({
   signingSecret: envVar('SLACK_BOT_SIGNING_SECRET'),
@@ -522,7 +522,7 @@ function updateSlackMsgCallback(
 
     contentChunks.push(partialResponse);
 
-    const blocks = await markdownToBlocks(contentChunks.join(''));
+    const blocks = await markdownToBlocks(stripCodeBlockLang(contentChunks.join('')));
 
     if (envVar('LOG_LEVEL') == 'debug') {
       console.log(
@@ -561,7 +561,7 @@ async function finalizeAnswer(
 
   const relevantSources = ragResponse.relevant_urls;
 
-  const blocks = await markdownToBlocks(translation ? ragResponse.translated_answer : ragResponse.english_answer);
+  const blocks = await markdownToBlocks(stripCodeBlockLang(translation ? ragResponse.translated_answer : ragResponse.english_answer));
 
   if (relevantSources.length > 0) {
     const linksMarkdown = relevantSources
