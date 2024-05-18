@@ -561,7 +561,9 @@ async function finalizeAnswer(
 
   const relevantSources = ragResponse.relevant_urls;
 
-  const blocks = await markdownToBlocks(stripCodeBlockLang(translation ? ragResponse.translated_answer : ragResponse.english_answer));
+  const blocks = await markdownToBlocks(
+    translation ? ragResponse.translated_answer : ragResponse.english_answer,
+  );
 
   if (relevantSources.length > 0) {
     const linksMarkdown = relevantSources

@@ -7,6 +7,7 @@ import BotReplyContent from "./BotReplyContent";
 import BotReplyMetadata from "./BotReplyMetadata";
 import RagSourceView from "./RagSourceView";
 import RagPromptView from "./RagPromptView";
+import { SelectedThreadView } from "../models/Models";
 
 const ThreadViewPane: React.FC<Props> = ({
   channelId,
@@ -19,9 +20,12 @@ const ThreadViewPane: React.FC<Props> = ({
     isLoading,
   } = useThreadReplies({ channelId, thread_ts_date, thread_ts_time });
 
-  const [currentTab, setCurrentTab] = useState("original");
+  const [currentTab, setCurrentTab] = useState<SelectedThreadView>("original");
 
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleChange = (
+    event: React.SyntheticEvent,
+    newValue: SelectedThreadView
+  ) => {
     console.log(`Tab changed to: ${newValue}`);
     setCurrentTab(newValue);
   };
@@ -31,7 +35,7 @@ const ThreadViewPane: React.FC<Props> = ({
       console.error(
         "Error fetching thread messages:",
         error.message,
-        error.stack,
+        error.stack
       );
     }
     if (isLoading) {
@@ -65,11 +69,15 @@ const ThreadViewPane: React.FC<Props> = ({
                 <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
                   <BotReplyContent
                     message={message}
-                    displayLanguage={currentTab}
+                    selectedThreadView={currentTab}
                   />
                 </ListItem>
                 {message.content_type == "docs_bot_reply" && (
-                  <BotReplyMetadata message={message} />
+                  <ListItem
+                    key={message.ts_date + "." + message.ts_time + "_1"}
+                  >
+                    <BotReplyMetadata message={message} />
+                  </ListItem>
                 )}
               </>
             ))}
@@ -79,24 +87,29 @@ const ThreadViewPane: React.FC<Props> = ({
           <List>
             {threadMessages?.map((message) => (
               <>
-                <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
+                <ListItem key={message.ts_date + "." + message.ts_time + "_2"}>
                   <BotReplyContent
                     message={message}
-                    displayLanguage={currentTab}
+                    selectedThreadView={currentTab}
                   />
                 </ListItem>
+
                 {message.content_type == "docs_bot_reply" && (
-                  <BotReplyMetadata message={message} />
+                  <ListItem
+                    key={message.ts_date + "." + message.ts_time + "_3"}
+                  >
+                    <BotReplyMetadata message={message} />
+                  </ListItem>
                 )}
               </>
             ))}
           </List>
         </TabPanel>
         <TabPanel value="sources" style={{ padding: "0px 8px" }}>
-          <RagSourceView message={threadMessages[0]} />
+          {threadMessages && <RagSourceView message={threadMessages[0]} />}
         </TabPanel>
         <TabPanel value="prompts" style={{ padding: "0px 8px" }}>
-          <RagPromptView message={threadMessages[0]} />
+          {threadMessages && <RagPromptView message={threadMessages[0]} />}
         </TabPanel>
       </TabContext>
     </Box>
