@@ -35,7 +35,7 @@ export const useMessages = (channelId: string) => {
       console.error(
         "Error in fetchMessages:",
         error instanceof Error ? error.message : "An unknown error occurred",
-        error instanceof Error ? error.stack : ""
+        error instanceof Error ? error.stack : "",
       );
       throw error;
     }
@@ -68,16 +68,16 @@ export const useMessages = (channelId: string) => {
                 if (payload.new.thread_ts_date === 0) {
                   console.log(
                     `New chat message received for channel ${channelId}:`,
-                    payload.new
-                  );                
+                    payload.new,
+                  );
                   return oldMessages
                     ? [...oldMessages, payload.new]
                     : [payload.new];
                 }
                 return oldMessages;
-              }
+              },
             );
-          }
+          },
         )
         .subscribe((status) => {
           if (status === "SUBSCRIBED") {
@@ -95,7 +95,7 @@ export const useMessages = (channelId: string) => {
     return () => {
       if (subscription.current && previousChannelId.current !== channelId) {
         console.log(
-          `Removing subscription for channel: ${previousChannelId.current}.`
+          `Removing subscription for channel: ${previousChannelId.current}.`,
         );
         supabase.removeChannel(subscription.current);
         subscription.current = null;

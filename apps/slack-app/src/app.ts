@@ -22,7 +22,7 @@ import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import OpenAI from 'openai';
 import { isNumber } from 'remeda';
 import { RagPipelineResult } from '@digdir/assistant-lib';
-import {markdownToBlocks} from '@bdb-dd/mack';
+import { markdownToBlocks } from '@bdb-dd/mack';
 
 const expressReceiver = new ExpressReceiver({
   signingSecret: envVar('SLACK_BOT_SIGNING_SECRET'),
