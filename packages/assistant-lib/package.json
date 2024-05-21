@@ -14,16 +14,16 @@
   "dependencies": {
     "@azure/openai": "^1.0.0-beta.11",
     "@instructor-ai/instructor": "^0.0.7",
-    "@supabase/supabase-js": "^2.39.8",
-    "axios": "^1.6.8",
+    "@supabase/supabase-js": "^2.43.2",
+    "axios": "^1.7.2",
     "dataclass": "^2.1.1",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
-    "openai": "^4.29.1",
+    "openai": "^4.47.1",
     "prettier": "^3.2.5",
-    "remeda": "^1.54.0",
-    "typesense": "^1.7.2",
-    "zod": "^3.22.4",
-    "zod-to-json-schema": "^3.22.4"
+    "remeda": "^1.61.0",
+    "typesense": "^1.8.2",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.0"
   }
 }
