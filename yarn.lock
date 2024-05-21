@@ -312,7 +312,7 @@
     "@babel/helper-validator-identifier" "^7.22.20"
     to-fast-properties "^2.0.0"
 
-"@bdb-dd/mack@https://github.com/bdb-dd/mack.git#master":
+"@bdb-dd/mack@https://github.com/bdb-dd/mack.git#819389d8446960f8a12ba82344e53993b499144b":
   version "1.2.1"
   resolved "https://github.com/bdb-dd/mack.git#819389d8446960f8a12ba82344e53993b499144b"
   dependencies:
