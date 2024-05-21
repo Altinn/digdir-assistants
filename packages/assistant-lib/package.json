@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@azure/openai": "^1.0.0-beta.11",
-    "@instructor-ai/instructor": "^0.0.7",
+    "@instructor-ai/instructor": "^1.0.0",
     "@supabase/supabase-js": "^2.43.2",
     "axios": "^1.7.2",
     "dataclass": "^2.1.1",
