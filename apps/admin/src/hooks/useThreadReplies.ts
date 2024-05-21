@@ -15,7 +15,7 @@ const fetchThreadReplies = async ({
   thread_ts_time,
 }: ThreadRepliesParams): Promise<Message[]> => {
   console.log(
-    `Fetching thread replies for channel: ${channelId}, date: ${thread_ts_date}, time: ${thread_ts_time}`
+    `Fetching thread replies for channel: ${channelId}, date: ${thread_ts_date}, time: ${thread_ts_time}`,
   );
   try {
     const { data, error } = await supabase
@@ -31,7 +31,7 @@ const fetchThreadReplies = async ({
       console.error(
         "Error fetching thread replies:",
         error.message,
-        error.details
+        error.details,
       );
       throw new Error(error.message);
     }
@@ -42,7 +42,7 @@ const fetchThreadReplies = async ({
     console.error(
       "Error in fetchThreadReplies:",
       error instanceof Error ? error.message : "An unknown error occurred",
-      error instanceof Error ? error.stack : ""
+      error instanceof Error ? error.stack : "",
     );
     throw error;
   }
@@ -85,7 +85,7 @@ export const useThreadReplies = ({
               thread_ts_time,
             ],
           });
-        }
+        },
       )
       .subscribe();
 
