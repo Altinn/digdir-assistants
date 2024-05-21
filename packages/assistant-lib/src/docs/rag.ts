@@ -213,6 +213,11 @@ export async function ragPipeline(
     }
 
     let docMd = searchHit.content_markdown;
+
+    const sourceDesc = "\n```\nSource URL: " + uniqueUrl + "\n```\n\n";
+
+    console.log("Source desc: " + sourceDesc);
+
     let docTrimmed = docMd.substring(0, envVar("MAX_SOURCE_LENGTH"));
     if (docsLength + docTrimmed.length > envVar("MAX_CONTEXT_LENGTH")) {
       docTrimmed = docTrimmed.substring(
@@ -226,7 +231,7 @@ export async function ragPipeline(
     }
 
     const loadedDoc = {
-      page_content: docTrimmed,
+      page_content: sourceDesc + docTrimmed,
       metadata: {
         source: uniqueUrl,
       },

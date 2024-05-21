@@ -24,7 +24,7 @@ const ThreadViewPane: React.FC<Props> = ({
 
   const handleChange = (
     event: React.SyntheticEvent,
-    newValue: SelectedThreadView
+    newValue: SelectedThreadView,
   ) => {
     console.log(`Tab changed to: ${newValue}`);
     setCurrentTab(newValue);
@@ -35,7 +35,7 @@ const ThreadViewPane: React.FC<Props> = ({
       console.error(
         "Error fetching thread messages:",
         error.message,
-        error.stack
+        error.stack,
       );
     }
     if (isLoading) {

@@ -56,8 +56,8 @@ export const useChannels = ({ selectedTeam }: UseChannelsProps) => {
           .from("slack_channel")
           .select("*")
           .eq("team_id", selectedTeam)
-          .order("name", {ascending: true});
-          
+          .order("name", { ascending: true });
+
         if (error) {
           console.error("Error fetching channels:", error.message, error.stack);
           throw new Error(error.message);

@@ -3,7 +3,11 @@ import { ListItemText } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import { LightAsync as SyntaxHighlighter } from "react-syntax-highlighter";
 import { github } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import { DocsBotReplyMessage, DocsUserQueryMessage, SelectedThreadView } from "../models/Models";
+import {
+  DocsBotReplyMessage,
+  DocsUserQueryMessage,
+  SelectedThreadView,
+} from "../models/Models";
 
 export type Params = (DocsBotReplyMessage | DocsUserQueryMessage) & {
   selectedThreadView: SelectedThreadView;

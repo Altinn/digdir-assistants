@@ -17,12 +17,13 @@
   "dependencies": {
     "@azure/openai": "^1.0.0-beta.11",
     "@babel/runtime": "^7.17.2",
+    "@bdb-dd/mack": "https://github.com/bdb-dd/mack.git#master",
     "@digdir/assistant-lib": "*",
     "@instructor-ai/instructor": "^0.0.7",
     "@slack/bolt": "^3.17.1",
     "@supabase/supabase-js": "^2.39.8",
-    "@tryfabric/mack": "^1.2.1",
     "@types/ramda": "^0.30.0",
+    "add": "^2.0.6",
     "axios": "^1.6.8",
     "dataclass": "^2.1.1",
     "js-yaml": "^4.1.0",
@@ -32,6 +33,7 @@
     "ramda": "^0.30.0",
     "remeda": "^1.54.0",
     "typesense": "^1.7.2",
+    "yarn": "^1.22.22",
     "zod": "^3.22.4",
     "zod-to-json-schema": "^3.22.4"
   },
