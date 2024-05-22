@@ -10,7 +10,8 @@
     "build": "cd ../ && yarn build:assistant-lib && cd cli/ && tsc -p .",
     "run:generateSearchPhrases": "node ./dist/functions/generateSearchPhrases.js",
     "run:contentAnalysis": "node ./dist/functions/contentAnalysis.js",
-    "run:listMissingEnDocs": "node ./dist/functions/listMissingEnDocs.js"
+    "run:listMissingEnDocs": "node ./dist/functions/listMissingEnDocs.js",
+    "run:listAllDocs": "node ./dist/functions/listAllDocs.js"
   },
   "dependencies": {
     "@instructor-ai/instructor": "^1.2.1",

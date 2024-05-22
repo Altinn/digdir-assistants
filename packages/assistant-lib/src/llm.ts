@@ -47,6 +47,25 @@ export function extract_json_from_response(
   });
 }
 
+export function extractCodeBlockContents(input: string): string {
+  const blockMarker = "```";
+  const json_doc_start = input.indexOf(blockMarker);
+
+  if (json_doc_start < 0) {
+    return input;
+  }
+
+  let codeBlockStart = input.indexOf("```");
+  const newlineIndex = input.indexOf("\n", codeBlockStart + 3);
+  if (newlineIndex >= 0) {
+    codeBlockStart = newlineIndex;
+  }
+  let codeBlockEnd = input.indexOf("```", codeBlockStart);
+  codeBlockEnd = codeBlockEnd > 0 ? codeBlockEnd : input.length; // ignore missing code block marker
+  const generatedText = input.substring(codeBlockStart, codeBlockEnd).trim();
+  return generatedText;
+}
+
 export function azureOpenAI() {
   const azureOpenAI = new AzureOpenAI(
     envVar("AZURE_OPENAI_API_URL"),

@@ -217,10 +217,10 @@ export async function setupSearchPhraseSchema(
         },
       },
       { "name": "language", "type": "string", "facet": true, "optional": true },
-      { "name": "item_priority", "type": "int64" },
-      { "name": "updated_at", "type": "int64" },
-      { "name": "checksum", "type": "string" },
-      { "name": "prompt", "type": "string", "optional": true, "sort": true },
+      { "name": "item_priority", "type": "int64", sort: true },
+      { "name": "updated_at", type: "int64", sort: true, },
+      { "name": "checksum", type: "string" },
+      { "name": "prompt", type: "string", facet: true, optional: true, sort: true },
     ],
     "default_sorting_field": "sort_order",
     "token_separators": ["_", "-", "/"],
@@ -242,6 +242,7 @@ export async function setupSearchPhraseSchema(
 export async function lookupSearchPhrases(
   url: string,
   collectionName?: string,
+  prompt: string = "original"
 ): Promise<MultiSearchResponse<SearchPhraseEntry[]>> {
   const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
   collectionName = collectionName ||
@@ -253,7 +254,7 @@ export async function lookupSearchPhrases(
       "q": "*",
       "query_by": "url",
       "include_fields": "id,url,search_phrase,sort_order,updated_at,checksum",
-      "filter_by": `url:=${url}`,
+      "filter_by": `url:=${url} && prompt:=${prompt}`,
       "sort_by": "sort_order:asc",
       "per_page": 30,
     }],

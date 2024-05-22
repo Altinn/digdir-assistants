@@ -1,5 +1,4 @@
 import { Client, Errors } from "typesense";
-import * as typesenseSearch from "../lib/typesense-search";
 import { config } from "../lib/config";
 
 const cfg = config();

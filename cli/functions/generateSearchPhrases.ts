@@ -4,17 +4,23 @@ import { MultiSearchResponse } from "typesense/lib/Typesense/MultiSearch";
 import Instructor from "@instructor-ai/instructor";
 import { Command } from "commander";
 
-import {Client, Errors} from 'typesense'
+import { Client, Errors } from "typesense";
 import { config } from "../lib/config";
 import * as typesenseSearch from "../lib/typesense-search";
-import OpenAI from "openai"
-import { z } from "zod"
+import { extractCodeBlockContents } from "@digdir/assistant-lib";
+import OpenAI from "openai";
+import Groq from "groq-sdk";
+
+import { z } from "zod";
 import sha1 from "sha1";
 
 const cfg = config();
 
 const openAI = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+});
+const groqClient = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 const openaiClientInstance = Instructor({
@@ -37,34 +43,45 @@ type SearchHit = {
   id: string;
   url: string;
   contentMarkdown: string;
-}
+};
 
-const generatePrompt = `Please analyze the contents of the following documentation article and generate a list of English phrases that you would expect to match the following document. 
+const originalPrompt = `Please analyze the contents of the following documentation article and generate a list of English phrases that you would expect to match the following document. 
 DO NOT include the phrases "Altinn Studio", "Altinn 3" or "Altinn apps".
 
 Document:
 
 `;
 
+// for use as system prompt in JSON mode with llama3-8b on Groq
+const typicalQsSysPrompt = `Generate a list of typical questions that a user might have, that can be answered by the following documentation article. Return only the list of questions as a JSON string array in a code block, do not include answers.`;
+
 async function main() {
-
   const program = new Command();
-  program.name('generate-search-phrases')
-    .description('Use LLMs to generate search phrases for markdown content')
-    .version('0.1.0');
-
+  program
+    .name("generate-search-phrases")
+    .description("Use LLMs to generate search phrases for markdown content")
+    .version("0.1.0");
 
   program
-    .option('--prompt <string>, ', 'prompt name', 'original')
-    .option('-c, --collection <string>', 'collection to update (or -n for new)')
-    .option('-n', 'create new collection based on TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION env var')
-    ;
+    .option("--prompt <string>, ", "prompt name", "original")
+    .option("-c, --collection <string>", "collection to update (or -n for new)")
+    .option(
+      "-n",
+      "create new collection based on TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION env var"
+    );
 
   program.parse(process.argv);
   const opts = program.opts();
-  
+
   let promptName = opts.prompt;
   let collectionNameTmp = opts.collection;
+
+  if (!["original", "typicalqs"].includes(promptName)) {
+    console.error(
+      "Invalid prompt name. Prompt name must be 'original' or 'typicalqs'"
+    );
+    process.exit(1);
+  }
 
   const client = new Client(cfg.TYPESENSE_CONFIG);
 
@@ -72,10 +89,12 @@ async function main() {
     collectionNameTmp = `${
       process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION
     }_${Date.now()}`;
-  
+
     await typesenseSearch.setupSearchPhraseSchema(collectionNameTmp);
   } else {
-    console.log(`Will update existing search phrases in collection: '${process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION}'`);
+    console.log(
+      `Will update existing search phrases in collection: '${process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION}'`
+    );
   }
 
   const durations = {
@@ -87,11 +106,10 @@ async function main() {
   };
 
   let page = 1;
-  const pageSize = 10;
+  const pageSize = 30;
   const jobPageSize = -1;
 
   const totalStart = Date.now();
-
 
   while (jobPageSize < 0 || page <= jobPageSize) {
     console.log(
@@ -104,14 +122,15 @@ async function main() {
     );
     durations.queryDocs += Date.now() - totalStart;
 
-    const searchHits: SearchHit[] = searchResponse.results.flatMap((result: any) =>
-      result.grouped_hits.flatMap((hit: any) =>
-        hit.hits.map((document: any) => ({
-          id: document.document.id,
-          url: document.document.url_without_anchor,
-          contentMarkdown: document.document.content_markdown || "",
-        }))
-      )
+    const searchHits: SearchHit[] = searchResponse.results.flatMap(
+      (result: any) =>
+        result.grouped_hits.flatMap((hit: any) =>
+          hit.hits.map((document: any) => ({
+            id: document.document.id,
+            url: document.document.url_without_anchor,
+            contentMarkdown: document.document.content_markdown || "",
+          }))
+        )
     );
 
     console.log(`Retrieved ${searchHits.length} urls.`);
@@ -129,7 +148,11 @@ async function main() {
 
       // console.log(`searchHit: ${JSON.stringify(searchHit)}`);
 
-      const existingPhrases = await lookupSearchPhrases(url, collectionNameTmp);
+      const existingPhrases = await lookupSearchPhrases(
+        url,
+        collectionNameTmp,
+        promptName
+      );
 
       // console.log(`existing phrases:\n${JSON.stringify(existingPhrases)}`);
 
@@ -139,7 +162,8 @@ async function main() {
       const existingPhraseCount = existingPhrases.found || 0;
 
       if (existingPhraseCount > 0) {
-        const storedChecksum = existingPhrases.hits?.[0]?.document?.checksum || "";
+        const storedChecksum =
+          existingPhrases.hits?.[0]?.document?.checksum || "";
         const checksumMatches = storedChecksum === checksumMd;
 
         if (checksumMatches) {
@@ -156,16 +180,21 @@ async function main() {
       const start = performance.now();
 
       const result = await generateSearchPhrases(promptName, searchHit);
-      
+
       durations.generatePhrases += performance.now() - start;
       durations.total += Math.round(performance.now() - totalStart);
-      
 
       let searchPhrases: string[] = [];
       if (result !== null) {
-        searchPhrases = result.searchPhrases.map((context: any) => context.searchPhrase);
+        searchPhrases = result.searchPhrases.map(
+          (context: any) => context.searchPhrase
+        );
       } else {
         searchPhrases = [];
+      }
+      if (searchPhrases.length == 0) {
+        docIndex++;
+        continue;
       }
 
       // delete existing search phrases before uploading new
@@ -201,15 +230,17 @@ async function main() {
           item_priority: 1,
           updated_at: Math.floor(new Date().getTime() / 1000),
           checksum: checksumMd,
-          prompt: "original"
+          prompt: promptName,
         };
         if (batch.search_phrase) {
           uploadBatch.push(batch);
         }
       }
 
-      const results = await client.collections(collectionNameTmp).documents()
-                                  .import(uploadBatch, { action: "upsert", return_id: true });
+      const results = await client
+        .collections(collectionNameTmp)
+        .documents()
+        .import(uploadBatch, { action: "upsert", return_id: true });
       const failedResults = results.filter((result: any) => !result.success);
       if (failedResults.length > 0) {
         console.log(
@@ -228,16 +259,19 @@ main();
 
 async function lookupSearchPhrases(
   url: string,
-  collectionNameTmp: string
+  collectionNameTmp: string,
+  prompt: string
 ): Promise<SearchResponse<SearchPhraseEntry>> {
   let retryCount = 0;
 
   while (true) {
     try {
-      const lookupResults: MultiSearchResponse<SearchPhraseEntry[]> = await typesenseSearch.lookupSearchPhrases(
-        url,
-        collectionNameTmp
-      );
+      const lookupResults: MultiSearchResponse<SearchPhraseEntry[]> =
+        await typesenseSearch.lookupSearchPhrases(
+          url,
+          collectionNameTmp,
+          prompt
+        );
       const existingPhrases = lookupResults.results[0];
       return existingPhrases;
     } catch (e) {
@@ -255,46 +289,106 @@ async function lookupSearchPhrases(
   }
 }
 
-async function generateSearchPhrases(prompt: string, searchHit: SearchHit): Promise<SearchPhraseList> {
+async function generateSearchPhrases(
+  prompt: string,
+  searchHit: SearchHit
+): Promise<SearchPhraseList> {
   let retryCount = 0;
 
-  if (prompt != "original") {
-    throw new Error(`unknown prompt name \'${prompt}\'`);
-  }
+  if (prompt == "original") {
+    while (true) {
+      try {
+        const content = searchHit.contentMarkdown || "";
 
-  while (true) {
-    try {
-      const content = searchHit.contentMarkdown || "";
+        let queryResult = await openaiClientInstance.chat.completions.create({
+          model: "gpt-4-turbo-preview",
+          response_model: {
+            schema: SearchPhraseListSchema,
+            name: "RagPromptReplySchema",
+          },
+          temperature: 0.1,
+          messages: [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: originalPrompt + content },
+          ],
+          max_retries: 0,
+        });
 
-      let queryResult = await openaiClientInstance.chat.completions.create({
-        model: 'gpt-4-turbo-preview',        
-        response_model: {
-          schema: SearchPhraseListSchema,
-          name: "RagPromptReplySchema",
-        },
-        temperature: 0.1,
-        messages: [
-          { role: "system", content: "You are a helpful assistant." },
-          { role: "user", content: generatePrompt + content },
-        ],
-        max_retries: 0,
-      });
-      
-      return queryResult;
-      
-    } catch (e) {
-      console.error(
-        `Exception occurred while generating search phrases for url: ${
-          searchHit.url || ""
-        }\n Error: ${e}`
-      );
-      if (retryCount < 10) {
-        retryCount++;
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        continue;
-      } else {
-        throw e;
+        return queryResult;
+      } catch (e) {
+        console.error(
+          `Exception occurred while generating search phrases for url: ${
+            searchHit.url || ""
+          }\n Error: ${e}`
+        );
+        if (retryCount < 10) {
+          retryCount++;
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+          continue;
+        } else {
+          throw e;
+        }
       }
     }
-  }
+  } else if (prompt == "typicalqs") {
+    while (true) {
+      try {
+        let queryResult = await groqClient.chat.completions.create({
+          model: "llama3-8b-8192",
+          //response_format: { type: "json_object" },
+          temperature: 0.6,
+          messages: [
+            { role: "system", content: typicalQsSysPrompt },
+            { role: "user", content: searchHit.contentMarkdown.slice(0, 7000) },
+          ],
+        });
+        if (
+          queryResult &&
+          queryResult.choices &&
+          queryResult.choices.length > 0
+        ) {
+          // use
+
+          const response = queryResult?.choices[0]?.message?.content;
+          console.log(`Groq response:\n${response}`);
+
+          const jsonExtracted = extractCodeBlockContents(response);
+          console.log(`JSON extracted:\n${jsonExtracted}`);
+
+          const typicalQsList = JSON.parse(jsonExtracted);
+
+          const extractedValues = typicalQsList.flatMap((item) => {
+            if (typeof item === "object") {
+              return Object.values(item);
+            }
+            return item;
+          });
+          console.log(`parsed json:\n${JSON.stringify(extractedValues)}`);
+
+          const mapped = extractedValues
+            .filter((item) => typeof item === "string")
+            .map((item) => ({ searchPhrase: item }));
+
+          return { searchPhrases: mapped };
+        } else {
+          throw new Error("invalid response from groq");
+        }
+      } catch (e) {
+        console.error(
+          `Exception occurred while generating search phrases for url: ${
+            searchHit.url || ""
+          }\n Error: ${e}`
+        );
+        if (retryCount < 10) {
+          retryCount++;
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+          continue;
+        } else {
+          return { searchPhrases: [] };        
+        }
+      }
+    }
+  } else throw new Error(`unknown prompt name \'${prompt}\'`);
+
+  return { searchPhrases: [] };
 }

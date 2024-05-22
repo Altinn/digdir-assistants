@@ -1,4 +1,3 @@
-import Instructor from "@instructor-ai/instructor";
 import Groq from "groq-sdk";
 import { Client, Errors } from "typesense";
 
@@ -10,15 +9,8 @@ import { get_encoding } from "tiktoken";
 
 const cfg = config();
 
-// Initialize Groq client
 const groqClient = new Groq({
   apiKey: process.env.GROQ_API_KEY,
-});
-
-const patchedClient = Instructor({
-  client: groqClient as any,
-  mode: "FUNCTIONS",
-  debug: process.env.DEBUG_INSTRUCTOR == "true",
 });
 
 const encoding = get_encoding("cl100k_base");
@@ -31,15 +23,7 @@ const ContentAnalysisSchema = z.object({
 
 type ContentAnalysis = z.infer<typeof ContentAnalysisSchema>;
 
-type SearchHit = any;
-// {
-//   id: string;
-//   url: string;
-//   contentMarkdown: string;
-//   checksum: string;
-//   language: string;
-//   token_count: number;
-// };
+type SearchHit = any; // we want all fields coming from typesense
 
 const systemPrompt = `Which language is used the most in the following content? Answer with the following JSON format:
 { "language": "en" } `;
@@ -89,16 +73,6 @@ async function main() {
           hit.hits.map((hit: any) => hit.document)
         )
     );
-
-    // .map((document: any) => ({
-    //     id: document.document.id,
-    //     url: document.document.url_without_anchor,
-    //     contentMarkdown: document.document.content_markdown || "",
-    //     checksum: document.document.checkshum,
-    //     language: document.document.language,
-    //     token_count: document.document.token_count,
-    //   }))
-    // )
 
     let updatedDocs: SearchHit[] = [];
 
