@@ -43,6 +43,7 @@ export async function searchMultiple(relaxedQueries: QueryRelaxation) {
 
 export async function lookupSearchPhrasesSimilar(
   relaxedQueries: QueryRelaxation,
+  prompt: string,
 ): Promise<RankedUrl[]> {
   if (!relaxedQueries || !relaxedQueries.searchQueries) {
     console.warn(`typesenseSearchMultiple() - search terms not provided`);
@@ -56,6 +57,7 @@ export async function lookupSearchPhrasesSimilar(
       q: query,
       query_by: "search_phrase,phrase_vec",
       include_fields: "search_phrase,url",
+      filter_by: `prompt:=${prompt}`,
       group_by: "url",
       group_limit: 1,
       limit: 20,
@@ -139,42 +141,6 @@ export async function retrieveAllByUrl(urlList: RankedUrl[]) {
 
   const response = await client.multiSearch.perform(multiSearchArgs, {});
   return response;
-}
-
-async function setupSearchPhraseSchema(collectionNameTmp: string) {
-  const client = new Typesense.Client(typesenseCfg);
-  const schema: CollectionCreateSchema = {
-    name: collectionNameTmp,
-    fields: [
-      { name: "doc_id", type: "string", optional: false },
-      { name: "url", type: "string", optional: false, facet: true, sort: true },
-      { name: "search_phrase", type: "string", optional: false },
-      { name: "sort_order", type: "int32", optional: false, sort: true },
-      {
-        name: "phrase_vec",
-        type: "float[]",
-        optional: true,
-        embed: {
-          from: ["search_phrase"],
-          model_config: {
-            model_name: "ts/all-MiniLM-L12-v2",
-          },
-        },
-      },
-      { name: "language", type: "string", facet: true, optional: true },
-      { name: "item_priority", type: "int64" },
-    ],
-    default_sorting_field: "sort_order",
-    token_separators: ["_", "-", "/"],
-  };
-
-  try {
-    await client.collections(collectionNameTmp).retrieve();
-  } catch (error) {
-    if (error instanceof Typesense.Errors.ObjectNotFound) {
-      await client.collections().create(schema);
-    }
-  }
 }
 
 async function lookupSearchPhrases(url: string, collectionName?: string) {

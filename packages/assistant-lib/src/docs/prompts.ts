@@ -40,7 +40,6 @@ Question: {question}
 }
 
 export const generate_search_phrases_template = `Please analyze the contents of the following documentation article and generate a list of English phrases that you would expect to match the following document. 
-DO NOT include the phrases "Altinn Studio", "Altinn 3" or "Altinn apps".
 
 Document:
 {document}

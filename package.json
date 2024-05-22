@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "cli"
   ],
   "scripts": {
     "clean": "rimraf packages/assistant-lib/dist/ && rimraf apps/slack-app/dist/ && rimraf apps/admin/dist/",
