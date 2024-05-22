@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { OpenAI } from "openai";
+import OpenAI from "openai";
 import { ChatCompletionMessageParam } from "openai/resources";
 import { AzureKeyCredential, OpenAIClient as AzureOpenAI } from "@azure/openai";
 

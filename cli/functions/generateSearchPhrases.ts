@@ -1,3 +1,5 @@
+import Groq from "groq-sdk";
+
 import { SearchPhraseEntry } from "../lib/typesense-search";
 import { SearchResponse } from "typesense/lib/Typesense/Documents";
 import { MultiSearchResponse } from "typesense/lib/Typesense/MultiSearch";
@@ -7,24 +9,21 @@ import { Command } from "commander";
 import { Client, Errors } from "typesense";
 import { config } from "../lib/config";
 import * as typesenseSearch from "../lib/typesense-search";
-import { extractCodeBlockContents } from "@digdir/assistant-lib";
-import OpenAI from "openai";
-import Groq from "groq-sdk";
+import { openaiClient, extractCodeBlockContents } from "@digdir/assistant-lib";
 
 import { z } from "zod";
 import sha1 from "sha1";
 
 const cfg = config();
 
-const openAI = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const openAI = openaiClient();
+
 const groqClient = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
 const openaiClientInstance = Instructor({
-  client: openAI,
+  client: openAI as any,
   mode: "FUNCTIONS",
   debug: process.env.DEBUG_INSTRUCTOR == "true",
 });
@@ -46,7 +45,6 @@ type SearchHit = {
 };
 
 const originalPrompt = `Please analyze the contents of the following documentation article and generate a list of English phrases that you would expect to match the following document. 
-DO NOT include the phrases "Altinn Studio", "Altinn 3" or "Altinn apps".
 
 Document:
 
@@ -92,6 +90,7 @@ async function main() {
 
     await typesenseSearch.setupSearchPhraseSchema(collectionNameTmp);
   } else {
+    // TODO: verify that collection exists
     console.log(
       `Will update existing search phrases in collection: '${process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION}'`
     );
@@ -301,10 +300,10 @@ async function generateSearchPhrases(
         const content = searchHit.contentMarkdown || "";
 
         let queryResult = await openaiClientInstance.chat.completions.create({
-          model: "gpt-4-turbo-preview",
+          model: "gpt-4o",
           response_model: {
             schema: SearchPhraseListSchema,
-            name: "RagPromptReplySchema",
+            name: "SearchPhraseListSchema",
           },
           temperature: 0.1,
           messages: [
