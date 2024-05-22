@@ -620,12 +620,12 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/retry/-/retry-0.3.0.tgz#6d86b8cb322660f03d3f0aa94b99bdd8e172d570"
   integrity sha512-d2CGZR2o7fS6sWB7DG/3a95bGKQyHMACZ5aW8qGkkqQpUoZV6C0X7Pc7l4ZNMZkfNBf4VWNe9E1jRsf0G146Ew==
 
-"@instructor-ai/instructor@1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@instructor-ai/instructor/-/instructor-1.2.1.tgz#507fe47eaba7db53730a13269a7dc27283941110"
-  integrity sha512-u1Ji7uLmpIU0KmW9mbuthoy8PxvXkjJIamiJiU8xZ1/vXKLhiC3pfsh1ZVPXDzdi714kzZp06lwAmJZQoGstKQ==
+"@instructor-ai/instructor@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@instructor-ai/instructor/-/instructor-1.3.0.tgz#7dbff5feed8be01f8d492c4686448a97c1dcb2b4"
+  integrity sha512-nzadwGSkiVLcK3NAVeinPUrA6KwV5mkyWDGTXLMR8eXKbzlUwmLwQ+PTabPn2hCR+LtQ+7MvtuoR2acSTXgy6Q==
   dependencies:
-    zod-stream "1.0.2"
+    zod-stream "1.0.3"
     zod-validation-error "^2.1.0"
 
 "@isaacs/cliui@^8.0.2":
@@ -5445,10 +5445,10 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-zod-stream@1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/zod-stream/-/zod-stream-1.0.2.tgz#5c89913617c3d201a009eda721c31d85be3ddb03"
-  integrity sha512-8wPLppLRk7N1AHCtt+WHBUoEGkgssoyQAWN87m5Z9dnueBnzgTYeVWKSRP43tmswhx/Qf8xMt7isJRwc8pFdfw==
+zod-stream@1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/zod-stream/-/zod-stream-1.0.3.tgz#9387acc958bd0f8d6901e880f381570e8ef5f26b"
+  integrity sha512-HxK/PZ0faOMgI1Pgjhcwin22StvlwiaYo6R7jWCT3jOFcPa4wGyFLVpeC5TwmpT6YlZhNJfDoB0qJoa+rQLYmQ==
   dependencies:
     schema-stream "^3.1.0"
     zod-to-json-schema "^3.22.3"
