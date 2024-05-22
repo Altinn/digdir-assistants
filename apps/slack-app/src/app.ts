@@ -522,7 +522,7 @@ function updateSlackMsgCallback(
 
     contentChunks.push(partialResponse);
 
-    const blocks = await markdownToBlocks(stripCodeBlockLang(contentChunks.join('')));
+    const blocks = markdownToBlocks(stripCodeBlockLang(contentChunks.join('')));
 
     if (envVar('LOG_LEVEL') == 'debug') {
       console.log(

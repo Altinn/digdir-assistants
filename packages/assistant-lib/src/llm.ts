@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { OpenAI } from "openai";
+import OpenAI from "openai";
 import { ChatCompletionMessageParam } from "openai/resources";
 import { AzureKeyCredential, OpenAIClient as AzureOpenAI } from "@azure/openai";
 
@@ -45,6 +45,25 @@ export function extract_json_from_response(
     json_dict: {},
     response_json_removed: response,
   });
+}
+
+export function extractCodeBlockContents(input: string): string {
+  const blockMarker = "```";
+  const json_doc_start = input.indexOf(blockMarker);
+
+  if (json_doc_start < 0) {
+    return input;
+  }
+
+  let codeBlockStart = input.indexOf("```");
+  const newlineIndex = input.indexOf("\n", codeBlockStart + 3);
+  if (newlineIndex >= 0) {
+    codeBlockStart = newlineIndex;
+  }
+  let codeBlockEnd = input.indexOf("```", codeBlockStart);
+  codeBlockEnd = codeBlockEnd > 0 ? codeBlockEnd : input.length; // ignore missing code block marker
+  const generatedText = input.substring(codeBlockStart, codeBlockEnd).trim();
+  return generatedText;
 }
 
 export function azureOpenAI() {

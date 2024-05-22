@@ -16,7 +16,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: prod-slack-altinndevops
+    environment: prod-slack-altinn
 
     steps:
       - name: Checkout to the branch
@@ -36,7 +36,7 @@ jobs:
           registryPassword: ${{ secrets.ASSISTANTSSLACKALTINN_REGISTRY_PASSWORD }}
           containerAppName: assistants-slack-altinn
           resourceGroup: assistants-prod-norwayeast
-          imageToBuild: altinnaicontainers.azurecr.io/assistants-slack-altinndevops:${{ github.sha }}
+          imageToBuild: altinnaicontainers.azurecr.io/assistants-slack-altinn:${{ github.sha }}
           buildArguments: |
             "VITE_SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
             "VITE_SLACK_APP_SUPABASE_ANON_KEY=${{secrets.SLACK_APP_SUPABASE_ANON_KEY}}"

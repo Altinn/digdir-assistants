@@ -93,6 +93,7 @@ export async function ragPipeline(
   start = performance.now();
   const search_phrase_hits = await lookupSearchPhrasesSimilar(
     extract_search_queries,
+    "original",
   );
   durations["phrase_similarity_search"] = round(lapTimer(start));
 
