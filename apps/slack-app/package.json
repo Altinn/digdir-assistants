@@ -19,7 +19,7 @@
     "@babel/runtime": "^7.24.5",
     "@bdb-dd/mack": "https://github.com/bdb-dd/mack.git#f26f12cef2650a1121ed6d5d2ad2b089226656cc",
     "@digdir/assistant-lib": "*",
-    "@instructor-ai/instructor": "^1.2.1",
+    "@instructor-ai/instructor": "1.2.1",
     "@slack/bolt": "^3.17.1",
     "@supabase/supabase-js": "^2.39.8",
     "@types/ramda": "^0.29.12",
