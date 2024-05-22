@@ -300,9 +300,9 @@
     "@babel/helper-validator-identifier" "^7.24.5"
     to-fast-properties "^2.0.0"
 
-"@bdb-dd/mack@https://github.com/bdb-dd/mack.git#f26f12cef2650a1121ed6d5d2ad2b089226656cc":
+"@bdb-dd/mack@https://github.com/bdb-dd/mack.git#14338e54e63d85151e9065d28b25caa778b9a73a":
   version "1.2.1"
-  resolved "https://github.com/bdb-dd/mack.git#f26f12cef2650a1121ed6d5d2ad2b089226656cc"
+  resolved "https://github.com/bdb-dd/mack.git#14338e54e63d85151e9065d28b25caa778b9a73a"
   dependencies:
     "@slack/types" "^2.11.0"
     fast-xml-parser "^4.4.0"
