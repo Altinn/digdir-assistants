@@ -432,8 +432,10 @@ __metadata:
     "@bdb-dd/mack": "https://github.com/bdb-dd/mack.git#14338e54e63d85151e9065d28b25caa778b9a73a"
     "@digdir/assistant-lib": "npm:*"
     "@instructor-ai/instructor": "npm:1.2.1"
-    "@slack/bolt": "npm:^3.17.1"
+    "@slack/bolt": "npm:^3.18.0"
+    "@slack/web-api": "npm:^6.11.2"
     "@supabase/supabase-js": "npm:^2.39.8"
+    "@types/express": "npm:^4.17.21"
     "@types/js-yaml": "npm:^4.0.9"
     "@types/node": "npm:^20.12.12"
     "@types/ramda": "npm:^0.29.12"
@@ -1352,7 +1354,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@slack/bolt@npm:^3.17.1":
+"@slack/bolt@npm:^3.18.0":
   version: 3.18.0
   resolution: "@slack/bolt@npm:3.18.0"
   dependencies:
@@ -1727,7 +1729,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:^4.16.1":
+"@types/express@npm:^4.16.1, @types/express@npm:^4.17.21":
   version: 4.17.21
   resolution: "@types/express@npm:4.17.21"
   dependencies:

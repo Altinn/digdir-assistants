@@ -58,11 +58,10 @@ export async function getEventContext(
   let team_name = '';
 
   try {
-    team_name = await client.team.info().then((res) => res.team?.name || '');
+    team_name = await client.team.info({team: evt.team}).then((res) => res.team?.name || '');
   } catch (err) {
     console.error(`Error retrieving the team name. Error: ${err}`);
   }
-
   var user_name = '';
   if (evt.user) {
     const user_info = await client.users.info({ user: evt.user });
@@ -101,17 +100,7 @@ export async function getChatUpdateContext(
 ): Promise<SlackContext> {
   const { date: ts_date, time: ts_time } = parseSlackTs(evt.ts || '');
 
-  const context = new SlackContext({
-    ts_date,
-    ts_time,
-    thread_ts_date: threadStart.ts_date,
-    thread_ts_time: threadStart.ts_time,
-    channel_id: evt.channel || '',
-    team_id: threadStart.team_id,
-    user_id: threadStart.user_id,
-    user_type: 'human',
-    time_utc: UtcNowTimestamptz(),
-  });
+  const context = new SlackContext();
   return context;
 }
 
@@ -122,17 +111,19 @@ export async function getThreadResponseContext(
 ): Promise<SlackContext> {
   const { date: ts_date, time: ts_time } = parseSlackTs(responseTs || '');
 
-  const context = new SlackContext({
+  const slackContext = {
     ts_date,
     ts_time,
-    thread_ts_date: item.thread_ts_date,
-    thread_ts_time: item.thread_ts_time,
-    channel_id: item.channel_id,
-    team_id: item.team_id,
-    user_id: item.user_id,
+    thread_ts_date: threadStart.ts_date,
+    thread_ts_time: threadStart.ts_time,
+    channel_id: evt.channel || '',
+    team_id: threadStart.team_id,
+    user_id: threadStart.user_id,
+    user_type: 'human',
     time_utc: UtcNowTimestamptz(),
-  });
-  return context;
+  };
+
+  return SlackContext.apply(slackContext);
 }
 
 export async function getReactionItemContext(
