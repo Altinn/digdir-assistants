@@ -60,7 +60,7 @@ app.message(async ({ message, say }) => {
   await ensureBotContext();
 
   const genericMsg = message as GenericMessageEvent;
-  var srcEvtContext = await getEventContext(app.client as WebClient, genericMsg);
+  var srcEvtContext = await getEventContext(app.client, genericMsg);
 
   var userInput = (genericMsg.text || '').trim();
 
