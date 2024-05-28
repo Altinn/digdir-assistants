@@ -24,7 +24,7 @@ ENV VITE_SLACK_APP_SUPABASE_ANON_KEY=$VITE_SLACK_APP_SUPABASE_ANON_KEY
 # DEBUG: print environment vars
 # RUN export
 
-RUN yarn install --frozen-lockfile 
+RUN yarn install --immutable --immutable-cache --check-cache
 RUN yarn build
 
 FROM node:slim as runner
@@ -41,7 +41,7 @@ WORKDIR /usr/src/app
 # Install app dependencies
 COPY package.json yarn.lock ./
 
-RUN yarn install --production --frozen-lockfile
+RUN yarn workspaces focus --production
 
 COPY --from=builder /usr/src/app/ .
 
