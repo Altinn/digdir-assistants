@@ -25,7 +25,7 @@ ENV VITE_SLACK_APP_SUPABASE_ANON_KEY=$VITE_SLACK_APP_SUPABASE_ANON_KEY
 # DEBUG: print environment vars
 # RUN export
 
-RUN yarn install --immutable
+RUN yarn install
 RUN yarn build
 
 FROM node:slim as runner
