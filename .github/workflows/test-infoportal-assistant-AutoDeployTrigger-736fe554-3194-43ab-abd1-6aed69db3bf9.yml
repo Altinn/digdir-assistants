@@ -41,7 +41,7 @@ jobs:
           registryPassword: ${{ secrets.TESTINFOPORTALASSISTANT_REGISTRY_PASSWORD }}
           containerAppName: test-infoportal-assistant
           resourceGroup: altinn-ai-assistant
-          imageToBuild: altinnaicontainers.azurecr.io/digdir-assistants:${{ github.sha }}
+          imageToBuild: altinnaicontainers.azurecr.io/test-infoportal-assistant:${{ github.sha }}
           buildArguments: |
             "VITE_SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
             "VITE_SLACK_APP_SUPABASE_ANON_KEY=${{secrets.SLACK_APP_SUPABASE_ANON_KEY}}"
