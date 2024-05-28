@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { App, ExpressReceiver, LogLevel, GenericMessageEvent, Block } from '@slack/bolt';
-import { ChatUpdateResponse, ReactionsGetResponse } from '@slack/web-api';
+import { ChatUpdateResponse, ReactionsGetResponse, WebClient } from '@slack/web-api';
 // import { SocketModeClient } from '@slack/socket-mode';
 import { createServer } from 'http';
 import {

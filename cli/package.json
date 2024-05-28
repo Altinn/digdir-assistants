@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@digdir/assistant-lib": "*",
+    "@types/node": "^20.12.12",
     "@instructor-ai/instructor": "1.2.1",
     "commander": "^12.1.0",
     "groq-sdk": "^0.3.3",
