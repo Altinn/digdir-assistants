@@ -12,6 +12,7 @@ RUN corepack enable yarn \
 WORKDIR /usr/src/app
 
 # Install app dependencies
+COPY .yarn ./.yarn
 COPY apps/ ./apps/
 COPY packages/ ./packages/
 COPY package.json yarn.lock ./
@@ -39,6 +40,7 @@ RUN corepack enable yarn \
 WORKDIR /usr/src/app
 
 # Install app dependencies
+COPY .yarn ./.yarn
 COPY package.json yarn.lock ./
 
 RUN yarn workspaces focus --production
