@@ -29,5 +29,23 @@ RUN yarn install && yarn build
 
 COPY . .
 
+
+# production image - START
+FROM node:slim as runner
+
+ENV YARN_CACHE_FOLDER .yarn/cache
+ENV NODE_ENV production
+
+# switch back to non-root user    
+USER node
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Install app dependencies
+COPY --from=builder /usr/src/app/ .
+
+RUN yarn install
+
 EXPOSE 3000
-CMD node ./apps/slack-app/dist/src/app.js
+CMD yarn node ./apps/slack-app/dist/src/app.js
