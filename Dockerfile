@@ -27,7 +27,6 @@ ENV VITE_SLACK_APP_SUPABASE_ANON_KEY=$VITE_SLACK_APP_SUPABASE_ANON_KEY
 
 RUN yarn install
 RUN yarn build
-RUN yarn workspaces focus --production
 
 COPY . .
 
@@ -47,7 +46,7 @@ WORKDIR /usr/src/app
 # Install app dependencies
 COPY --from=builder /usr/src/app/ .
 
-RUN yarn workspaces focus --production
+RUN yarn install
 
 EXPOSE 3000
 CMD node ./apps/slack-app/dist/src/app.js
