@@ -28,6 +28,7 @@
     "axios": "^1.6.8",
     "dataclass": "^2.1.1",
     "es-abstract": "^1.23.3",
+    "express": "^4.19.2",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "openai": "^4.47.1",
