@@ -34,10 +34,6 @@ RUN yarn build
 FROM node:slim as runner
 
 ENV NODE_ENV production
-ENV YARN_VERSION 4.2.2
-USER root
-RUN corepack enable yarn \
-    && yarn policies set-version $YARN_VERSION
 
 # switch back to non-root user    
 USER node
@@ -46,12 +42,7 @@ USER node
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY .yarn ./.yarn
-COPY package.json yarn.lock ./
-
-RUN yarn workspaces focus --production
-
 COPY --from=builder /usr/src/app/ .
 
 EXPOSE 3000
-CMD export; yarn run:slack-app
+CMD node ./apps/slack-app/dist/src/app.js
