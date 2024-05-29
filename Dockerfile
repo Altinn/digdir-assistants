@@ -8,6 +8,9 @@ USER root
 RUN corepack enable yarn \
     && yarn policies set-version $YARN_VERSION
 
+# switch back to non-root user
+USER node
+
 # Create app directory
 WORKDIR /usr/src/app
 
@@ -36,6 +39,9 @@ USER root
 RUN corepack enable yarn \
     && yarn policies set-version $YARN_VERSION
 
+# switch back to non-root user    
+USER node
+
 # Create app directory
 WORKDIR /usr/src/app
 
@@ -48,5 +54,4 @@ RUN yarn workspaces focus --production
 COPY --from=builder /usr/src/app/ .
 
 EXPOSE 3000
-USER node
 CMD export; yarn run:slack-app
