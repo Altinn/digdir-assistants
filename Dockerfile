@@ -15,13 +15,19 @@ RUN yarn policies set-version $YARN_VERSION \
 # Create app directory
 WORKDIR /usr/src/app
 
+# Install app dependencies
+COPY . .
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn ./.yarn
+COPY apps/ ./apps/
+COPY packages/ ./packages/
+
 # important to prefix envvar with 'VITE_' so that is included in the build artifact
 ENV VITE_SLACK_APP_SUPABASE_API_URL=$VITE_SLACK_APP_SUPABASE_API_URL
 ENV VITE_SLACK_APP_SUPABASE_ANON_KEY=$VITE_SLACK_APP_SUPABASE_ANON_KEY
 
-RUN yarn install && yarn build
-
-COPY . .
+RUN yarn install
+RUN yarn build
 
 
 # production image - START
@@ -30,14 +36,15 @@ FROM node:slim as runner
 ENV YARN_CACHE_FOLDER .yarn/cache
 ENV NODE_ENV production
 
-# switch back to non-root user    
-USER node
-
 # Create app directory
 WORKDIR /usr/src/app
 
 # Install app dependencies
 COPY --from=builder /usr/src/app/ .
 
+# switch back to non-root user    
+USER node
+
 EXPOSE 3000
-CMD yarn node ./apps/slack-app/dist/src/app.js
+ENV PORT 3000
+CMD yarn run:slack-app
