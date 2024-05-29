@@ -27,6 +27,7 @@ ENV VITE_SLACK_APP_SUPABASE_ANON_KEY=$VITE_SLACK_APP_SUPABASE_ANON_KEY
 
 RUN yarn install
 RUN yarn build
+RUN yarn workspaces focus --production
 
 COPY . .
 
