@@ -34,6 +34,7 @@ COPY . .
 # production image - START
 FROM node:slim as runner
 
+ENV YARN_CACHE_FOLDER .yarn/cache
 ENV NODE_ENV production
 
 # switch back to non-root user    
