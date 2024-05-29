@@ -25,28 +25,9 @@ COPY package.json yarn.lock ./
 ENV VITE_SLACK_APP_SUPABASE_API_URL=$VITE_SLACK_APP_SUPABASE_API_URL
 ENV VITE_SLACK_APP_SUPABASE_ANON_KEY=$VITE_SLACK_APP_SUPABASE_ANON_KEY
 
-RUN yarn install
-RUN yarn build
+RUN yarn install && yarn build
 
 COPY . .
-
-
-# production image - START
-FROM node:slim as runner
-
-ENV YARN_CACHE_FOLDER .yarn/cache
-ENV NODE_ENV production
-
-# switch back to non-root user    
-USER node
-
-# Create app directory
-WORKDIR /usr/src/app
-
-# Install app dependencies
-COPY --from=builder /usr/src/app/ .
-
-RUN yarn install
 
 EXPOSE 3000
 CMD node ./apps/slack-app/dist/src/app.js
