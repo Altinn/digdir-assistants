@@ -38,7 +38,7 @@ export async function lookupConfig<T>(
 
   if (matching) {
     for (let value of matching) {
-      if (envVar('LOG_LEVEL') == 'debug') {
+      if (envVar('LOG_LEVEL') == 'debug-config') {
         console.log(
           `before merge:\n${JSON.stringify(merged)}\nmerging with:\n${JSON.stringify(value)}`,
         );
@@ -47,13 +47,13 @@ export async function lookupConfig<T>(
     }
   }
 
-  if (envVar('LOG_LEVEL') == 'debug') {
+  if (envVar('LOG_LEVEL') == 'debug-config') {
     console.log(`lookupConfig, merged result:\n${JSON.stringify(merged)}`);
   }
   if (merged && propName in merged) {
     const configValue = merged[propName as keyof typeof merged] as T;
     const result = configValue === undefined ? defaultValue : configValue;
-    if (envVar('LOG_LEVEL') == 'debug') {
+    if (envVar('LOG_LEVEL') == 'debug-config') {
       console.log(`lookupConfig found ${propName}: ${result}`);
     }
     return result;
@@ -75,7 +75,9 @@ async function fetchConfig(app: SlackApp, context: SlackContext): Promise<BotCon
       }
       cachedConfigDb = data as BotConfigDbRow[];
 
-      console.log(`db config fetched. Here are all the rows:\n${JSON.stringify(cachedConfigDb)}`);
+      if (envVar('LOG_LEVEL') == 'debug') {
+        console.log(`db config fetched. Here are all the rows:\n${JSON.stringify(cachedConfigDb)}`);
+      }
     }
     if (cachedConfigDb) {
       const matching = matchingConfigDbRows(cachedConfigDb, app, context);
@@ -97,7 +99,7 @@ function matchingConfigDbRows(
 
   configDbRows.sort(sortBotConfig);
 
-  if (envVar('LOG_LEVEL') == 'debug') {
+  if (envVar('LOG_LEVEL') == 'debug-config') {
     console.log(
       `matching config db rows for app: ${JSON.stringify(app)}, context: ${JSON.stringify(context)}`,
     );
@@ -110,7 +112,7 @@ function matchingConfigDbRows(
       isNullOrEmpty(configDbRow.slack_context?.channel_id) ||
       configDbRow.slack_context?.channel_id == context.channel_id;
 
-    if (envVar('LOG_LEVEL') == 'debug') {
+    if (envVar('LOG_LEVEL') == 'debug-config') {
       console.log(
         `db config loaded, will match with:\n` +
           `->slack context:\n${JSON.stringify(context, null, 2)}\n`,
@@ -125,7 +127,7 @@ function matchingConfigDbRows(
 
     if (app_id_matches && channel_matches && team_matches && bot_name_matches) {
       matching.push(configDbRow);
-      if (envVar('LOG_LEVEL') == 'debug') {
+      if (envVar('LOG_LEVEL') == 'debug-config') {
         console.log(
           `Matching ConfigDbRow ID: ${configDbRow.id}\n` +
             `->DB row: { \napp: ${JSON.stringify(configDbRow.slack_app, null, 2)}\n` +

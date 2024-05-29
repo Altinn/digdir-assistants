@@ -87,6 +87,19 @@ app.message(async ({ message, say }) => {
 
   // we have eliminated as many message types as we can
 
+  const docsCollectionName = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'search.docs.collection',
+    envVar('TYPESENSE_DOCS_COLLECTION'),
+  );
+  const phrasesCollectionName = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'search.phrases.collection',
+    envVar('TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION'),
+  );
+
   const ignoreWhenNotTagged = await lookupConfig(
     slackApp,
     srcEvtContext,
@@ -278,6 +291,8 @@ app.message(async ({ message, say }) => {
       stage1Result.userInputLanguageName,
       promptRagQueryRelax || '',
       promptRagGenerate || '',
+      docsCollectionName,
+      phrasesCollectionName,
       originalMsgCallback,
       translatedMsgCallback,
     );

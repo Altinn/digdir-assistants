@@ -49,6 +49,8 @@ const RagPipelineResultSchema = z.object({
   not_loaded_urls: z.array(z.string()),
   durations: z.record(z.string(), z.number()),
   prompts: RagPromptSchema.optional(),
+  docsCollection: z.string().optional(),
+  phrasesCollection: z.string().optional(),
 });
 
 export type RagPipelineResult = z.infer<typeof RagPipelineResultSchema>;
@@ -58,6 +60,8 @@ export async function ragPipeline(
   user_query_language_name: string,
   promptRagQueryRelax: string,
   promptRagGenerate: string,
+  docsCollectionName: string,
+  phrasesCollectionName: string,
   stream_callback_msg1: any = null,
   stream_callback_msg2: any = null,
 ): Promise<RagPipelineResult> {
@@ -92,6 +96,7 @@ export async function ragPipeline(
   }
   start = performance.now();
   const search_phrase_hits = await lookupSearchPhrasesSimilar(
+    phrasesCollectionName,
     extract_search_queries,
     "original",
   );
@@ -104,7 +109,10 @@ export async function ragPipeline(
     );
   }
   start = performance.now();
-  const search_response = await retrieveAllByUrl(search_phrase_hits);
+  const search_response = await retrieveAllByUrl(
+    docsCollectionName,
+    search_phrase_hits,
+  );
   durations["execute_searches"] = round(lapTimer(start));
 
   if (envVar("LOG_LEVEL") === "debug-relaxation") {
