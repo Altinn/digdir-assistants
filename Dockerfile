@@ -7,7 +7,9 @@ ARG VITE_SLACK_APP_SUPABASE_API_URL=default \
 ENV YARN_VERSION 4.2.2
 USER root
 RUN corepack enable yarn \
-    && yarn policies set-version $YARN_VERSION
+    && yarn policies set-version $YARN_VERSION \
+    && yarn config set cache-folder .yarn/cache \
+    && yarn cache dir
 
 # Create app directory
 WORKDIR /usr/src/app
