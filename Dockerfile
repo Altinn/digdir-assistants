@@ -15,12 +15,6 @@ RUN yarn policies set-version $YARN_VERSION \
 # Create app directory
 WORKDIR /usr/src/app
 
-# Install app dependencies
-COPY .yarn ./.yarn
-COPY apps/ ./apps/
-COPY packages/ ./packages/
-COPY package.json yarn.lock ./
-
 # important to prefix envvar with 'VITE_' so that is included in the build artifact
 ENV VITE_SLACK_APP_SUPABASE_API_URL=$VITE_SLACK_APP_SUPABASE_API_URL
 ENV VITE_SLACK_APP_SUPABASE_ANON_KEY=$VITE_SLACK_APP_SUPABASE_ANON_KEY
@@ -44,8 +38,6 @@ WORKDIR /usr/src/app
 
 # Install app dependencies
 COPY --from=builder /usr/src/app/ .
-
-RUN yarn install
 
 EXPOSE 3000
 CMD yarn node ./apps/slack-app/dist/src/app.js
