@@ -57,7 +57,7 @@ export async function getEventContext(
   let team_name = '';
 
   try {
-    team_name = await client.team.info({team: evt.team}).then((res) => res.team?.name || '');
+    team_name = await client.team.info({ team: evt.team }).then((res) => res.team?.name || '');
   } catch (err) {
     console.error(`Error retrieving the team name. Error: ${err}`);
   }
