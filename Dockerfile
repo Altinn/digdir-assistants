@@ -8,8 +8,8 @@ ARG VITE_SLACK_APP_SUPABASE_API_URL=default \
 USER root
 ENV YARN_VERSION 4.2.2
 RUN corepack enable yarn
-RUN yarn -v \
-    && yarn policies set-version $YARN_VERSION \
+RUN yarn policies set-version $YARN_VERSION \
+    && yarn -v \    
     && yarn config set global-folder .yarn \
     && yarn cache dir
 
