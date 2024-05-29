@@ -31,7 +31,7 @@ export async function lookupConfig<T>(
   context: SlackContext,
   propName: string,
   defaultValue: T,
-): Promise<T | null> {
+): Promise<T> {
   let merged = {};
 
   const matching = await fetchConfig(app, context);

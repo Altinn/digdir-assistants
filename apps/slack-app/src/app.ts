@@ -248,11 +248,27 @@ app.message(async ({ message, say }) => {
   let busyReadingMsg = '';
 
   if (stage1Result.userInputLanguageCode === 'en') {
-    busyReadingMsg = 'Reading Altinn 3 documentation...';
+    busyReadingMsg = await lookupConfig(
+      slackApp,
+      srcEvtContext,
+      'docs.readingMessage.en',
+      'Reading the documentation...',
+    );
   } else if (stage1Result.userInputLanguageCode === 'no') {
-    busyReadingMsg = 'Leser Altinn 3 dokumentasjon...';
+    busyReadingMsg = await lookupConfig(
+      slackApp,
+      srcEvtContext,
+      'docs.readingMessage.no',
+      'Leser dokumentasjonen...',
+    );
   } else {
-    busyReadingMsg = `Reading Altinn 3 documentation. The reply will be translated to ${stage1Result.userInputLanguageName}.`;
+    busyReadingMsg = await lookupConfig(
+      slackApp,
+      srcEvtContext,
+      'docs.readingMessage.en',
+      'Reading the documentation...',
+    );
+    busyReadingMsg += ` The reply will be translated to ${stage1Result.userInputLanguageName}.`;
   }
 
   if (firstThreadTs != null) {
