@@ -46,5 +46,7 @@ WORKDIR /usr/src/app
 # Install app dependencies
 COPY --from=builder /usr/src/app/ .
 
+RUN yarn workspaces focus --production
+
 EXPOSE 3000
 CMD node ./apps/slack-app/dist/src/app.js
