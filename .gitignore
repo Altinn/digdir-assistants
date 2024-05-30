@@ -6,3 +6,5 @@ node_modules
 
 .env*
 **/yarn-error.log
+.yarn/cache
+!.yarn/cache/.gitkeep

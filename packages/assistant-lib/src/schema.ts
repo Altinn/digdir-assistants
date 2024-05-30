@@ -22,7 +22,7 @@ export function ZSchema<
 >(schema: z.ZodObject<T>): Type {
   const res = class {
     static schema = schema;
-    constructor(value: z.infer<z.ZodObject<T>>) {
+    public constructor(value: z.infer<z.ZodObject<T>>) {
       // console.log(`ZSchema constructor - type: ${JSON.stringify(schema)}  value: ${JSON.stringify(value)}`);
       Object.assign(this, schema.parse(value));
     }

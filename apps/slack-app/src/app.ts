@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { App, ExpressReceiver, LogLevel, GenericMessageEvent, Block } from '@slack/bolt';
-import { ChatUpdateResponse, ReactionsGetResponse } from '@slack/web-api';
+import { ChatUpdateResponse, ReactionsGetResponse, WebClient } from '@slack/web-api';
 // import { SocketModeClient } from '@slack/socket-mode';
 import { createServer } from 'http';
 import {
@@ -86,6 +86,19 @@ app.message(async ({ message, say }) => {
   }
 
   // we have eliminated as many message types as we can
+
+  const docsCollectionName = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'search.docs.collection',
+    envVar('TYPESENSE_DOCS_COLLECTION'),
+  );
+  const phrasesCollectionName = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'search.phrases.collection',
+    envVar('TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION'),
+  );
 
   const ignoreWhenNotTagged = await lookupConfig(
     slackApp,
@@ -235,11 +248,27 @@ app.message(async ({ message, say }) => {
   let busyReadingMsg = '';
 
   if (stage1Result.userInputLanguageCode === 'en') {
-    busyReadingMsg = 'Reading Altinn 3 documentation...';
+    busyReadingMsg = await lookupConfig(
+      slackApp,
+      srcEvtContext,
+      'docs.readingMessage.en',
+      'Reading the documentation...',
+    );
   } else if (stage1Result.userInputLanguageCode === 'no') {
-    busyReadingMsg = 'Leser Altinn 3 dokumentasjon...';
+    busyReadingMsg = await lookupConfig(
+      slackApp,
+      srcEvtContext,
+      'docs.readingMessage.no',
+      'Leser dokumentasjonen...',
+    );
   } else {
-    busyReadingMsg = `Reading Altinn 3 documentation. The reply will be translated to ${stage1Result.userInputLanguageName}.`;
+    busyReadingMsg = await lookupConfig(
+      slackApp,
+      srcEvtContext,
+      'docs.readingMessage.en',
+      'Reading the documentation...',
+    );
+    busyReadingMsg += ` The reply will be translated to ${stage1Result.userInputLanguageName}.`;
   }
 
   if (firstThreadTs != null) {
@@ -278,6 +307,8 @@ app.message(async ({ message, say }) => {
       stage1Result.userInputLanguageName,
       promptRagQueryRelax || '',
       promptRagGenerate || '',
+      docsCollectionName,
+      phrasesCollectionName,
       originalMsgCallback,
       translatedMsgCallback,
     );
