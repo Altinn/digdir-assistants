@@ -5,7 +5,6 @@ import { ChatUpdateResponse, WebClient } from '@slack/web-api';
 import { z } from 'zod';
 import { ZSchema } from '@digdir/assistant-lib';
 import ramda from 'ramda';
-import { markdownToBlocks } from '@bdb-dd/mack';
 
 export const SlackContextSchema = z.object({
   ts_date: z.number(),
@@ -58,11 +57,10 @@ export async function getEventContext(
   let team_name = '';
 
   try {
-    team_name = await client.team.info().then((res) => res.team?.name || '');
+    team_name = await client.team.info({ team: evt.team }).then((res) => res.team?.name || '');
   } catch (err) {
     console.error(`Error retrieving the team name. Error: ${err}`);
   }
-
   var user_name = '';
   if (evt.user) {
     const user_info = await client.users.info({ user: evt.user });
@@ -91,7 +89,7 @@ export async function getEventContext(
     user_type: 'human',
     time_utc: tsToTimestamptz(evt.ts),
   };
-  return SlackContext.parse(slackContext);
+  return new SlackContext(slackContext);
 }
 
 export async function getChatUpdateContext(
@@ -101,7 +99,7 @@ export async function getChatUpdateContext(
 ): Promise<SlackContext> {
   const { date: ts_date, time: ts_time } = parseSlackTs(evt.ts || '');
 
-  const context = new SlackContext({
+  const context = {
     ts_date,
     ts_time,
     thread_ts_date: threadStart.ts_date,
@@ -111,28 +109,30 @@ export async function getChatUpdateContext(
     user_id: threadStart.user_id,
     user_type: 'human',
     time_utc: UtcNowTimestamptz(),
-  });
-  return context;
+  };
+  return new SlackContext(context);
 }
 
 export async function getThreadResponseContext(
   client: WebClient,
-  item: SlackContext,
+  threadStart: SlackContext,
   responseTs: string,
 ): Promise<SlackContext> {
   const { date: ts_date, time: ts_time } = parseSlackTs(responseTs || '');
 
-  const context = new SlackContext({
+  const slackContext = {
     ts_date,
     ts_time,
-    thread_ts_date: item.thread_ts_date,
-    thread_ts_time: item.thread_ts_time,
-    channel_id: item.channel_id,
-    team_id: item.team_id,
-    user_id: item.user_id,
+    thread_ts_date: threadStart.ts_date,
+    thread_ts_time: threadStart.ts_time,
+    channel_id: threadStart.channel_id || '',
+    team_id: threadStart.team_id,
+    user_id: threadStart.user_id,
+    user_type: 'human',
     time_utc: UtcNowTimestamptz(),
-  });
-  return context;
+  };
+
+  return new SlackContext(slackContext);
 }
 
 export async function getReactionItemContext(
@@ -145,7 +145,7 @@ export async function getReactionItemContext(
   const { date: ts_date, time: ts_time } = parseSlackTs(item.ts || '0.0');
   const { date: thread_ts_date, time: thread_ts_time } = parseSlackTs(item.thread_ts || '0.0');
 
-  const context = new SlackContext({
+  const context = {
     ts_date,
     ts_time,
     thread_ts_date,
@@ -156,9 +156,8 @@ export async function getReactionItemContext(
     team_id: item.team,
     user_id: item.user,
     time_utc: item.event_time_utc,
-  });
-
-  return context;
+  };
+  return new SlackContext(context);
 }
 
 export function tsToTimestamptz(ts: string): string {
@@ -264,8 +263,3 @@ export function parseSlackTs(ts: string): { date: number; time: number } {
   const [date, time] = ts.split('.');
   return { date: parseInt(date), time: parseInt(time) };
 }
-
-const testMarkdown =
-  'In the context of Altinn Authorization, the term "org" refers to an organization. It is used to specify the entity that owns or is associated with an application or instance within the Altinn platform. For example, in the authorization rules, `[ORG]` is a placeholder that should be replaced with the actual organization identifier.\n\nHere are some relevant source code examples:\n\n1. **Instantiation Rule:**\n    ```xml\n    <xacml:Rule RuleId="urn:altinn:example:ruleid:[RULE_ID]" Effect="Permit">\n     <xacml:Description>[ORG_2] can instantiate an instance of [ORG_1]/[APP]</xacml:Description>\n     <xacml:Target>\n     <xacml:AnyOf>\n     <xacml:AllOf>\n     <xacml:Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">\n     <xacml:AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">[ORG_2]</xacml:AttributeValue>\n     <xacml:AttributeDesignator AttributeId="urn:altinn:org" Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject" DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="false"/>\n     </xacml:Match>\n     </xacml:AllOf>\n     </xacml:AnyOf>\n     <xacml:AnyOf>\n     <xacml:AllOf>\n     <xacml:Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">\n     <xacml:AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">[ORG_1]</xacml:AttributeValue>\n     <xacml:AttributeDesignator AttributeId="urn:altinn:org" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource" DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="false"/>\n     </xacml:Match>\n     <xacml:Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">\n     <xacml:AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">[APP]</xacml:AttributeValue>\n     <xacml:AttributeDesignator AttributeId="urn:altinn:app" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource" DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="false"/>\n     </xacml:Match>\n     </xacml:AllOf>\n     </xacml:AnyOf>\n     <xacml:AnyOf>\n     <xacml:AllOf>\n     <xacml:Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">\n     <xacml:AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">instantiate</xacml:AttributeValue>\n     <xacml:AttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action" DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="false"/>\n     </xacml:Match>\n     </xacml:AllOf>\n     </xacml:AnyOf>\n     </xacml:Target>\n    </xacml:Rule>\n    ```\n\n2. **JSON Example:**\n    ```json\n    {\n     "$schema": "https://altinncdn.no/schemas/json/policy/policy.schema.v1.json",\n     "Policy": {\n     "Rules": [\n     {\n     "Effect": "Permit",\n     "Description": "[ORG_2] can instantiate an instance of [ORG_1]/[APP]",\n     "Subjects": [\n     "org:[ORG_2]"\n     ],\n     "Resources": [\n     "app:[ORG_1]/[APP]"\n     ],\n     "Actions": [\n     "instantiate"\n     ]\n     }\n     ]\n     }\n    }\n    ```\n\nIn these examples, `[ORG_1]` and `[ORG_2]` are placeholders for the organization identifiers.';
-
-// console.log(markdownToBlocks(testMarkdown));

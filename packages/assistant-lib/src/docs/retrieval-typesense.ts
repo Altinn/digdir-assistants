@@ -12,7 +12,10 @@ export interface RankedUrl {
   rank: number;
 }
 
-export async function searchMultiple(relaxedQueries: QueryRelaxation) {
+export async function searchMultiple(
+  docsCollectionName: string,
+  relaxedQueries: QueryRelaxation,
+) {
   if (!relaxedQueries || !relaxedQueries.searchQueries) {
     console.warn(`typesenseSearchMultiple() - search terms not provided`);
     return;
@@ -23,7 +26,7 @@ export async function searchMultiple(relaxedQueries: QueryRelaxation) {
 
   const multiSearchArgs = {
     searches: relaxedQueries.searchQueries.map((query) => ({
-      collection: envVar("TYPESENSE_DOCS_COLLECTION"),
+      collection: docsCollectionName,
       q: query,
       query_by: "content,embedding",
       include_fields:
@@ -42,6 +45,7 @@ export async function searchMultiple(relaxedQueries: QueryRelaxation) {
 }
 
 export async function lookupSearchPhrasesSimilar(
+  phrasesCollectionName: string,
   relaxedQueries: QueryRelaxation,
   prompt: string,
 ): Promise<RankedUrl[]> {
@@ -53,7 +57,7 @@ export async function lookupSearchPhrasesSimilar(
 
   const multiSearchArgs = {
     searches: relaxedQueries.searchQueries.map((query) => ({
-      collection: envVar("TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION"),
+      collection: phrasesCollectionName,
       q: query,
       query_by: "search_phrase,phrase_vec",
       include_fields: "search_phrase,url",
@@ -98,13 +102,17 @@ export async function lookupSearchPhrasesSimilar(
   return uniqueUrls || [];
 }
 
-export async function retrieveAllUrls(page: number, pageSize: number) {
+export async function retrieveAllUrls(
+  docsCollectionName: string,
+  page: number,
+  pageSize: number,
+) {
   const client = new Typesense.Client(typesenseCfg);
 
   const multiSearchArgs = {
     searches: [
       {
-        collection: envVar("TYPESENSE_DOCS_COLLECTION"),
+        collection: docsCollectionName,
         q: "*",
         query_by: "url_without_anchor",
         include_fields: "url_without_anchor,content_markdown,id",
@@ -121,11 +129,14 @@ export async function retrieveAllUrls(page: number, pageSize: number) {
   return response;
 }
 
-export async function retrieveAllByUrl(urlList: RankedUrl[]) {
+export async function retrieveAllByUrl(
+  docsCollectionName: string,
+  urlList: RankedUrl[],
+) {
   const client = new Typesense.Client(typesenseCfg);
 
   const urlSearches = urlList.slice(0, 20).map((rankedUrl) => ({
-    collection: envVar("TYPESENSE_DOCS_COLLECTION"),
+    collection: docsCollectionName,
     q: rankedUrl["url"],
     query_by: "url_without_anchor",
     include_fields:
@@ -143,16 +154,13 @@ export async function retrieveAllByUrl(urlList: RankedUrl[]) {
   return response;
 }
 
-async function lookupSearchPhrases(url: string, collectionName?: string) {
+async function lookupSearchPhrases(phrasesCollectionName: string, url: string) {
   const client = new Typesense.Client(typesenseCfg);
-  if (!collectionName) {
-    collectionName = envVar("TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION");
-  }
 
   const multiSearchArgs = {
     searches: [
       {
-        collection: collectionName,
+        collection: phrasesCollectionName,
         q: "*",
         query_by: "url",
         include_fields: "id,url,search_phrase,sort_order",
