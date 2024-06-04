@@ -14,15 +14,16 @@
     "run:listAllDocs": "node ./dist/functions/listAllDocs.js"
   },
   "dependencies": {
-    "@digdir/assistant-lib": "*",
-    "@types/node": "^20.12.12",
+    "@digdir/assistant-lib": "1.0.0",
     "@instructor-ai/instructor": "1.2.1",
+    "@types/node": "^20.12.12",
     "commander": "^12.1.0",
     "groq-sdk": "^0.3.3",
     "openai": "^4.29.1",
     "prettier": "^3.2.5",
     "rimraf": "^5.0.7",
     "sha1": "^1.1.1",
+    "tiktoken": "^1.0.15",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "typesense": "^1.8.2",
