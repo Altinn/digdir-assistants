@@ -91,8 +91,9 @@ async function main() {
     await typesenseSearch.setupSearchPhraseSchema(collectionNameTmp);
   } else {
     // TODO: verify that collection exists
+    collectionNameTmp = process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION
     console.log(
-      `Will update existing search phrases in collection: '${process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION}'`
+      `Will update existing search phrases in collection: '${collectionNameTmp}'`
     );
   }
 
@@ -112,7 +113,7 @@ async function main() {
 
   while (jobPageSize < 0 || page <= jobPageSize) {
     console.log(
-      `Retrieving content_markdown for all urls from collection '${process.env.TYPESENSE_DOCS_COLLECTION}', page ${page} (page_size=${pageSize})`
+      `Retrieving content_markdown for all urls from collection '${collectionNameTmp}', page ${page} (page_size=${pageSize})`
     );
 
     const searchResponse = await typesenseSearch.typesenseRetrieveAllUrls(
@@ -236,16 +237,23 @@ async function main() {
         }
       }
 
-      const results = await client
-        .collections(collectionNameTmp)
-        .documents()
-        .import(uploadBatch, { action: "upsert", return_id: true });
-      const failedResults = results.filter((result: any) => !result.success);
-      if (failedResults.length > 0) {
-        console.log(
-          `The following search_phrases for url:\n  "${url}"\n were not successfully upserted to typesense:\n${failedResults}`
-        );
+      try {
+
+        const results = await client
+          .collections(collectionNameTmp)
+          .documents()
+          .import(uploadBatch, { action: "upsert", return_id: true });
+        const failedResults = results.filter((result: any) => !result.success);
+        if (failedResults.length > 0) {
+          console.log(
+            `The following search_phrases for url:\n  "${url}"\n were not successfully upserted to typesense:\n${failedResults}`
+          );
+        }
+      } catch (error) {
+        console.error(`An error occurred while importing documents: ${error}`);
+        return;
       }
+
 
       docIndex += 1;
       // end while
