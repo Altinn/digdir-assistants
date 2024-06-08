@@ -1,0 +1,20 @@
+{
+	"extends": "./apify.tsconfig.json",
+	"compilerOptions": {
+    "alwaysStrict": false,
+    "module": "NodeNext",
+		"moduleResolution": "NodeNext",
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+		"target": "ES2022",
+		"outDir": "dist",
+		"noUnusedLocals": false,
+    "noImplicitAny": false,
+		"lib": ["ES2022"],
+    "paths": {
+      "playwright": ["."],
+      "@crawlee/browser": ["../../../crawlee/packages/browser-crawler/dist"]
+    }
+	},
+	"include": ["./src/**/*"]
+}

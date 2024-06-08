@@ -1,0 +1,36 @@
+{
+    "name": "assistant-crawler",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Altinn Assistant crawler",
+    "dependencies": {
+        "@crawlee/browser": "portal:../../../crawlee/packages/browser-crawler/dist",
+        "@crawlee/playwright": "portal:../../../crawlee/packages/playwright-crawler/dist",
+        "@crawlee/utils": "portal:../../../crawlee/packages/utils/dist",
+        "@digdir/assistant-lib": "1.0.0",
+        "crawlee": "portal:../../../crawlee/packages/crawlee/dist",
+        "playwright": "1.44.1",
+        "sha1": "^1.1.1",
+        "tiktoken": "^1.0.15",
+        "turndown": "^7.2.0",
+        "typesense": "^1.8.2"
+    },
+    "devDependencies": {
+        "@playwright/test": "1.44.1",
+        "@types/node": "^20.0.0",
+        "@types/sha1": "^1.1.5",
+        "@types/turndown": "^5.0.4",
+        "tsx": "^4.14.0",
+        "typescript": "^5.4.5"
+    },
+    "scripts": {
+        "start": "yarn run start:dev",
+        "start:prod": "node dist/main.js",
+        "start:dev": "tsx src/main.ts",
+        "build": "tsc",
+        "test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1",
+        "postinstall": "npx crawlee install-playwright-browsers"
+    },
+    "author": "Digitaliseringsdirektoratet",
+    "license": "MIT"
+}

@@ -6,6 +6,7 @@
     "packages/assistant-lib",
     "apps/admin",
     "apps/slack-app",
+    "services/crawler",
     "cli"
   ],
   "scripts": {
