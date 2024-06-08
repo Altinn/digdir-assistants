@@ -49,7 +49,7 @@ export async function typesenseSearchMultiple(
       "q": query,
       "query_by": "content,embedding",
       "include_fields":
-        "hierarchy.lvl0,hierarchy.lvl1,hierarchy.lvl2,hierarchy.lvl3,hierarchy.lvl4,url_without_anchor,type,id,content_markdown",
+        "id,url_without_anchor,type,content_markdown",
       "group_by": "url_without_anchor",
       "group_limit": 3,
       "limit": 10,
@@ -125,7 +125,7 @@ export async function typesenseSearchMultipleVector(
       "q": "*",
       "vector_query": `embedding:([${query}], k:10)`,
       "include_fields":
-        "hierarchy.lvl0,hierarchy.lvl1,hierarchy.lvl2,hierarchy.lvl3,hierarchy.lvl4,url_without_anchor,type,id,content_markdown",
+        "id,url_without_anchor,type,content_markdown",
     })),
   };
 
@@ -168,8 +168,7 @@ export async function typesenseRetrieveAllByUrl(
     "collection": process.env.TYPESENSE_DOCS_COLLECTION,
     "q": rankedUrl.url,
     "query_by": "url_without_anchor",
-    "include_fields":
-      "hierarchy.lvl0,hierarchy.lvl1,hierarchy.lvl2,hierarchy.lvl3,hierarchy.lvl4,url_without_anchor,type,id,content_markdown",
+    "include_fields": "id,url_without_anchor,type,content_markdown",
     "filter_by": `url_without_anchor:=${rankedUrl.url}`,
     "group_by": "url_without_anchor",
     "group_limit": 1,

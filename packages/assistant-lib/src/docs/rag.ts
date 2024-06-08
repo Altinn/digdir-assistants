@@ -125,7 +125,6 @@ export async function ragPipeline(
         return {
           id: hit.document.id,
           url: hit.document.url_without_anchor,
-          lvl0: hit.document.hierarchy.lvl0,
           content_markdown: hit.document.content_markdown || "",
         };
       }),

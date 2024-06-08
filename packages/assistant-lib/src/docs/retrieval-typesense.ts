@@ -4,6 +4,7 @@ import { QueryRelaxation } from "./query-relaxation";
 import { typesenseConfig } from "../config/typesense";
 import { envVar } from "../general";
 import { flatMap } from "remeda";
+import { z } from "zod";
 
 const typesenseCfg = typesenseConfig();
 
@@ -12,37 +13,51 @@ export interface RankedUrl {
   rank: number;
 }
 
-export async function searchMultiple(
-  docsCollectionName: string,
-  relaxedQueries: QueryRelaxation,
-) {
-  if (!relaxedQueries || !relaxedQueries.searchQueries) {
-    console.warn(`typesenseSearchMultiple() - search terms not provided`);
-    return;
-  }
-  const client = new Typesense.Client(typesenseCfg);
+const RagDocSchema = z.object({
+  id: z.string().optional(),
+  content_markdown: z.string().optional(),
+  url: z.string(),
+  url_without_anchor: z.string(),
+  type: z.string().optional(),
+  language: z.string().optional(),
+  item_priority: z.number(),
+  updated_at: z.number(),
+  markdown_checksum: z.string().optional(),
+  token_count: z.number().optional(),
+});
+export type RagDoc = z.infer<typeof RagDocSchema>;
 
-  console.log(`incoming queries: ${relaxedQueries}`);
+// export async function searchMultiple(
+//   docsCollectionName: string,
+//   relaxedQueries: QueryRelaxation,
+// ) {
+//   if (!relaxedQueries || !relaxedQueries.searchQueries) {
+//     console.warn(`typesenseSearchMultiple() - search terms not provided`);
+//     return;
+//   }
+//   const client = new Typesense.Client(typesenseCfg);
 
-  const multiSearchArgs = {
-    searches: relaxedQueries.searchQueries.map((query) => ({
-      collection: docsCollectionName,
-      q: query,
-      query_by: "content,embedding",
-      include_fields:
-        "hierarchy.lvl0,hierarchy.lvl1,hierarchy.lvl2,hierarchy.lvl3,hierarchy.lvl4,url_without_anchor,type,id,content_markdown",
-      group_by: "url_without_anchor",
-      group_limit: 3,
-      limit: 10,
-      prioritize_exact_match: false,
-      sort_by: "_text_match:desc",
-      drop_tokens_threshold: 5,
-    })),
-  };
+//   console.log(`incoming queries: ${relaxedQueries}`);
 
-  const response = await client.multiSearch.perform(multiSearchArgs, {});
-  return response;
-}
+//   const multiSearchArgs = {
+//     searches: relaxedQueries.searchQueries.map((query: any) => ({
+//       collection: docsCollectionName,
+//       q: query,
+//       query_by: "content_markdown,embedding",
+//       include_fields:
+//         "url_without_anchor,type,id,content_markdown",
+//       group_by: "url_without_anchor",
+//       group_limit: 3,
+//       limit: 10,
+//       prioritize_exact_match: false,
+//       sort_by: "_text_match:desc",
+//       drop_tokens_threshold: 5,
+//     })),
+//   };
+
+//   const response = await client.multiSearch.perform(multiSearchArgs, {});
+//   return response;
+// }
 
 export async function lookupSearchPhrasesSimilar(
   phrasesCollectionName: string,
@@ -139,8 +154,7 @@ export async function retrieveAllByUrl(
     collection: docsCollectionName,
     q: rankedUrl["url"],
     query_by: "url_without_anchor",
-    include_fields:
-      "hierarchy.lvl0,hierarchy.lvl1,hierarchy.lvl2,hierarchy.lvl3,hierarchy.lvl4,url_without_anchor,type,id,content_markdown",
+    include_fields: "id,url_without_anchor,type,content_markdown",
     filter_by: `url_without_anchor:=${rankedUrl["url"]}`,
     group_by: "url_without_anchor",
     group_limit: 1,
@@ -154,23 +168,151 @@ export async function retrieveAllByUrl(
   return response;
 }
 
-async function lookupSearchPhrases(phrasesCollectionName: string, url: string) {
-  const client = new Typesense.Client(typesenseCfg);
-
-  const multiSearchArgs = {
-    searches: [
+const docsCollectionSchema = (
+  collectionName: string,
+): CollectionCreateSchema => {
+  return {
+    name: collectionName,
+    symbols_to_index: ["_"],
+    default_sorting_field: "item_priority",
+    enable_nested_fields: false,
+    fields: [
+      { name: "id", type: "string", facet: true, index: true, optional: true },
       {
-        collection: phrasesCollectionName,
-        q: "*",
-        query_by: "url",
-        include_fields: "id,url,search_phrase,sort_order",
-        filter_by: `url:=${url}`,
-        sort_by: "sort_order:asc",
-        per_page: 30,
+        name: "content_markdown",
+        type: "string",
+        facet: false,
+        optional: true,
+        index: true,
+        sort: false,
+        infix: false,
+        locale: "en",
+      },
+      {
+        name: "url",
+        type: "string",
+        facet: true,
+        optional: false,
+        index: true,
+        sort: false,
+        infix: false,
+        locale: "",
+      },
+      {
+        name: "url_without_anchor",
+        type: "string",
+        facet: true,
+        optional: false,
+        index: true,
+        sort: false,
+        infix: false,
+        locale: "",
+      },
+      {
+        name: "version",
+        type: "string[]",
+        facet: true,
+        optional: true,
+        index: true,
+        sort: false,
+        infix: false,
+        locale: "",
+      },
+      {
+        name: "type",
+        type: "string",
+        facet: true,
+        optional: true,
+        index: true,
+        sort: false,
+        infix: false,
+        locale: "en",
+      },
+      {
+        name: ".*_tag",
+        type: "string",
+        facet: true,
+        optional: true,
+        index: true,
+        sort: false,
+        infix: false,
+        locale: "en",
+      },
+      {
+        name: "language",
+        type: "string",
+        facet: true,
+        optional: true,
+        index: true,
+        sort: false,
+        infix: false,
+        locale: "",
+      },
+      {
+        name: "item_priority",
+        type: "int64",
+        facet: false,
+        optional: false,
+        index: true,
+        sort: true,
+        infix: false,
+        locale: "",
+      },
+      {
+        name: "updated_at",
+        type: "int64",
+        facet: true,
+        optional: false,
+        index: true,
+        sort: true,
+        infix: false,
+        locale: "",
+      },
+      {
+        name: "markdown_checksum",
+        type: "string",
+        facet: false,
+        optional: true,
+        index: false,
+        sort: false,
+        infix: false,
+        locale: "",
+      },
+      {
+        name: "token_count",
+        type: "int64",
+        facet: true,
+        optional: true,
+        index: true,
+        sort: true,
+        infix: false,
+        locale: "",
       },
     ],
   };
+};
 
-  const response = await client.multiSearch.perform(multiSearchArgs, {});
-  return response;
+export async function createDocsCollectionIfNotExists(collectionName: string) {
+  const client = new Typesense.Client(typesenseCfg);
+  const collections = await client.collections().retrieve();
+  const collectionExists = collections.find(
+    (collection: any) => collection?.name === collectionName,
+  );
+
+  if (!collectionExists) {
+    await client.collections().create(docsCollectionSchema(collectionName));
+    console.log(`Collection ${collectionName} created successfully.`);
+  } else {
+    console.error(`Collection '${collectionName}' exists.`);
+  }
+}
+
+export async function updateDocs(docs: RagDoc[], collectionName: string) {
+  const client = new Typesense.Client(typesenseCfg);
+
+  // Index the document in Typesense
+  await client
+    .collections(collectionName)
+    .documents()
+    .import(docs, { action: "upsert" });
 }
