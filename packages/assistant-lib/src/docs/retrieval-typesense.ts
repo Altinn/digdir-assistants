@@ -1,5 +1,7 @@
 import Typesense from "typesense";
+import { DocumentSchema } from "typesense/lib/Typesense/Documents";
 import { CollectionCreateSchema } from "typesense/lib/Typesense/Collections";
+import { SearchResponseHit } from "typesense/lib/Typesense/Documents";
 import { QueryRelaxation } from "./query-relaxation";
 import { typesenseConfig } from "../config/typesense";
 import { envVar } from "../general";
@@ -27,37 +29,18 @@ const RagDocSchema = z.object({
 });
 export type RagDoc = z.infer<typeof RagDocSchema>;
 
-// export async function searchMultiple(
-//   docsCollectionName: string,
-//   relaxedQueries: QueryRelaxation,
-// ) {
-//   if (!relaxedQueries || !relaxedQueries.searchQueries) {
-//     console.warn(`typesenseSearchMultiple() - search terms not provided`);
-//     return;
-//   }
-//   const client = new Typesense.Client(typesenseCfg);
-
-//   console.log(`incoming queries: ${relaxedQueries}`);
-
-//   const multiSearchArgs = {
-//     searches: relaxedQueries.searchQueries.map((query: any) => ({
-//       collection: docsCollectionName,
-//       q: query,
-//       query_by: "content_markdown,embedding",
-//       include_fields:
-//         "url_without_anchor,type,id,content_markdown",
-//       group_by: "url_without_anchor",
-//       group_limit: 3,
-//       limit: 10,
-//       prioritize_exact_match: false,
-//       sort_by: "_text_match:desc",
-//       drop_tokens_threshold: 5,
-//     })),
-//   };
-
-//   const response = await client.multiSearch.perform(multiSearchArgs, {});
-//   return response;
-// }
+export type RagDocQuery = DocumentSchema & {
+  id?: string;
+  content_markdown?: string;
+  url?: string;
+  url_without_anchor?: string;
+  type?: string;
+  language?: string;
+  item_priority?: number;
+  updated_at?: number;
+  markdown_checksum?: string;
+  token_count?: number;
+};
 
 export async function lookupSearchPhrasesSimilar(
   phrasesCollectionName: string,
@@ -312,7 +295,25 @@ export async function updateDocs(docs: RagDoc[], collectionName: string) {
 
   // Index the document in Typesense
   await client
-    .collections(collectionName)
+    .collections<RagDocQuery>(collectionName)
     .documents()
     .import(docs, { action: "upsert" });
+}
+
+export async function getDocChecksums(
+  collectionName: string,
+  idList: string[],
+): Promise<RagDocQuery> {
+  const client = new Typesense.Client(typesenseCfg);
+
+  const documents = await client
+    .collections<RagDocQuery>(collectionName)
+    .documents()
+    .search({
+      q: "*",
+      filter_by: idList.map((id) => `id:=${id}`).join(" || "),
+      include_fields: "id,doc_id,markdown_checksum",
+    });
+  
+  return documents.hits?.map((hit) => hit.document as RagDocQuery) || [];
 }

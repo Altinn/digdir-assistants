@@ -2,7 +2,7 @@ import { createPlaywrightRouter } from '@crawlee/playwright';
 import { Locator } from '@playwright/test';
 import TurndownService from 'turndown';
 import sha1 from "sha1";
-import { RagDoc, updateDocs, countTokens } from "@digdir/assistant-lib";
+import { RagDoc, RagDocQuery, updateDocs, getDocChecksums, countTokens } from "@digdir/assistant-lib";
 
 import { URL } from 'url';
 
@@ -45,11 +45,12 @@ async function defaultHandler(collectionName: string, { page, request, log }) {
     }));
     
     const markdown = turndownService.turndown(contents.join("\n\n"));
-    log.info(markdown);        
+    
 
     const hash = sha1(request.url);
     log.info('Generating sha1 hash: ' + hash);
 
+    const markdown_checksum = sha1(markdown);
     const url_without_anchor = new URL(request.url).origin + new URL(request.url).pathname;
 
     const updatedDoc: RagDoc = {
@@ -60,7 +61,7 @@ async function defaultHandler(collectionName: string, { page, request, log }) {
         type: 'content',
         item_priority: 1,
         updated_at: Math.floor(new Date().getTime() / 1000),
-        markdown_checksum: sha1(markdown),
+        markdown_checksum: markdown_checksum,
         token_count: countTokens(markdown),
     }
     if (!markdown.trim()) {
@@ -71,7 +72,16 @@ async function defaultHandler(collectionName: string, { page, request, log }) {
         log.warning(`Only ${updatedDoc.token_count} tokens extracted\n from ${url_without_anchor}\n consider verifying the locators for this url.`)
     }
 
-    await updateDocs([updatedDoc], collectionName);    
+    const currentDocs = await getDocChecksums(collectionName, [hash]);
+
+    if (currentDocs && currentDocs.length > 0 
+        && currentDocs[0].id == hash
+        && currentDocs[0].markdown_checksum == markdown_checksum) {
+        log.info(`Tokens: ${updatedDoc.token_count}, content checksums match, skipping update for url '${url_without_anchor}'`);
+    } else {
+        log.info(markdown);        
+        await updateDocs([updatedDoc], collectionName);    
+    }
 }
 
 function getLocators(request, page): Locator[] {

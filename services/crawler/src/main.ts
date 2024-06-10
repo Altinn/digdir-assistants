@@ -20,7 +20,7 @@ const crawler = new PlaywrightCrawler({
 const { urls } = await Sitemap.load('https://info.altinn.no/sitemap.xml');
 
 const crawlRoutes = [
-    // 'https://info.altinn.no/en/forms-overview/',
+    'https://info.altinn.no/en/forms-overview/',
     'https://info.altinn.no/en/start-and-run-business/',
     'https://info.altinn.no/en/help/',
 ]
@@ -30,7 +30,7 @@ const ignoreRoutes = [
     "https://info.altinn.no/en/start-and-run-business/e-guide-",
     "https://info.altinn.no/en/start-and-run-business/eguide-",
     "https://info.altinn.no/en/help/contact-us/",
-    
+
 ]
 
 const urlsToCrawl = urls.filter((url) => (
