@@ -92,9 +92,22 @@ async function main() {
   } else {
     // TODO: verify that collection exists
     collectionNameTmp = process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION
+
+    const collectionFound = await typesenseSearch.lookupCollectionByNameExact(collectionNameTmp);
+
+    if (!collectionFound) {
+      console.error(`Collection '${collectionNameTmp}' not found. To create, use the '-n' option.`)
+      return;
+    }
+
+    if (collectionFound.name != collectionNameTmp) {
+      `Resolved alias '${collectionNameTmp}' to collection '${collectionFound.name}'`
+    }
+    collectionNameTmp = collectionFound.name;
+
     console.log(
       `Will update existing search phrases in collection: '${collectionNameTmp}'`
-    );
+    );    
   }
 
   const durations = {
@@ -199,19 +212,21 @@ async function main() {
 
       // delete existing search phrases before uploading new
       for (const document of existingPhrases.hits || []) {
-        const docId = document.document?.doc_id || "";
-        if (docId) {
+        const phraseId = document.document?.id || "";
+        if (phraseId) {
           try {
             await client
               .collections(collectionNameTmp)
-              .documents(docId)
+              .documents(phraseId)
               .delete();
-            console.log(`Search phrase ID ${docId} deleted for url: ${url}`);
+            console.log(`Search phrase ID ${phraseId} deleted for url: ${url}`);
           } catch (error) {
             if (error instanceof Errors.ObjectNotFound) {
               console.log(
-                `Search phrase ID ${docId} not found in collection "${collectionNameTmp}"`
+                `Search phrase ID ${phraseId} not found in collection "${collectionNameTmp}"`
               );
+            } else {
+              console.error(`Error occurred while removing existing search phrases: ${error}`);
             }
           }
         }
@@ -222,7 +237,7 @@ async function main() {
 
       for (const [index, phrase] of searchPhrases.entries()) {
         console.log(phrase);
-        const batch: SearchPhraseEntry = {
+        const entry: SearchPhraseEntry = {
           doc_id: searchHit.id || "",
           url: url,
           search_phrase: phrase,
@@ -232,8 +247,10 @@ async function main() {
           checksum: checksumMd,
           prompt: promptName,
         };
-        if (batch.search_phrase) {
-          uploadBatch.push(batch);
+        if (entry.search_phrase) {
+          uploadBatch.push(entry);
+        } else {
+          console.error(`Empty search phrase generated in entry: ${JSON.stringify(entry)}`);
         }
       }
 
@@ -250,7 +267,9 @@ async function main() {
           );
         }
       } catch (error) {
-        console.error(`An error occurred while importing documents: ${error}`);
+        console.error(`An error occurred while importing documents to '${collectionNameTmp}'\nERROR: ${error}`);
+
+        console.log(`Failed batch content:\n${JSON.stringify(uploadBatch)}`)
         return;
       }
 
