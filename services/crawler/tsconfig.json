@@ -6,6 +6,8 @@
 		"moduleResolution": "NodeNext",
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
+    "emitDeclarationOnly": true,
+    "allowImportingTsExtensions": true,
 		"target": "ES2022",
 		"outDir": "dist",
 		"noUnusedLocals": false,

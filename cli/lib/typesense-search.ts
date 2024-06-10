@@ -12,6 +12,7 @@ export interface SearchPhraseDoc {
 }
 
 export interface SearchPhraseEntry {
+  id?: string;
   doc_id: string;
   url: string;
   search_phrase: string;
@@ -243,16 +244,15 @@ export async function lookupSearchPhrases(
   collectionName?: string,
   prompt: string = "original"
 ): Promise<MultiSearchResponse<SearchPhraseEntry[]>> {
+  
   const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
-  collectionName = collectionName ||
-    process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION;
-
+  
   const multiSearchArgs = {
     "searches": [{
       "collection": collectionName,
       "q": "*",
       "query_by": "url",
-      "include_fields": "id,url,search_phrase,sort_order,updated_at,checksum",
+      "include_fields": "id,doc_id,url,search_phrase,sort_order,updated_at,checksum",
       "filter_by": `url:=${url} && prompt:=${prompt}`,
       "sort_by": "sort_order:asc",
       "per_page": 30,
@@ -261,4 +261,25 @@ export async function lookupSearchPhrases(
 
   const response = await client.multiSearch.perform<SearchPhraseEntry[]>(multiSearchArgs, {});
   return response;
+}
+
+
+export async function lookupCollectionByNameExact(collectionName: string) {
+
+  const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
+
+  const aliases = await client.aliases().retrieve();
+  const aliasLookupResult = aliases.aliases.find(
+    (alias: any) => alias?.name === collectionName
+  )
+  if (aliasLookupResult) {
+    collectionName = aliasLookupResult.collection_name;
+  }
+
+  const collections = await client.collections().retrieve();
+  const findResult = collections.find(
+    (collection: any) => collection?.name === collectionName,
+  );
+
+  return findResult;
 }

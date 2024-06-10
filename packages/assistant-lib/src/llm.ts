@@ -170,8 +170,8 @@ export async function chat_stream(
   return content_so_far;
 }
 
-export function countTokens(text: string) {
+export function countTokens(text: string): number {
   const tokens = encoding.encode(text);
 
-  return tokens.length;
+  return tokens.length ?? 0;
 }
