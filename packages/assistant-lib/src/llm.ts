@@ -5,6 +5,9 @@ import { AzureKeyCredential, OpenAIClient as AzureOpenAI } from "@azure/openai";
 
 import { envVar, lapTimer } from "./general";
 import { isNullOrEmpty } from "./markdown";
+import { get_encoding } from "tiktoken";
+
+const encoding = get_encoding("cl100k_base");
 
 const JsonExtractionSchema = z.object({
   json_dict: z.record(z.any()),
@@ -165,4 +168,10 @@ export async function chat_stream(
   }
 
   return content_so_far;
+}
+
+export function countTokens(text: string): number {
+  const tokens = encoding.encode(text);
+
+  return tokens.length ?? 0;
 }

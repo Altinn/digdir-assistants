@@ -1,14 +1,14 @@
-import { Client, Errors } from "typesense";
-import { config } from "../lib/config";
+import { Client, Errors } from 'typesense';
+import { config } from '../lib/config';
 
 const cfg = config();
 
 async function main() {
-  const collectionName = process.env.TYPESENSE_DOCS_COLLECTION || "";
+  const collectionName = process.env.TYPESENSE_DOCS_COLLECTION || '';
 
   if (!collectionName) {
     console.log(
-      "Be sure to set the TYPESENSE_DOCS_COLLECTION environment variable to a valid collection name."
+      'Be sure to set the TYPESENSE_DOCS_COLLECTION environment variable to a valid collection name.',
     );
     process.exit(1);
   }
@@ -28,23 +28,20 @@ async function main() {
   const totalStart = Date.now();
 
   console.log(
-    `Retrieving all docs from collection '${collectionName}', page ${page} (page_size=${pageSize})\n\n`
+    `Retrieving all docs from collection '${collectionName}', page ${page} (page_size=${pageSize})\n\n`,
   );
 
   console.log(`token_count;actual_language;url_without_anchor`);
 
-
-
   while (jobPageSize < 0 || page <= jobPageSize) {
-
     const multiSearchArgs = {
       searches: [
         {
           collection: process.env.TYPESENSE_DOCS_COLLECTION,
-          q: "*",
-          query_by: "url_without_anchor",
-          include_fields: "language,url_without_anchor,token_count",
-          sort_by: "token_count:desc",
+          q: '*',
+          query_by: 'url_without_anchor',
+          include_fields: 'language,url_without_anchor,token_count',
+          sort_by: 'token_count:desc',
           page: page,
           per_page: pageSize,
         },
@@ -54,9 +51,8 @@ async function main() {
     const searchResponse = await client.multiSearch.perform(multiSearchArgs);
     durations.queryDocs += Date.now() - totalStart;
 
-
     const allDocs: any[] = searchResponse.results.flatMap((result: any) =>
-      result.hits?.map((hit: any) => hit.document)
+      result.hits?.map((hit: any) => hit.document),
     );
 
     if (allDocs.length === 0) {
@@ -65,7 +61,7 @@ async function main() {
     }
 
     allDocs.forEach((doc) => {
-      console.log(`${doc.token_count};${doc.language};${doc.url_without_anchor};`);      
+      console.log(`${doc.token_count};${doc.language};${doc.url_without_anchor};`);
     });
 
     page++;

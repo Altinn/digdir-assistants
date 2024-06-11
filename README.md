@@ -57,7 +57,7 @@ Note: in order for your local bot endpoint to receive traffic from Slack, you ne
 2. Update search phrase index
 
 `$ cd  cli`
-`$ yarn run:generate-search-phrases <typesense collection name>`
+`$ yarn run:generateSearchPhrases <typesense collection name>`
 
 Example collection name: TEST_altinn-studio-docs-search-phrases`
 
