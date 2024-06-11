@@ -10,6 +10,7 @@
         "@digdir/assistant-lib": "1.0.0",
         "crawlee": "portal:../../../crawlee/packages/crawlee/dist",
         "playwright": "1.44.1",
+        "prettier": "^3.3.2",
         "sha1": "^1.1.1",
         "tiktoken": "^1.0.15",
         "turndown": "^7.2.0",
@@ -17,7 +18,7 @@
     },
     "devDependencies": {
         "@playwright/test": "1.44.1",
-        "@types/node": "^20.0.0",
+        "@types/node": "^20.14.2",
         "@types/sha1": "^1.1.5",
         "@types/turndown": "^5.0.4",
         "tsx": "^4.14.0",
@@ -27,9 +28,17 @@
         "start": "yarn run start:dev",
         "start:prod": "node dist/main.js",
         "start:dev": "tsx src/main.ts",
+        "codestyle:check": "prettier src/ --check",
+        "codestyle:fix": "prettier src/ --write",
         "build": "tsc",
         "test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1",
         "postinstall": "npx crawlee install-playwright-browsers"
+    },
+    "prettier": {
+        "endOfLine": "auto",
+        "jsxSingleQuote": true,
+        "printWidth": 100,
+        "singleQuote": true
     },
     "author": "Digdir",
     "license": "MIT"

@@ -1095,7 +1095,7 @@ const RAW_RUNTIME_STATE =
           ["lodash", "npm:4.17.21"],\
           ["nodemon", "npm:3.1.3"],\
           ["openai", "npm:4.48.1"],\
-          ["prettier", "npm:3.3.0"],\
+          ["prettier", "npm:3.3.2"],\
           ["ramda", "npm:0.30.1"],\
           ["remeda", "npm:1.61.0"],\
           ["ts-node", "virtual:a20587c5c30dd389a37ca4e307e53acdde0b18298a5e50a6e2a5c2be058069ab5cdba932fd9656e883313d381df18e1b0ff20704b5ca65ff278c6517a2b94927#npm:10.9.2"],\
@@ -3900,6 +3900,7 @@ const RAW_RUNTIME_STATE =
           ["@types/turndown", "npm:5.0.4"],\
           ["crawlee", "virtual:93de7ac422244803c188066537ae624c326819cee75009ae09b380c101ff0fbad4ad4d7ffab22b030756d2b37e6f5879c0f5ccd96e4bfdf338e7937638d2e891#portal:../../../crawlee/packages/crawlee/dist::locator=assistant-crawler%40workspace%3Aservices%2Fcrawler"],\
           ["playwright", "npm:1.44.1"],\
+          ["prettier", "npm:3.3.2"],\
           ["sha1", "npm:1.1.1"],\
           ["tiktoken", "npm:1.0.15"],\
           ["tsx", "npm:4.14.0"],\
@@ -3955,15 +3956,15 @@ const RAW_RUNTIME_STATE =
           ["assistants-cli", "workspace:cli"],\
           ["@digdir/assistant-lib", "workspace:packages/assistant-lib"],\
           ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.2.1"],\
-          ["@types/node", "npm:20.14.1"],\
+          ["@types/node", "npm:20.14.2"],\
           ["commander", "npm:12.1.0"],\
           ["groq-sdk", "npm:0.3.3"],\
           ["openai", "npm:4.48.1"],\
-          ["prettier", "npm:3.3.0"],\
+          ["prettier", "npm:3.3.2"],\
           ["rimraf", "npm:5.0.7"],\
           ["sha1", "npm:1.1.1"],\
           ["tiktoken", "npm:1.0.15"],\
-          ["ts-node", "virtual:a20587c5c30dd389a37ca4e307e53acdde0b18298a5e50a6e2a5c2be058069ab5cdba932fd9656e883313d381df18e1b0ff20704b5ca65ff278c6517a2b94927#npm:10.9.2"],\
+          ["ts-node", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:10.9.2"],\
           ["typescript", "patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"],\
           ["typesense", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.8.2"],\
           ["zod", "npm:3.23.8"]\
@@ -9513,6 +9514,13 @@ const RAW_RUNTIME_STATE =
           ["prettier", "npm:3.3.0"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:3.3.2", {\
+        "packageLocation": "./.yarn/unplugged/prettier-npm-3.3.2-efeafcaa4b/node_modules/prettier/",\
+        "packageDependencies": [\
+          ["prettier", "npm:3.3.2"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["prismjs", [\
@@ -11171,6 +11179,42 @@ const RAW_RUNTIME_STATE =
           ["ts-node", "npm:10.9.2"]\
         ],\
         "linkType": "SOFT"\
+      }],\
+      ["virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:10.9.2", {\
+        "packageLocation": "./.yarn/__virtual__/ts-node-virtual-3bd6f726a2/4/.yarn/berry/cache/ts-node-npm-10.9.2-3f3890b9ac-10c0.zip/node_modules/ts-node/",\
+        "packageDependencies": [\
+          ["ts-node", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:10.9.2"],\
+          ["@cspotcode/source-map-support", "npm:0.8.1"],\
+          ["@swc/core", null],\
+          ["@swc/wasm", null],\
+          ["@tsconfig/node10", "npm:1.0.11"],\
+          ["@tsconfig/node12", "npm:1.0.11"],\
+          ["@tsconfig/node14", "npm:1.0.3"],\
+          ["@tsconfig/node16", "npm:1.0.4"],\
+          ["@types/node", "npm:20.14.2"],\
+          ["@types/swc__core", null],\
+          ["@types/swc__wasm", null],\
+          ["@types/typescript", null],\
+          ["acorn", "npm:8.11.3"],\
+          ["acorn-walk", "npm:8.3.2"],\
+          ["arg", "npm:4.1.3"],\
+          ["create-require", "npm:1.1.1"],\
+          ["diff", "npm:4.0.2"],\
+          ["make-error", "npm:1.3.6"],\
+          ["typescript", "patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"],\
+          ["v8-compile-cache-lib", "npm:3.0.1"],\
+          ["yn", "npm:3.1.1"]\
+        ],\
+        "packagePeers": [\
+          "@swc/core",\
+          "@swc/wasm",\
+          "@types/node",\
+          "@types/swc__core",\
+          "@types/swc__wasm",\
+          "@types/typescript",\
+          "typescript"\
+        ],\
+        "linkType": "HARD"\
       }],\
       ["virtual:a20587c5c30dd389a37ca4e307e53acdde0b18298a5e50a6e2a5c2be058069ab5cdba932fd9656e883313d381df18e1b0ff20704b5ca65ff278c6517a2b94927#npm:10.9.2", {\
         "packageLocation": "./.yarn/__virtual__/ts-node-virtual-c948db7b6d/4/.yarn/berry/cache/ts-node-npm-10.9.2-3f3890b9ac-10c0.zip/node_modules/ts-node/",\
