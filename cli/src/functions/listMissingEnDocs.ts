@@ -1,14 +1,14 @@
-import { Client, Errors } from "typesense";
-import { config } from "../lib/config";
+import { Client, Errors } from 'typesense';
+import { config } from '../lib/config';
 
 const cfg = config();
 
 async function main() {
-  const collectionName = process.env.TYPESENSE_DOCS_COLLECTION || "";
+  const collectionName = process.env.TYPESENSE_DOCS_COLLECTION || '';
 
   if (!collectionName) {
     console.log(
-      "Be sure to set the TYPESENSE_DOCS_COLLECTION environment variable to a valid collection name."
+      'Be sure to set the TYPESENSE_DOCS_COLLECTION environment variable to a valid collection name.',
     );
     process.exit(1);
   }
@@ -29,7 +29,7 @@ async function main() {
 
   while (jobPageSize < 0 || page <= jobPageSize) {
     console.log(
-      `Retrieving all Norwegian urls from collection '${collectionName}', page ${page} (page_size=${pageSize})`
+      `Retrieving all Norwegian urls from collection '${collectionName}', page ${page} (page_size=${pageSize})`,
     );
 
     // 1. Query 10 url_without_anchor, starts_with "https://docs.altinn.studio/nb/"
@@ -38,10 +38,10 @@ async function main() {
       searches: [
         {
           collection: process.env.TYPESENSE_DOCS_COLLECTION,
-          q: "https://docs.altinn.studio/nb/*",
-          query_by: "url_without_anchor",
-          include_fields: "language,url_without_anchor,token_count",
-          sort_by: "token_count:desc",
+          q: 'https://docs.altinn.studio/nb/*',
+          query_by: 'url_without_anchor',
+          include_fields: 'language,url_without_anchor,token_count',
+          sort_by: 'token_count:desc',
           page: page,
           per_page: pageSize,
         },
@@ -62,7 +62,7 @@ async function main() {
     // console.log(`all norwegian docs\n${JSON.stringify(searchResponse)}`);
 
     const norwegianDocs: any[] = searchResponse.results.flatMap((result: any) =>
-      result.hits?.map((hit: any) => hit.document)
+      result.hits?.map((hit: any) => hit.document),
     );
 
     if (norwegianDocs.length === 0) {
@@ -76,18 +76,18 @@ async function main() {
         const result = {
           collection: process.env.TYPESENSE_DOCS_COLLECTION,
           q: hit.document.url_without_anchor.replace(
-            "https://docs.altinn.studio/nb/",
-            "https://docs.altinn.studio/"
+            'https://docs.altinn.studio/nb/',
+            'https://docs.altinn.studio/',
           ),
-          query_by: "url_without_anchor",
-          include_fields: "language,url_without_anchor,token_count",
-          sort_by: "token_count:desc",
+          query_by: 'url_without_anchor',
+          include_fields: 'language,url_without_anchor,token_count',
+          sort_by: 'token_count:desc',
           page: 1,
           per_page: 4,
         };
         // console.log(`result: ${JSON.stringify(result)}`);
         return result;
-      })
+      }),
     );
 
     const enSearchResponse = await client.multiSearch.perform({
@@ -99,7 +99,7 @@ async function main() {
         url_without_anchor: hit.document.url_without_anchor,
         language: hit.document.language,
         token_count: hit.document.token_count,
-      }))
+      })),
     );
 
     // 2. For each, query for same url, without /nb/
@@ -117,23 +117,23 @@ async function main() {
         (englishDoc) =>
           englishDoc.url_without_anchor ===
           norwegianDoc.url_without_anchor.replace(
-            "https://docs.altinn.studio/nb/",
-            "https://docs.altinn.studio/"
-          )
+            'https://docs.altinn.studio/nb/',
+            'https://docs.altinn.studio/',
+          ),
       );
 
       if (matchingEnglishDoc) {
-        if (matchingEnglishDoc.language != "en") {
+        if (matchingEnglishDoc.language != 'en') {
           notActuallyEnglishDocs.push(matchingEnglishDoc);
 
           console.log(
-            `true;true;${matchingEnglishDoc.token_count};${matchingEnglishDoc.url_without_anchor};`
+            `true;true;${matchingEnglishDoc.token_count};${matchingEnglishDoc.url_without_anchor};`,
           );
         }
       } else {
         missingDocs.push(norwegianDoc);
         console.log(
-          `true;false;${norwegianDoc.token_count};unknown;${norwegianDoc.url_without_anchor};`
+          `true;false;${norwegianDoc.token_count};unknown;${norwegianDoc.url_without_anchor};`,
         );
       }
     });
@@ -157,10 +157,10 @@ async function main() {
       searches: [
         {
           collection: process.env.TYPESENSE_DOCS_COLLECTION,
-          q: "*",
-          query_by: "url_without_anchor",
-          include_fields: "language,url_without_anchor,token_count",
-          sort_by: "token_count:desc",
+          q: '*',
+          query_by: 'url_without_anchor',
+          include_fields: 'language,url_without_anchor,token_count',
+          sort_by: 'token_count:desc',
           page: page,
           per_page: pageSize,
         },
@@ -171,7 +171,7 @@ async function main() {
     durations.queryDocs += Date.now() - totalStart;
 
     let englishDocs: any[] = searchResponse.results.flatMap((result: any) =>
-      result.hits?.map((hit: any) => hit.document)
+      result.hits?.map((hit: any) => hit.document),
     );
     if (englishDocs.length === 0) {
       // console.log(`Last page with results was page ${page - 1}`);
@@ -179,13 +179,13 @@ async function main() {
     }
     englishDocs = englishDocs.filter(
       (hit) =>
-        hit.url_without_anchor.startsWith("https://docs.altinn.studio/nb/") ==
-          false && hit.language != "en"
+        hit.url_without_anchor.startsWith('https://docs.altinn.studio/nb/') == false &&
+        hit.language != 'en',
     );
 
     englishDocs.forEach((englishDoc) => {
       console.log(
-        `true;true;${englishDoc.token_count};${englishDoc.language};${englishDoc.url_without_anchor};`
+        `true;true;${englishDoc.token_count};${englishDoc.language};${englishDoc.url_without_anchor};`,
       );
     });
 

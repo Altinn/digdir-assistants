@@ -115,7 +115,7 @@ export async function updateReactions(
   const result = await functionResponse.json();
 
   if (envVar('LOG_LEVEL') === 'debug-reactions') {
-     console.log(`Updated slack reactions, result:\n${JSON.stringify(result)}`);
+    console.log(`Updated slack reactions, result:\n${JSON.stringify(result)}`);
   }
 
   return result as BotLogEntry;

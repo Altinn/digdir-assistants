@@ -1,11 +1,11 @@
-import Groq from "groq-sdk";
-import { Client, Errors } from "typesense";
+import Groq from 'groq-sdk';
+import { Client, Errors } from 'typesense';
 
-const { config } = require("../lib/config");
-import * as typesenseSearch from "../lib/typesense-search";
-import { z } from "zod";
-import sha1 from "sha1";
-import { get_encoding } from "tiktoken";
+const { config } = require('../lib/config');
+import * as typesenseSearch from '../lib/typesense-search';
+import { z } from 'zod';
+import sha1 from 'sha1';
+import { get_encoding } from 'tiktoken';
 
 const cfg = config();
 
@@ -13,12 +13,10 @@ const groqClient = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-const encoding = get_encoding("cl100k_base");
+const encoding = get_encoding('cl100k_base');
 
 const ContentAnalysisSchema = z.object({
-  sourceLanguage: z
-    .string()
-    .describe("ISO 639-1 language code for the user query"),
+  sourceLanguage: z.string().describe('ISO 639-1 language code for the user query'),
 });
 
 type ContentAnalysis = z.infer<typeof ContentAnalysisSchema>;
@@ -31,12 +29,11 @@ const systemPrompt = `Which language is used the most in the following content? 
 const analyseContentPrompt = ``;
 
 async function main() {
-
-  const collectionName = process.env.TYPESENSE_DOCS_COLLECTION || "";
+  const collectionName = process.env.TYPESENSE_DOCS_COLLECTION || '';
 
   if (!collectionName) {
     console.log(
-      "Be sure to set the TYPESENSE_DOCS_COLLECTION environment variable to a valid collection name."
+      'Be sure to set the TYPESENSE_DOCS_COLLECTION environment variable to a valid collection name.',
     );
     process.exit(1);
   }
@@ -57,21 +54,14 @@ async function main() {
 
   while (jobPageSize < 0 || page <= jobPageSize) {
     console.log(
-      `Retrieving content_markdown for all urls from collection '${collectionName}', page ${page} (page_size=${pageSize})`
+      `Retrieving content_markdown for all urls from collection '${collectionName}', page ${page} (page_size=${pageSize})`,
     );
 
-    const searchResponse = await typesenseSearch.typesenseRetrieveAllUrls(
-      page,
-      pageSize,
-      "*"
-    );
+    const searchResponse = await typesenseSearch.typesenseRetrieveAllUrls(page, pageSize, '*');
     durations.queryDocs += Date.now() - totalStart;
 
-    const searchHits: SearchHit[] = searchResponse.results.flatMap(
-      (result: any) =>
-        result.grouped_hits.flatMap((hit: any) =>
-          hit.hits.map((hit: any) => hit.document)
-        )
+    const searchHits: SearchHit[] = searchResponse.results.flatMap((result: any) =>
+      result.grouped_hits.flatMap((hit: any) => hit.hits.map((hit: any) => hit.document)),
     );
 
     let updatedDocs: SearchHit[] = [];
@@ -90,7 +80,7 @@ async function main() {
       const url = searchHit.url_without_anchor;
       // console.log(`searchHit: ${JSON.stringify(searchHit)}`);
 
-      const contentMd = searchHit.content_markdown || "";
+      const contentMd = searchHit.content_markdown || '';
       const checksumMd = contentMd ? sha1(contentMd) : null;
       const checksumMatches = searchHit.markdown_checksum === checksumMd;
 
@@ -111,17 +101,14 @@ async function main() {
       durations.analyze += performance.now() - start;
       durations.total += Math.round(performance.now() - totalStart);
 
-      result.language =
-        result.language == "nb" || result.language == "nn"
-          ? "no"
-          : result.language;
+      result.language = result.language == 'nb' || result.language == 'nn' ? 'no' : result.language;
       result.markdown_checksum = checksumMd;
-      
+
       console.log(
-        `Results -> doc id: ${result.id}, language: ${result.language}, token count: ${result.token_count}`
+        `Results -> doc id: ${result.id}, language: ${result.language}, token count: ${result.token_count}`,
       );
       if (result.language == 'no') {
-        console.log(result.content_markdown.slice(0, 2000))
+        console.log(result.content_markdown.slice(0, 2000));
       }
 
       docIndex += 1;
@@ -130,16 +117,14 @@ async function main() {
     // store results on original document in typesense collection
 
     if (updatedDocs.length > 0) {
-      console.log(`Upserting ${updatedDocs.length} docs...`)
+      console.log(`Upserting ${updatedDocs.length} docs...`);
       const results = await client
         .collections(collectionName)
         .documents()
-        .import(updatedDocs, { action: "upsert", return_id: true });
+        .import(updatedDocs, { action: 'upsert', return_id: true });
       const failedResults = results.filter((result: any) => !result.success);
       if (failedResults.length > 0) {
-        console.log(
-          `Upsert to typesense failed for the following urls:\n${failedResults}`
-        );
+        console.log(`Upsert to typesense failed for the following urls:\n${failedResults}`);
       }
       updatedDocs = [];
     }
@@ -157,44 +142,36 @@ async function analyzeContent(searchHit: SearchHit): Promise<SearchHit> {
     try {
       // console.log(`searchHit:\n${JSON.stringify(searchHit)}`);
 
-      const content = searchHit.content_markdown.slice(0, 2000) || "";
+      const content = searchHit.content_markdown.slice(0, 2000) || '';
 
       //  1. call Groq API to categorize content language
       let queryResult = await groqClient.chat.completions.create({
-        model: "gemma-7b-it",
-        response_format: { type: "json_object" },
+        model: 'gemma-7b-it',
+        response_format: { type: 'json_object' },
         temperature: 0.1,
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: analyseContentPrompt + content },
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: analyseContentPrompt + content },
         ],
         // max_retries: 0,
       });
-      if (
-        queryResult &&
-        queryResult.choices &&
-        queryResult.choices.length > 0
-      ) {
-        searchHit.language = JSON.parse(
-          queryResult?.choices[0]?.message?.content
-        )?.language;
+      if (queryResult && queryResult.choices && queryResult.choices.length > 0) {
+        searchHit.language = JSON.parse(queryResult?.choices[0]?.message?.content)?.language;
       } else {
         console.error(
-          `Failed to extract content language for url: ${searchHit.url_without_anchor}`
+          `Failed to extract content language for url: ${searchHit.url_without_anchor}`,
         );
       }
 
       //  2. Use tiktoken wrapper to count tokens
-      searchHit.token_count = encoding.encode(
-        searchHit.content_markdown
-      ).length;
+      searchHit.token_count = encoding.encode(searchHit.content_markdown).length;
 
       return searchHit;
     } catch (e) {
       console.error(
         `Exception occurred while analysing content for url: ${
-          searchHit.url_without_anchor || ""
-        }\n Error: ${e}`
+          searchHit.url_without_anchor || ''
+        }\n Error: ${e}`,
       );
       if (retryCount < 10) {
         retryCount++;
