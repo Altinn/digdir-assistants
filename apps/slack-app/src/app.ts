@@ -430,7 +430,7 @@ app.message(async ({ message, say }) => {
 });
 
 async function handleReactionEvents(eventBody: any) {
-  if (envVar('LOG_LEVEL') === 'debug') {
+  if (envVar('LOG_LEVEL') === 'debug-reactions') {
     console.log('handle reactions: eventBody: ', JSON.stringify(eventBody));
   }
 
@@ -443,7 +443,7 @@ async function handleReactionEvents(eventBody: any) {
     return;
   }
 
-  if (envVar('LOG_LEVEL') == 'debug') {
+  if (envVar('LOG_LEVEL') == 'debug-reactions') {
     console.log('event:', JSON.stringify(eventBody));
   }
 
@@ -462,7 +462,7 @@ async function handleReactionEvents(eventBody: any) {
     const botId = botInfo.user_id;
 
     const eventUserId = eventBody?.body?.event?.item_user;
-    if (envVar('LOG_LEVEL') === 'debug') {
+    if (envVar('LOG_LEVEL') === 'debug-reactions') {
       if (botId === eventUserId) {
         console.log('Reaction on message from Assistant, will update reactions in DB');
       } else {
