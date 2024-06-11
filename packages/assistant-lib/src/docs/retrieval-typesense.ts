@@ -314,6 +314,6 @@ export async function getDocChecksums(
       filter_by: idList.map((id) => `id:=${id}`).join(" || "),
       include_fields: "id,doc_id,markdown_checksum",
     });
-  
+
   return documents.hits?.map((hit) => hit.document as RagDocQuery) || [];
 }

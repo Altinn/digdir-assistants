@@ -8,10 +8,12 @@
   "scripts": {
     "clean": "rimraf ./dist/",
     "build": "cd ../ && yarn build:assistant-lib && cd cli/ && tsc -p .",
-    "run:generateSearchPhrases": "ts-node ./functions/generateSearchPhrases.ts",
-    "run:contentAnalysis": "node ./dist/functions/contentAnalysis.js",
-    "run:listMissingEnDocs": "node ./dist/functions/listMissingEnDocs.js",
-    "run:listAllDocs": "node ./dist/functions/listAllDocs.js"
+    "codestyle:check": "prettier src/ --check",
+    "codestyle:fix": "prettier src/ --write",
+    "run:generateSearchPhrases": "ts-node src/functions/generateSearchPhrases.ts",
+    "run:contentAnalysis": "ts-node src/functions/contentAnalysis.js",
+    "run:listMissingEnDocs": "ts-node src/functions/listMissingEnDocs.js",
+    "run:listAllDocs": "ts-node src/functions/listAllDocs.js"
   },
   "dependencies": {
     "@digdir/assistant-lib": "1.0.0",
@@ -20,7 +22,7 @@
     "commander": "^12.1.0",
     "groq-sdk": "^0.3.3",
     "openai": "^4.29.1",
-    "prettier": "^3.2.5",
+    "prettier": "^3.3.2",
     "rimraf": "^5.0.7",
     "sha1": "^1.1.1",
     "tiktoken": "^1.0.15",
@@ -28,5 +30,11 @@
     "typescript": "^5.3.3",
     "typesense": "^1.8.2",
     "zod": "^3.23.8"
+  },
+  "prettier": {
+    "endOfLine": "auto",
+    "jsxSingleQuote": true,
+    "printWidth": 100,
+    "singleQuote": true
   }
 }
