@@ -10,11 +10,14 @@ import { URL } from 'url';
 const turndownService = new TurndownService();
 const tokenCountWarningThreshold = 100;
 
-export function createRouter(collectionName: string) {
+type FilterUrlsToCrawl = (urls: string[]) => string[];
+
+
+export function createRouter(collectionName: string, urlFilter: FilterUrlsToCrawl) {
 
     const router = createPlaywrightRouter();
 
-    const localDefaultHandler = defaultHandler.bind(null, collectionName);
+    const localDefaultHandler = defaultHandler.bind(null, collectionName, urlFilter);
 
     router.addDefaultHandler(localDefaultHandler);
 
@@ -31,7 +34,24 @@ export function createRouter(collectionName: string) {
     return router;
 }
 
-async function defaultHandler(collectionName: string, { page, request, log }) {
+async function getLinks(page) {
+    const links = await page.$$eval('/*/a', ($posts) => {
+        const scrapedData: { title: string; rank: string; href: string }[] = [];
+
+        // We're getting the title, rank and URL of each post on Hacker News.
+        $posts.forEach(($post) => {
+            scrapedData.push({
+                title: $post.querySelector('.title a').innerText,
+                rank: $post.querySelector('.rank').innerText,
+                href: $post.querySelector('.title a').href,
+            });
+        });
+
+        return scrapedData;
+    });
+}
+
+async function defaultHandler(collectionName: string, urlFilter: FilterUrlsToCrawl, { page, request, log, $$, crawler }) {
     
     log.info('Crawling ' + request.url);
 
@@ -40,6 +60,26 @@ async function defaultHandler(collectionName: string, { page, request, log }) {
 
         const elements = await locator.all();
         const innerHTMLs = await Promise.all(elements.map(element => element.innerHTML()));
+
+        // extract links            
+        const linksList = await Promise.all(elements.map(async (element) => {
+            const linkElements = await element.getByRole('link').all();
+
+            return await Promise.all(linkElements.map(link => link.getAttribute('href')));
+        }));
+        const links = linksList.flatMap(link => link);
+
+        
+        log.info(`All links: ${JSON.stringify(links)}`);
+
+        const filteredUrls = urlFilter(links)
+        log.info(`Filtered urls:\n${JSON.stringify(filteredUrls)}`);
+
+        if (filteredUrls.length > 0) {
+            log.info(`Adding ${filteredUrls.length} links:\n${JSON.stringify(filteredUrls)}`);
+            await crawler.addRequests(filteredUrls.map((url: string) => { return { url: url }; }) );
+        }
+        
         return innerHTMLs.join("\n");            
 
     }));
@@ -101,6 +141,15 @@ function getLocators(request, page): Locator[] {
         ],
         "https://info.altinn.no/en/help/": [
             page.locator('//html/body/div[@class="a-page"]/div[@class="container"]')
+        ],
+        "https://docs.altinn.studio/": [
+            page.locator('//*[@id="body-inner"]')
+        ],
+        "https://github.com/Altinn/altinn-studio/releases": [
+            page.locator('//*[@id="repo-content-turbo-frame"]/div/div[3]') // data-hpc
+        ],
+        "https://github.com/digdir/roadmap/issues/": [
+            page.locator('//div[@class="js-discussion"]')
         ]
     }
 
