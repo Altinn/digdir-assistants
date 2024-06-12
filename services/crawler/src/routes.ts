@@ -37,6 +37,8 @@ async function defaultHandler(
 ) {
   log.info('Crawling ' + request.url);
 
+  await page.waitForLoadState('networkidle');
+
   const locators = getLocators(request, page);
   const contents = await Promise.all(
     locators.map(async (locator) => {
@@ -53,9 +55,6 @@ async function defaultHandler(
       );
       const links = linksList.flatMap((link) => link).filter((link) => link !== null) as string[];
 
-      if (links.length > 0) {
-        log.info(`All links: ${JSON.stringify(links)}`);
-      }
       const filteredUrls = urlFilter(links);
 
       if (filteredUrls.length > 0) {
@@ -73,7 +72,7 @@ async function defaultHandler(
 
   const markdown = turndownService.turndown(contents.join('\n\n'));
   const hash = sha1(request.url);
-  log.info('Generating sha1 hash: ' + hash);
+  //   log.info('Generating sha1 hash: ' + hash);
 
   const markdown_checksum = sha1(markdown);
   const url_without_anchor = new URL(request.url).origin + new URL(request.url).pathname;
@@ -107,12 +106,12 @@ async function defaultHandler(
     currentDocs[0].id == hash &&
     currentDocs[0].markdown_checksum == markdown_checksum
   ) {
-    log.info(
-      `Tokens: ${updatedDoc.token_count}, content checksums match, skipping update for url '${url_without_anchor}'`,
-    );
+    // log.info(
+    //   `Tokens: ${updatedDoc.token_count}, content checksums match, skipping update for url '${url_without_anchor}'`,
+    // );
   } else {
     log.info(`Tokens: ${updatedDoc.token_count}, updating doc for url '${url_without_anchor}'`);
-    log.info(markdown);
+    // log.info(markdown);
     await updateDocs([updatedDoc], collectionName);
   }
 }
