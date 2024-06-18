@@ -2,6 +2,9 @@ import React, { useEffect } from "react";
 import { Button, Box } from "@mui/material";
 import { DocsUserQuery, Message, User } from "../models/Models";
 import { useUsers } from "../hooks/useUsers";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCopy } from '@fortawesome/free-solid-svg-icons';
+
 
 interface ChatMessageItemViewProps {
   message: Message;
@@ -58,8 +61,13 @@ const ChatMessageItemView: React.FC<ChatMessageItemViewProps> = ({
                 " " +
                 new Date(message.ts_date * 1000).toTimeString().slice(0, 5)}
             </span>
+            
           </Box>
-          <div>{(message.content as DocsUserQuery).original_user_query}</div>
+          <div>{(message.content as DocsUserQuery).original_user_query}
+            <Button onClick={() => (navigator.clipboard.writeText(message.content.original_user_query))}>
+              <FontAwesomeIcon icon={faCopy} size="1x" color="gray" />
+            </Button>
+          </div>
         </Box>
       </Button>
     );
