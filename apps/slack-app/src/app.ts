@@ -304,6 +304,7 @@ app.message(async ({ message, say }) => {
   try {
     ragResponse = await ragPipeline(
       stage1Result.questionTranslatedToEnglish,
+      userInput,
       stage1Result.userInputLanguageName,
       promptRagQueryRelax || '',
       promptRagGenerate || '',
@@ -317,8 +318,8 @@ app.message(async ({ message, say }) => {
 
     payload = {
       bot_name: 'docs',
-      original_user_query: ragResponse.original_user_query || '',
-      english_user_query: ragResponse.english_user_query || '',
+      original_user_query: userInput || '',
+      english_user_query: stage1Result.questionTranslatedToEnglish || '',
       user_query_language_code: stage1Result.userInputLanguageCode || '',
       user_query_language_name: ragResponse.user_query_language_name || '',
       english_answer: ragResponse.english_answer || '',
