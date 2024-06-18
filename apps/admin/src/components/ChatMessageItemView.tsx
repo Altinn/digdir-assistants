@@ -2,6 +2,9 @@ import React, { useEffect } from "react";
 import { Button, Box } from "@mui/material";
 import { DocsUserQuery, Message, User } from "../models/Models";
 import { useUsers } from "../hooks/useUsers";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCopy } from '@fortawesome/free-solid-svg-icons';
+
 
 interface ChatMessageItemViewProps {
   message: Message;
@@ -24,9 +27,9 @@ const ChatMessageItemView: React.FC<ChatMessageItemViewProps> = ({
 
   try {
     return (
-      <Button
+      <Box
         onClick={onClick}
-        fullWidth
+        width="100%"
         style={{
           padding: "8px",
           textAlign: "left",
@@ -37,6 +40,7 @@ const ChatMessageItemView: React.FC<ChatMessageItemViewProps> = ({
         <Box
           display="flex"
           flexDirection="column"
+
           width="100%"
           style={{ color: "black" }}
         >
@@ -46,22 +50,33 @@ const ChatMessageItemView: React.FC<ChatMessageItemViewProps> = ({
             width="100%"
             justifyContent="space-between"
           >
-            <span style={{ fontWeight: "bold" }}>
+            <span style={{ color: "gray"}}>
               {users?.filter((u) => u.user_id == message.user_id)[0]!?.name}
             </span>
 
-            <span style={{ color: "gray" }}>
-              {new Date(message.ts_date * 1000).toLocaleDateString("en-US", {
-                day: "2-digit",
-                month: "short",
-              }) +
-                " " +
-                new Date(message.ts_date * 1000).toTimeString().slice(0, 5)}
-            </span>
+            <Box>
+              <Button
+                onClick={() => (navigator.clipboard.writeText(message.content.original_user_query))}
+                className="copy-query"
+                size="small"
+                sx={{ color: "#EEEEEE", minWidth: 0, padding: 0, marginRight: 1 }}
+              >
+                <FontAwesomeIcon icon={faCopy} />
+              </Button>
+              <span style={{ color: "gray" }}>
+                {new Date(message.ts_date * 1000).toTimeString().slice(0, 5)
+                  + " " + new Date(message.ts_date * 1000).toLocaleDateString("en-US",
+                    { day: "2-digit", month: "short", })}
+              </span>
+
+            </Box>
+
           </Box>
-          <div>{(message.content as DocsUserQuery).original_user_query}</div>
+          <Box>
+            {(message.content as DocsUserQuery).original_user_query}
+          </Box>
         </Box>
-      </Button>
+      </Box>
     );
   } catch (error: any) {
     console.error(

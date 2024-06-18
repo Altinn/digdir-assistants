@@ -67,6 +67,19 @@ const ThreadViewPane: React.FC<Props> = ({
             {threadMessages?.map((message) => (
               <>
                 <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
+                  <Box
+                    sx={{
+                      padding: "20px",
+                      background: "lightyellow",
+                      border: "1px solid gray",
+                    }}
+                  >
+                    User query:{" "}
+                    {threadMessages?.length > 0 &&
+                      threadMessages[0].content.english_user_query}
+                  </Box>
+                </ListItem>
+                <ListItem key={message.ts_date + "." + message.ts_time + "_1"}>
                   <BotReplyContent
                     message={message}
                     selectedThreadView={currentTab}
@@ -74,7 +87,7 @@ const ThreadViewPane: React.FC<Props> = ({
                 </ListItem>
                 {message.content_type == "docs_bot_reply" && (
                   <ListItem
-                    key={message.ts_date + "." + message.ts_time + "_1"}
+                    key={message.ts_date + "." + message.ts_time + "_2"}
                   >
                     <BotReplyMetadata message={message} />
                   </ListItem>
@@ -87,6 +100,20 @@ const ThreadViewPane: React.FC<Props> = ({
           <List>
             {threadMessages?.map((message) => (
               <>
+                <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
+                  <Box
+                    sx={{
+                      padding: "20px",
+                      background: "lightyellow",
+                      border: "1px solid gray",
+                    }}
+                  >
+                    User query:{" "}
+                    {threadMessages?.length > 0 &&
+                      threadMessages[0].content.original_user_query}
+                  </Box>
+                </ListItem>
+
                 <ListItem key={message.ts_date + "." + message.ts_time + "_2"}>
                   <BotReplyContent
                     message={message}

@@ -48,7 +48,7 @@ const ChatMessageView: React.FC<Props> = ({
                   setCurrentMessageId({
                     ts_date: message.ts_date,
                     ts_time: message.ts_time,
-                  });
+                  });                  
                 }}
               />
             )}

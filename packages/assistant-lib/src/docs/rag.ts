@@ -56,7 +56,8 @@ const RagPipelineResultSchema = z.object({
 export type RagPipelineResult = z.infer<typeof RagPipelineResultSchema>;
 
 export async function ragPipeline(
-  user_input: string,
+  translated_user_input: string,
+  original_user_input: string,
   user_query_language_name: string,
   promptRagQueryRelax: string,
   promptRagGenerate: string,
@@ -83,7 +84,7 @@ export async function ragPipeline(
   var start = total_start;
 
   const extract_search_queries = await queryRelaxation(
-    user_input,
+    translated_user_input,
     promptRagQueryRelax,
   );
   durations.generate_searches = round(lapTimer(total_start));
@@ -184,7 +185,7 @@ export async function ragPipeline(
   }
 
   const rerankData = {
-    user_input: user_input,
+    user_input: translated_user_input,
     documents: searchHits.map((document) =>
       document.content_markdown.substring(0, envVar("MAX_SOURCE_LENGTH")),
     ),
@@ -287,7 +288,7 @@ export async function ragPipeline(
   const partialPrompt = promptRagGenerate;
   const fullPrompt = partialPrompt
     .replace("{context}", contextYaml)
-    .replace("{question}", user_input);
+    .replace("{question}", translated_user_input);
 
   if (envVar("LOG_LEVEL") == "debug") {
     console.log(`rag prompt:\n${partialPrompt}`);
@@ -365,8 +366,8 @@ export async function ragPipeline(
   durations["total"] = round(lapTimer(total_start));
 
   const response: RagPipelineResult = {
-    original_user_query: user_input,
-    english_user_query: user_input,
+    original_user_query: original_user_input,
+    english_user_query: translated_user_input,
     user_query_language_name,
     english_answer: english_answer || "",
     translated_answer: translated_answer || "",
