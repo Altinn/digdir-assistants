@@ -34,13 +34,13 @@ const ChatMessageItemView: React.FC<ChatMessageItemViewProps> = ({
           padding: "8px",
           textAlign: "left",
           justifyContent: "start",
-          textTransform: "none",          
+          textTransform: "none",
         }}
       >
         <Box
           display="flex"
           flexDirection="column"
-          
+
           width="100%"
           style={{ color: "black" }}
         >
@@ -50,22 +50,31 @@ const ChatMessageItemView: React.FC<ChatMessageItemViewProps> = ({
             width="100%"
             justifyContent="space-between"
           >
-            <span style={{ fontWeight: "bold" }}>
+            <span style={{ color: "gray"}}>
               {users?.filter((u) => u.user_id == message.user_id)[0]!?.name}
             </span>
 
-            <span style={{ color: "gray" }}>
-              {new Date(message.ts_date * 1000).toTimeString().slice(0, 5) 
-                + " " + new Date(message.ts_date * 1000).toLocaleDateString("en-US", 
-                  { day: "2-digit", month: "short", })}
-            </span> 
-            
+            <Box>
+              <Button
+                onClick={() => (navigator.clipboard.writeText(message.content.original_user_query))}
+                className="copy-query"
+                size="small"
+                sx={{ color: "#EEEEEE", minWidth: 0, padding: 0, marginRight: 1 }}
+              >
+                <FontAwesomeIcon icon={faCopy} />
+              </Button>
+              <span style={{ color: "gray" }}>
+                {new Date(message.ts_date * 1000).toTimeString().slice(0, 5)
+                  + " " + new Date(message.ts_date * 1000).toLocaleDateString("en-US",
+                    { day: "2-digit", month: "short", })}
+              </span>
+
+            </Box>
+
           </Box>
-          <div>{(message.content as DocsUserQuery).original_user_query}
-            <Button onClick={() => (navigator.clipboard.writeText(message.content.original_user_query))}>
-              <FontAwesomeIcon icon={faCopy} size="1x" color="gray" />
-            </Button>
-          </div>
+          <Box>
+            {(message.content as DocsUserQuery).original_user_query}
+          </Box>
         </Box>
       </Box>
     );

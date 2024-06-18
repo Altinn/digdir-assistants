@@ -7,7 +7,35 @@
   text-align: left;
   box-sizing: border-box;
   max-height: 100vh;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --sidebar-width: 240px;
 }
+
+body {
+  margin: 0;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  display: flex;
+  flex-direction: column;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #f4f6f8;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 100%;
+  }
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
 
 .appContainer {
   /* display: flex; */
@@ -50,4 +78,8 @@
   .chatMessageViewContainer {
     height: calc(100vh - 56px); /* Adjust height for smaller screens */
   }
+}
+
+.copy-query:hover {
+  color: blue;
 }
