@@ -66,7 +66,7 @@ const ThreadViewPane: React.FC<Props> = ({
           <List>
             {threadMessages?.map((message) => (
               <>
-                <ListItem>
+                <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
                   <Box
                     sx={{
                       padding: "20px",
@@ -79,7 +79,7 @@ const ThreadViewPane: React.FC<Props> = ({
                       threadMessages[0].content.english_user_query}
                   </Box>
                 </ListItem>
-                <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
+                <ListItem key={message.ts_date + "." + message.ts_time + "_1"}>
                   <BotReplyContent
                     message={message}
                     selectedThreadView={currentTab}
@@ -87,7 +87,7 @@ const ThreadViewPane: React.FC<Props> = ({
                 </ListItem>
                 {message.content_type == "docs_bot_reply" && (
                   <ListItem
-                    key={message.ts_date + "." + message.ts_time + "_1"}
+                    key={message.ts_date + "." + message.ts_time + "_2"}
                   >
                     <BotReplyMetadata message={message} />
                   </ListItem>
@@ -100,7 +100,7 @@ const ThreadViewPane: React.FC<Props> = ({
           <List>
             {threadMessages?.map((message) => (
               <>
-                <ListItem>
+                <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
                   <Box
                     sx={{
                       padding: "20px",

@@ -27,19 +27,20 @@ const ChatMessageItemView: React.FC<ChatMessageItemViewProps> = ({
 
   try {
     return (
-      <Button
+      <Box
         onClick={onClick}
-        fullWidth
+        width="100%"
         style={{
           padding: "8px",
           textAlign: "left",
           justifyContent: "start",
-          textTransform: "none",
+          textTransform: "none",          
         }}
       >
         <Box
           display="flex"
           flexDirection="column"
+          
           width="100%"
           style={{ color: "black" }}
         >
@@ -54,13 +55,10 @@ const ChatMessageItemView: React.FC<ChatMessageItemViewProps> = ({
             </span>
 
             <span style={{ color: "gray" }}>
-              {new Date(message.ts_date * 1000).toLocaleDateString("en-US", {
-                day: "2-digit",
-                month: "short",
-              }) +
-                " " +
-                new Date(message.ts_date * 1000).toTimeString().slice(0, 5)}
-            </span>
+              {new Date(message.ts_date * 1000).toTimeString().slice(0, 5) 
+                + " " + new Date(message.ts_date * 1000).toLocaleDateString("en-US", 
+                  { day: "2-digit", month: "short", })}
+            </span> 
             
           </Box>
           <div>{(message.content as DocsUserQuery).original_user_query}
@@ -69,7 +67,7 @@ const ChatMessageItemView: React.FC<ChatMessageItemViewProps> = ({
             </Button>
           </div>
         </Box>
-      </Button>
+      </Box>
     );
   } catch (error: any) {
     console.error(
