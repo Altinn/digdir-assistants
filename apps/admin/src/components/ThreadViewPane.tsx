@@ -66,6 +66,19 @@ const ThreadViewPane: React.FC<Props> = ({
           <List>
             {threadMessages?.map((message) => (
               <>
+                <ListItem>
+                  <Box
+                    sx={{
+                      padding: "20px",
+                      background: "lightyellow",
+                      border: "1px solid gray",
+                    }}
+                  >
+                    User query:{" "}
+                    {threadMessages?.length > 0 &&
+                      threadMessages[0].content.english_user_query}
+                  </Box>
+                </ListItem>
                 <ListItem key={message.ts_date + "." + message.ts_time + "_0"}>
                   <BotReplyContent
                     message={message}
@@ -87,6 +100,20 @@ const ThreadViewPane: React.FC<Props> = ({
           <List>
             {threadMessages?.map((message) => (
               <>
+                <ListItem>
+                  <Box
+                    sx={{
+                      padding: "20px",
+                      background: "lightyellow",
+                      border: "1px solid gray",
+                    }}
+                  >
+                    User query:{" "}
+                    {threadMessages?.length > 0 &&
+                      threadMessages[0].content.original_user_query}
+                  </Box>
+                </ListItem>
+
                 <ListItem key={message.ts_date + "." + message.ts_time + "_2"}>
                   <BotReplyContent
                     message={message}
