@@ -21,8 +21,9 @@ import { stripCodeBlockLang, isNullOrEmpty } from '@digdir/assistant-lib';
 import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
 import OpenAI from 'openai';
 import { isNumber } from 'remeda';
-import { RagPipelineResult } from '@digdir/assistant-lib';
+import { RagPipelineParams, RagPipelineResult } from '@digdir/assistant-lib';
 import { markdownToBlocks } from '@bdb-dd/mack';
+
 
 const expressReceiver = new ExpressReceiver({
   signingSecret: envVar('SLACK_BOT_SIGNING_SECRET'),
@@ -107,26 +108,35 @@ app.message(async ({ message, say }) => {
     true,
   );
 
-  const queryRelaxCustom = await lookupConfig(slackApp, srcEvtContext, 'prompt.rag.queryRelax', '');
-
-  const promptRagQueryRelax =
-    `You have access to a search API that returns relevant documentation.
-
-    Your task is to generate an array of up to 7 search queries that are relevant to this question. 
-    Use a variation of related keywords and synonyms for the queries, trying to be as general as possible.
-    Include as many queries as you can think of, including and excluding terms.
-    For example, include queries like ['keyword_1 keyword_2', 'keyword_1', 'keyword_2'].
-    Be creative. The more queries you include, the more likely you are to find relevant results.
-    
-  ` + queryRelaxCustom;
-
-  const promptRagGenerateCustom = await lookupConfig(
+  const promptRagQueryRelax = await lookupConfig(slackApp, srcEvtContext, 'rag.queryRelax.prompt', '');
+  if (promptRagQueryRelax == '') {
+    console.error('promptRagQueryRelax is empty!');
+    throw new Error('promptRagQueryRelax is empty!');
+  }
+  
+  const promptRagGenerate = await lookupConfig(
     slackApp,
     srcEvtContext,
-    'prompt.rag.generate',
-    '',
+    'rag.generate.prompt',
+    '');
+
+  if (promptRagGenerate == '') {
+    console.error('promptRagGenerate is empty!');
+    throw new Error('promptRagGenerate is empty!');
+  }
+
+  const maxResponseTokenCount = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'rag.generate.maxResponseTokenCount',
+    undefined,
   );
-  const promptRagGenerate = qaTemplate(promptRagGenerateCustom || '');
+  const streamCallbackFreqSec = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'rag.generate.streamCallbackFreqSec',
+    2.0,
+  );
 
   if (envVar('LOG_LEVEL') == 'debug') {
     console.log(`slackApp:\n${JSON.stringify(slackApp)}`);
@@ -302,17 +312,20 @@ app.message(async ({ message, say }) => {
   let ragResponse: RagPipelineResult | null = null;
 
   try {
-    ragResponse = await ragPipeline(
-      stage1Result.questionTranslatedToEnglish,
-      userInput,
-      stage1Result.userInputLanguageName,
-      promptRagQueryRelax || '',
-      promptRagGenerate || '',
-      docsCollectionName,
-      phrasesCollectionName,
-      originalMsgCallback,
-      translatedMsgCallback,
-    );
+    const ragParams: RagPipelineParams = {
+      translated_user_query: stage1Result.questionTranslatedToEnglish,
+      original_user_query: userInput,
+      user_query_language_name: stage1Result.userInputLanguageName,
+      promptRagQueryRelax: promptRagQueryRelax || '',
+      promptRagGenerate: promptRagGenerate || '',
+      docsCollectionName: docsCollectionName,
+      phrasesCollectionName: phrasesCollectionName,
+      stream_callback_msg1: originalMsgCallback,
+      stream_callback_msg2: translatedMsgCallback,
+      maxResponseTokenCount,
+      streamCallbackFreqSec,
+    }
+    ragResponse = await ragPipeline(ragParams);
 
     ragResponse.durations.analyze = stage1Duration;
 

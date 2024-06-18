@@ -92,6 +92,7 @@ export async function chat_stream(
   messages: Array<ChatCompletionMessageParam>,
   callback: (arg0: string) => void,
   callback_interval_seconds = 2.0,
+  max_tokens: number | null = null,
 ): Promise<string> {
   let content_so_far = "";
   let latest_chunk = "";
@@ -140,6 +141,7 @@ export async function chat_stream(
       model: envVar("OPENAI_API_MODEL_NAME"),
       temperature: 0.1,
       messages: messages,
+      max_tokens: max_tokens,
       stream: true,
     });
 
