@@ -113,7 +113,7 @@ export async function retrieveAllUrls(
         collection: docsCollectionName,
         q: "*",
         query_by: "url_without_anchor",
-        include_fields: "url_without_anchor,content_markdown,id",
+        include_fields: "url_without_anchor,id",
         group_by: "url_without_anchor",
         group_limit: 1,
         sort_by: "item_priority:asc",
@@ -124,7 +124,13 @@ export async function retrieveAllUrls(
   };
 
   const response = await client.multiSearch.perform(multiSearchArgs, {});
-  return response;
+  const searchPhraseHits = flatMap(response.results, (result: any) =>
+    flatMap(result.grouped_hits, (group: any) =>
+      flatMap(group.hits, (hit: any) => hit.document.url_without_anchor),
+    ),
+  );
+
+  return searchPhraseHits;
 }
 
 export async function retrieveAllByUrl(
@@ -276,13 +282,40 @@ const docsCollectionSchema = (
 };
 
 export async function createDocsCollectionIfNotExists(collectionName: string) {
+  const localTypesenseConfig = { ...typesenseCfg };
+  localTypesenseConfig.apiKey = envVar("TYPESENSE_API_KEY_ADMIN");
   const client = new Typesense.Client(typesenseCfg);
+
+  // if (envVar("LOG_LEVEL") === "debug") {
+  //   console.log("Typesense config:\n", JSON.stringify(typesenseCfg, null, 2));
+  // }
+
+  const aliases = await client.aliases().retrieve();
+  const alias = aliases.aliases.find(
+    (alias: any) => alias?.name === collectionName,
+  );
+  if (alias) {
+    if (envVar("LOG_LEVEL") === "debug") {
+      console.log(
+        `Alias ${collectionName} exists, points to ${alias.collection_name}.`,
+      );
+    }
+    collectionName = alias.collection_name;
+  } else {
+    if (envVar("LOG_LEVEL") === "debug") {
+      console.log(
+        `Alias ${collectionName} not found, will look for a collection with this name.`,
+      );
+    }
+  }
+
   const collections = await client.collections().retrieve();
   const collectionExists = collections.find(
     (collection: any) => collection?.name === collectionName,
   );
 
   if (!collectionExists) {
+    console.log(`Collection ${collectionName} not found, will create.`);
     await client.collections().create(docsCollectionSchema(collectionName));
     console.log(`Collection ${collectionName} created successfully.`);
   } else {
@@ -291,13 +324,20 @@ export async function createDocsCollectionIfNotExists(collectionName: string) {
 }
 
 export async function updateDocs(docs: RagDoc[], collectionName: string) {
+  const typesenseCfg = typesenseConfig();
+  typesenseCfg.apiKey = envVar("TYPESENSE_API_KEY_ADMIN");
+
+  console.log("Typesense config:\n", JSON.stringify(typesenseCfg, null, 2));
+
   const client = new Typesense.Client(typesenseCfg);
 
   // Index the document in Typesense
-  await client
+  const result = await client
     .collections<RagDocQuery>(collectionName)
     .documents()
     .import(docs, { action: "upsert" });
+
+  console.log("Typesense import result:\n", JSON.stringify(result, null, 2));
 }
 
 export async function getDocChecksums(
@@ -312,8 +352,8 @@ export async function getDocChecksums(
     .search({
       q: "*",
       filter_by: idList.map((id) => `id:=${id}`).join(" || "),
-      include_fields: "id,doc_id,markdown_checksum",
+      include_fields: "id,doc_id,markdown_checksum,url_without_anchor",
     });
 
-  return documents.hits?.map((hit) => hit.document as RagDocQuery) || [];
+  return documents.hits?.map((hit: any) => hit.document as RagDocQuery) || [];
 }

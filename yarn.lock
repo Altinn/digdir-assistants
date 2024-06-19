@@ -559,7 +559,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@crawlee/core@npm:3.10.5":
+"@crawlee/core@npm:3.10.5, @crawlee/core@npm:^3.10.5":
   version: 3.10.5
   resolution: "@crawlee/core@npm:3.10.5"
   dependencies:
@@ -3211,6 +3211,7 @@ __metadata:
   resolution: "assistant-crawler@workspace:services/crawler"
   dependencies:
     "@crawlee/browser": "npm:*"
+    "@crawlee/core": "npm:^3.10.5"
     "@crawlee/playwright": "npm:*"
     "@crawlee/utils": "npm:*"
     "@digdir/assistant-lib": "npm:1.0.0"
@@ -3221,6 +3222,7 @@ __metadata:
     crawlee: "npm:^3.10.5"
     playwright: "npm:1.44.1"
     prettier: "npm:^3.3.2"
+    rimraf: "npm:^5.0.7"
     sha1: "npm:^1.1.1"
     tiktoken: "npm:^1.0.15"
     tsx: "npm:^4.14.0"

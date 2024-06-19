@@ -16,7 +16,7 @@ export function config(): ConfigData {
           protocol: 'https',
         },
       ],
-      apiKey: process.env.TYPESENSE_API_KEY || '',
+      apiKey: process.env.TYPESENSE_API_KEY_ADMIN || '',
       connection_timeout_seconds: 2,
     },
     TYPESENSE_DOCS_COLLECTION: process.env.TYPESENSE_DOCS_COLLECTION || '',

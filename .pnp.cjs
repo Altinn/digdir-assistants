@@ -4079,6 +4079,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["assistant-crawler", "workspace:services/crawler"],\
           ["@crawlee/browser", "virtual:93de7ac422244803c188066537ae624c326819cee75009ae09b380c101ff0fbad4ad4d7ffab22b030756d2b37e6f5879c0f5ccd96e4bfdf338e7937638d2e891#npm:3.10.5"],\
+          ["@crawlee/core", "npm:3.10.5"],\
           ["@crawlee/playwright", "virtual:93de7ac422244803c188066537ae624c326819cee75009ae09b380c101ff0fbad4ad4d7ffab22b030756d2b37e6f5879c0f5ccd96e4bfdf338e7937638d2e891#npm:3.10.5"],\
           ["@crawlee/utils", "npm:3.10.5"],\
           ["@digdir/assistant-lib", "workspace:packages/assistant-lib"],\
@@ -4089,6 +4090,7 @@ const RAW_RUNTIME_STATE =
           ["crawlee", "virtual:93de7ac422244803c188066537ae624c326819cee75009ae09b380c101ff0fbad4ad4d7ffab22b030756d2b37e6f5879c0f5ccd96e4bfdf338e7937638d2e891#npm:3.10.5"],\
           ["playwright", "npm:1.44.1"],\
           ["prettier", "npm:3.3.2"],\
+          ["rimraf", "npm:5.0.7"],\
           ["sha1", "npm:1.1.1"],\
           ["tiktoken", "npm:1.0.15"],\
           ["tsx", "npm:4.15.2"],\
