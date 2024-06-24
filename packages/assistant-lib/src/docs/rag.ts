@@ -41,12 +41,15 @@ const RagPipelineParamsSchema = z.object({
   user_query_language_name: z.string(),
   promptRagQueryRelax: z.string(),
   promptRagGenerate: z.string(),
+  maxSourceDocCount: z.number(),
+  maxContextLength: z.number(),
+  maxSourceLength: z.number(),
   docsCollectionName: z.string(),
   phrasesCollectionName: z.string(),
   stream_callback_msg1: z.any().nullable(),
   stream_callback_msg2: z.any().nullable(),
-  maxResponseTokenCount: z.number().optional(),
   streamCallbackFreqSec: z.number().optional(),
+  maxResponseTokenCount: z.number().optional(),
 });
 
 export type RagPipelineParams = z.infer<typeof RagPipelineParamsSchema>;
@@ -85,8 +88,8 @@ export async function ragPipeline(
     translation: 0,
   };
 
-  if (envVar("MAX_CONTEXT_DOC_COUNT") == 0) {
-    throw new Error("MAX_CONTEXT_DOC_COUNT is set to 0");
+  if (params.maxSourceDocCount == 0) {
+    throw new Error("maxSourceDocCount is set to 0");
   }
   const total_start = performance.now();
   var start = total_start;
@@ -195,7 +198,7 @@ export async function ragPipeline(
   const rerankData = {
     user_input: params.translated_user_query,
     documents: searchHits.map((document: any) =>
-      document.content_markdown.substring(0, envVar("MAX_SOURCE_LENGTH")),
+      document.content_markdown.substring(0, params.maxSourceLength),
     ),
   };
 
@@ -235,11 +238,11 @@ export async function ragPipeline(
 
     console.log("Source desc: " + sourceDesc);
 
-    let docTrimmed = docMd.substring(0, envVar("MAX_SOURCE_LENGTH"));
-    if (docsLength + docTrimmed.length > envVar("MAX_CONTEXT_LENGTH")) {
+    let docTrimmed = docMd.substring(0, params.maxSourceLength);
+    if (docsLength + docTrimmed.length > params.maxContextLength) {
       docTrimmed = docTrimmed.substring(
         0,
-        envVar("MAX_CONTEXT_LENGTH") - docsLength - 20,
+        params.maxContextLength - docsLength - 20,
       );
     }
 
@@ -267,8 +270,8 @@ export async function ragPipeline(
     // TODO: add actual doc length, loaded doc length to dedicated lists and return
 
     if (
-      docsLength >= envVar("MAX_CONTEXT_LENGTH") ||
-      loadedDocs.length >= envVar("MAX_CONTEXT_DOC_COUNT")
+      docsLength >= params.maxContextLength ||
+      loadedDocs.length >= params.maxSourceDocCount
     ) {
       console.log(`Limits reached, loaded ${loadedDocs.length} docs.`);
       break;

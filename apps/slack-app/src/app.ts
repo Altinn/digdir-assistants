@@ -24,7 +24,6 @@ import { isNumber } from 'remeda';
 import { RagPipelineParams, RagPipelineResult } from '@digdir/assistant-lib';
 import { markdownToBlocks } from '@bdb-dd/mack';
 
-
 const expressReceiver = new ExpressReceiver({
   signingSecret: envVar('SLACK_BOT_SIGNING_SECRET'),
 });
@@ -108,29 +107,49 @@ app.message(async ({ message, say }) => {
     true,
   );
 
-  const promptRagQueryRelax = await lookupConfig(slackApp, srcEvtContext, 'rag.queryRelax.prompt', '');
+  const promptRagQueryRelax = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'rag.queryRelax.prompt',
+    '',
+  );
   if (promptRagQueryRelax == '') {
     console.error('promptRagQueryRelax is empty!');
     throw new Error('promptRagQueryRelax is empty!');
   }
-  
-  const promptRagGenerate = await lookupConfig(
-    slackApp,
-    srcEvtContext,
-    'rag.generate.prompt',
-    '');
+
+  const promptRagGenerate = await lookupConfig(slackApp, srcEvtContext, 'rag.generate.prompt', '');
 
   if (promptRagGenerate == '') {
     console.error('promptRagGenerate is empty!');
     throw new Error('promptRagGenerate is empty!');
   }
 
+  const maxSourceLength = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'rag.generate.maxSourceLength',
+    40000,
+  );
+  const maxSourceDocCount = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'rag.generate.maxSourceDocCount',
+    10,
+  );
+  const maxContextLength = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'rag.generate.maxContextLength',
+    90000,
+  );
   const maxResponseTokenCount = await lookupConfig(
     slackApp,
     srcEvtContext,
     'rag.generate.maxResponseTokenCount',
     undefined,
   );
+
   const streamCallbackFreqSec = await lookupConfig(
     slackApp,
     srcEvtContext,
@@ -322,9 +341,12 @@ app.message(async ({ message, say }) => {
       phrasesCollectionName: phrasesCollectionName,
       stream_callback_msg1: originalMsgCallback,
       stream_callback_msg2: translatedMsgCallback,
-      maxResponseTokenCount,
       streamCallbackFreqSec,
-    }
+      maxResponseTokenCount,
+      maxSourceDocCount,
+      maxSourceLength,
+      maxContextLength,
+    };
     ragResponse = await ragPipeline(ragParams);
 
     ragResponse.durations.analyze = stage1Duration;
