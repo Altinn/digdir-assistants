@@ -28,27 +28,25 @@ const RagSourceView: React.FC<Params> = ({ message }) => {
     },
   };
 
+  const obj = message?.content?.prompts || {};
+
   return (
     <Box sx={{ flexWrap: "wrap" }}>
       <React.Fragment>
         <ErrorBoundary>
           {" "}
           <ul>
-            {Object.entries(message?.content?.prompts || {}).map(
-              ([key, value], index) => (
-                <li key={key}>
-                  <Box flexDirection="column">
-                    <span>
-                      Prompt #{index + 1}: {key}
-                    </span>
-                    <ReactMarkdown components={components}>
-                      {value}
-                    </ReactMarkdown>
-                  </Box>
-                  <hr />
-                </li>
-              ),
-            )}
+            {["queryRelax", "generate"].map((key) => (
+              <li key={key}>
+                <Box flexDirection="column">
+                  <span>Prompt: {key}</span>
+                  <ReactMarkdown components={components}>
+                    {obj[key]}
+                  </ReactMarkdown>
+                </Box>
+                <hr />
+              </li>
+            ))}
           </ul>
         </ErrorBoundary>
       </React.Fragment>
