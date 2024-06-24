@@ -35,6 +35,25 @@ const RagPromptSchema = z.object({
 });
 export type RagPrompt = z.infer<typeof RagPromptSchema>;
 
+const RagPipelineParamsSchema = z.object({
+  translated_user_query: z.string(),
+  original_user_query: z.string(),
+  user_query_language_name: z.string(),
+  promptRagQueryRelax: z.string(),
+  promptRagGenerate: z.string(),
+  maxSourceDocCount: z.number(),
+  maxContextLength: z.number(),
+  maxSourceLength: z.number(),
+  docsCollectionName: z.string(),
+  phrasesCollectionName: z.string(),
+  stream_callback_msg1: z.any().nullable(),
+  stream_callback_msg2: z.any().nullable(),
+  streamCallbackFreqSec: z.number().optional(),
+  maxResponseTokenCount: z.number().optional(),
+});
+
+export type RagPipelineParams = z.infer<typeof RagPipelineParamsSchema>;
+
 const RagPipelineResultSchema = z.object({
   original_user_query: z.string(),
   english_user_query: z.string(),
@@ -56,15 +75,7 @@ const RagPipelineResultSchema = z.object({
 export type RagPipelineResult = z.infer<typeof RagPipelineResultSchema>;
 
 export async function ragPipeline(
-  translated_user_input: string,
-  original_user_input: string,
-  user_query_language_name: string,
-  promptRagQueryRelax: string,
-  promptRagGenerate: string,
-  docsCollectionName: string,
-  phrasesCollectionName: string,
-  stream_callback_msg1: any = null,
-  stream_callback_msg2: any = null,
+  params: RagPipelineParams,
 ): Promise<RagPipelineResult> {
   const durations: any = {
     total: 0,
@@ -77,15 +88,15 @@ export async function ragPipeline(
     translation: 0,
   };
 
-  if (envVar("MAX_CONTEXT_DOC_COUNT") == 0) {
-    throw new Error("MAX_CONTEXT_DOC_COUNT is set to 0");
+  if (params.maxSourceDocCount == 0) {
+    throw new Error("maxSourceDocCount is set to 0");
   }
   const total_start = performance.now();
   var start = total_start;
 
   const extract_search_queries = await queryRelaxation(
-    translated_user_input,
-    promptRagQueryRelax,
+    params.translated_user_query,
+    params.promptRagQueryRelax,
   );
   durations.generate_searches = round(lapTimer(total_start));
 
@@ -97,7 +108,7 @@ export async function ragPipeline(
   }
   start = performance.now();
   const search_phrase_hits = await lookupSearchPhrasesSimilar(
-    phrasesCollectionName,
+    params.phrasesCollectionName,
     extract_search_queries,
     "original",
   );
@@ -111,7 +122,7 @@ export async function ragPipeline(
   }
   start = performance.now();
   const search_response = await retrieveAllByUrl(
-    docsCollectionName,
+    params.docsCollectionName,
     search_phrase_hits,
   );
   durations["execute_searches"] = round(lapTimer(start));
@@ -185,9 +196,9 @@ export async function ragPipeline(
   }
 
   const rerankData = {
-    user_input: translated_user_input,
-    documents: searchHits.map((document) =>
-      document.content_markdown.substring(0, envVar("MAX_SOURCE_LENGTH")),
+    user_input: params.translated_user_query,
+    documents: searchHits.map((document: any) =>
+      document.content_markdown.substring(0, params.maxSourceLength),
     ),
   };
 
@@ -227,11 +238,11 @@ export async function ragPipeline(
 
     console.log("Source desc: " + sourceDesc);
 
-    let docTrimmed = docMd.substring(0, envVar("MAX_SOURCE_LENGTH"));
-    if (docsLength + docTrimmed.length > envVar("MAX_CONTEXT_LENGTH")) {
+    let docTrimmed = docMd.substring(0, params.maxSourceLength);
+    if (docsLength + docTrimmed.length > params.maxContextLength) {
       docTrimmed = docTrimmed.substring(
         0,
-        envVar("MAX_CONTEXT_LENGTH") - docsLength - 20,
+        params.maxContextLength - docsLength - 20,
       );
     }
 
@@ -259,8 +270,8 @@ export async function ragPipeline(
     // TODO: add actual doc length, loaded doc length to dedicated lists and return
 
     if (
-      docsLength >= envVar("MAX_CONTEXT_LENGTH") ||
-      loadedDocs.length >= envVar("MAX_CONTEXT_DOC_COUNT")
+      docsLength >= params.maxContextLength ||
+      loadedDocs.length >= params.maxSourceDocCount
     ) {
       console.log(`Limits reached, loaded ${loadedDocs.length} docs.`);
       break;
@@ -285,16 +296,16 @@ export async function ragPipeline(
   let relevant_sources: string[] = [];
 
   const contextYaml = yaml.dump(loadedDocs);
-  const partialPrompt = promptRagGenerate;
+  const partialPrompt = params.promptRagGenerate;
   const fullPrompt = partialPrompt
     .replace("{context}", contextYaml)
-    .replace("{question}", translated_user_input);
+    .replace("{question}", params.translated_user_query);
 
   if (envVar("LOG_LEVEL") == "debug") {
     console.log(`rag prompt:\n${partialPrompt}`);
   }
 
-  if (typeof stream_callback_msg1 !== "function") {
+  if (typeof params.stream_callback_msg1 !== "function") {
     if (envVar("USE_AZURE_OPENAI_API") === "true") {
       // const chatResponse = await azureClient.chat.completions.create({
       //     model: envVar('AZURE_OPENAI_DEPLOYMENT'),
@@ -338,7 +349,9 @@ export async function ragPipeline(
           content: fullPrompt,
         },
       ],
-      stream_callback_msg1,
+      params.stream_callback_msg1,
+      params.streamCallbackFreqSec || 2.0,
+      params.maxResponseTokenCount,
     );
     translated_answer = english_answer;
     rag_success = true;
@@ -353,12 +366,12 @@ export async function ragPipeline(
   if (
     translation_enabled &&
     rag_success &&
-    user_query_language_name !== "English"
+    params.user_query_language_name !== "English"
   ) {
     translated_answer = await translate(
       english_answer,
-      user_query_language_name,
-      stream_callback_msg2,
+      params.user_query_language_name,
+      params.stream_callback_msg2,
     );
   }
 
@@ -366,9 +379,9 @@ export async function ragPipeline(
   durations["total"] = round(lapTimer(total_start));
 
   const response: RagPipelineResult = {
-    original_user_query: original_user_input,
-    english_user_query: translated_user_input,
-    user_query_language_name,
+    original_user_query: params.original_user_query,
+    english_user_query: params.translated_user_query,
+    user_query_language_name: params.user_query_language_name,
     english_answer: english_answer || "",
     translated_answer: translated_answer || "",
     rag_success,
@@ -379,8 +392,8 @@ export async function ragPipeline(
     not_loaded_urls: notLoadedUrls,
     durations,
     prompts: {
-      queryRelax: promptRagQueryRelax || "",
-      generate: promptRagGenerate || "",
+      queryRelax: params.promptRagQueryRelax || "",
+      generate: params.promptRagGenerate || "",
     },
   };
 
