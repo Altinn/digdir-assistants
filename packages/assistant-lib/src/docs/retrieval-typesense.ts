@@ -327,7 +327,7 @@ export async function updateDocs(docs: RagDoc[], collectionName: string) {
   const typesenseCfg = typesenseConfig();
   typesenseCfg.apiKey = envVar("TYPESENSE_API_KEY_ADMIN");
 
-  console.log("Typesense config:\n", JSON.stringify(typesenseCfg, null, 2));
+  // console.log("Typesense config:\n", JSON.stringify(typesenseCfg, null, 2));
 
   const client = new Typesense.Client(typesenseCfg);
 
@@ -337,7 +337,12 @@ export async function updateDocs(docs: RagDoc[], collectionName: string) {
     .documents()
     .import(docs, { action: "upsert" });
 
-  console.log("Typesense import result:\n", JSON.stringify(result, null, 2));
+  const failedResults = result.filter((result: any) => !result.success);
+  if (failedResults.length > 0) {
+    console.log(
+      `Upsert to typesense failed for the following urls:\n${failedResults}`,
+    );
+  }
 }
 
 export async function getDocChecksums(

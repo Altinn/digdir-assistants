@@ -559,7 +559,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@crawlee/core@npm:3.10.5, @crawlee/core@npm:^3.10.5":
+"@crawlee/core@npm:*, @crawlee/core@npm:3.10.5":
   version: 3.10.5
   resolution: "@crawlee/core@npm:3.10.5"
   dependencies:
@@ -3211,7 +3211,7 @@ __metadata:
   resolution: "assistant-crawler@workspace:services/crawler"
   dependencies:
     "@crawlee/browser": "npm:*"
-    "@crawlee/core": "npm:^3.10.5"
+    "@crawlee/core": "npm:*"
     "@crawlee/playwright": "npm:*"
     "@crawlee/utils": "npm:*"
     "@digdir/assistant-lib": "npm:1.0.0"
