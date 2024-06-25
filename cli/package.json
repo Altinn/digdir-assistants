@@ -1,5 +1,6 @@
 {
   "name": "assistants-cli",
+  "packageManager": "yarn@4.2.2",
   "version": "1.0.0",
   "description": "CLI interface to run tasks and configure Altinn Assistant",
   "main": "main.ts",

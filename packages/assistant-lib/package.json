@@ -1,5 +1,6 @@
 {
   "name": "@digdir/assistant-lib",
+  "packageManager": "yarn@4.2.2",
   "private": true,
   "version": "1.0.0",
   "description": "Core assistant library",
@@ -13,7 +14,7 @@
   },
   "dependencies": {
     "@azure/openai": "^1.0.0-beta.11",
-    "@instructor-ai/instructor": "1.2.1",
+  "@instructor-ai/instructor": "1.2.1",
     "@supabase/supabase-js": "^2.43.2",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.12.12",
