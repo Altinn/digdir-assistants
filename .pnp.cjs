@@ -1027,7 +1027,7 @@ const RAW_RUNTIME_STATE =
           ["lodash", "npm:4.17.21"],\
           ["openai", "npm:4.48.1"],\
           ["prettier", "npm:3.3.0"],\
-          ["remeda", "npm:1.61.0"],\
+          ["remeda", "npm:2.2.0"],\
           ["tiktoken", "npm:1.0.15"],\
           ["typescript", "patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"],\
           ["typesense", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.8.2"],\
@@ -1053,7 +1053,7 @@ const RAW_RUNTIME_STATE =
           ["@types/express", "npm:4.17.21"],\
           ["@types/js-yaml", "npm:4.0.9"],\
           ["@types/node", "npm:20.14.1"],\
-          ["@types/ramda", "npm:0.29.12"],\
+          ["@types/ramda", "npm:0.30.0"],\
           ["@typescript-eslint/eslint-plugin", "virtual:a20587c5c30dd389a37ca4e307e53acdde0b18298a5e50a6e2a5c2be058069ab5cdba932fd9656e883313d381df18e1b0ff20704b5ca65ff278c6517a2b94927#npm:7.12.0"],\
           ["@typescript-eslint/parser", "virtual:a20587c5c30dd389a37ca4e307e53acdde0b18298a5e50a6e2a5c2be058069ab5cdba932fd9656e883313d381df18e1b0ff20704b5ca65ff278c6517a2b94927#npm:7.12.0"],\
           ["axios", "npm:1.7.2"],\
@@ -3278,11 +3278,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@types/ramda", [\
-      ["npm:0.29.12", {\
-        "packageLocation": "./.yarn/cache/@types-ramda-npm-0.29.12-41d4fea1e1-38746faf9f.zip/node_modules/@types/ramda/",\
+      ["npm:0.30.0", {\
+        "packageLocation": "./.yarn/cache/@types-ramda-npm-0.30.0-b38ed8b5be-6ae8c9fb87.zip/node_modules/@types/ramda/",\
         "packageDependencies": [\
-          ["@types/ramda", "npm:0.29.12"],\
-          ["types-ramda", "npm:0.29.10"]\
+          ["@types/ramda", "npm:0.30.0"],\
+          ["types-ramda", "npm:0.30.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10312,6 +10312,14 @@ const RAW_RUNTIME_STATE =
           ["remeda", "npm:1.61.0"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:2.2.0", {\
+        "packageLocation": "./.yarn/cache/remeda-npm-2.2.0-9789a371f6-f60695bb0a.zip/node_modules/remeda/",\
+        "packageDependencies": [\
+          ["remeda", "npm:2.2.0"],\
+          ["type-fest", "npm:4.20.1"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["require-directory", [\
@@ -11554,6 +11562,13 @@ const RAW_RUNTIME_STATE =
           ["type-fest", "npm:4.20.0"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:4.20.1", {\
+        "packageLocation": "./.yarn/cache/type-fest-npm-4.20.1-143520d5b0-c31da16fe1.zip/node_modules/type-fest/",\
+        "packageDependencies": [\
+          ["type-fest", "npm:4.20.1"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["type-is", [\
@@ -11624,10 +11639,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["types-ramda", [\
-      ["npm:0.29.10", {\
-        "packageLocation": "./.yarn/cache/types-ramda-npm-0.29.10-92568885a6-cc6439341a.zip/node_modules/types-ramda/",\
+      ["npm:0.30.0", {\
+        "packageLocation": "./.yarn/cache/types-ramda-npm-0.30.0-383f88f74c-8b0def1c98.zip/node_modules/types-ramda/",\
         "packageDependencies": [\
-          ["types-ramda", "npm:0.29.10"],\
+          ["types-ramda", "npm:0.30.0"],\
           ["ts-toolbelt", "npm:9.6.0"]\
         ],\
         "linkType": "HARD"\

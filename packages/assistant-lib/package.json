@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@azure/openai": "^1.0.0-beta.11",
-  "@instructor-ai/instructor": "1.2.1",
+    "@instructor-ai/instructor": "1.2.1",
     "@supabase/supabase-js": "^2.43.2",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.12.12",
@@ -24,7 +24,7 @@
     "lodash": "^4.17.21",
     "openai": "^4.47.1",
     "prettier": "^3.2.5",
-    "remeda": "^1.61.0",
+    "remeda": "^2.2.0",
     "tiktoken": "^1.0.14",
     "typesense": "^1.8.2",
     "zod": "^3.23.8",
