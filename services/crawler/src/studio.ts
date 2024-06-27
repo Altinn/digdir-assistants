@@ -119,9 +119,15 @@ do {
   i++;
 } while (newUrls.length > 0);
 
-const crawledUrls = new Set<string>(allData.items.filter((item) => item.status == 'success').map((item) => item.url));
-const redirectedUrls = new Set<string>(allData.items.filter((item) => item.status == 'redirected').map((item) => item.url));
-const failedUrls = new Set<string>(allData.items.filter((item) => item.status == 'failed').map((item) => item.url));
+const crawledUrls = new Set<string>(
+  allData.items.filter((item) => item.status == 'success').map((item) => item.url),
+);
+const redirectedUrls = new Set<string>(
+  allData.items.filter((item) => item.status == 'redirected').map((item) => item.url),
+);
+const failedUrls = new Set<string>(
+  allData.items.filter((item) => item.status == 'failed').map((item) => item.url),
+);
 const urlsToRemove = customDifference(alreadyIndexed, crawledUrls);
 const newUrlsAdded = customDifference(crawledUrls, alreadyIndexed);
 
@@ -130,9 +136,9 @@ console.log(`To remove:\n`, Array.from(urlsToRemove));
 console.log(`New:\n`, Array.from(newUrlsAdded));
 console.log(`Failed:\n`, Array.from(failedUrls));
 // console.log(`Indexed:\n`, Array.from(indexedUrls));
-console.log(`Last crawl: ${alreadyIndexed.size} | This crawl: ${crawledUrls.size} | Redirected: ${redirectedUrls.size} | Removed: ${urlsToRemove.size} | New: ${newUrlsAdded.size} | Failed: ${failedUrls.size}`);
-
-
+console.log(
+  `Last crawl: ${alreadyIndexed.size} | This crawl: ${crawledUrls.size} | Redirected: ${redirectedUrls.size} | Removed: ${urlsToRemove.size} | New: ${newUrlsAdded.size} | Failed: ${failedUrls.size}`,
+);
 
 // let i = 1;
 // let indexedUrls = new Set<string>();
@@ -147,4 +153,3 @@ console.log(`Last crawl: ${alreadyIndexed.size} | This crawl: ${crawledUrls.size
 
 // console.log(`Urls to remove: ${urlsToRemove.size}`);
 // console.log(Array.from(urlsToRemove));
-

@@ -1882,6 +1882,13 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
+      ["npm:1.5.0", {\
+        "packageLocation": "./.yarn/cache/@instructor-ai-instructor-npm-1.5.0-3fccfeb5ad-287d5d40ef.zip/node_modules/@instructor-ai/instructor/",\
+        "packageDependencies": [\
+          ["@instructor-ai/instructor", "npm:1.5.0"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
       ["virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.2.1", {\
         "packageLocation": "./.yarn/__virtual__/@instructor-ai-instructor-virtual-18b93424e1/0/cache/@instructor-ai-instructor-npm-1.2.1-ade0c99e33-ea1967e6d7.zip/node_modules/@instructor-ai/instructor/",\
         "packageDependencies": [\
@@ -1891,6 +1898,25 @@ const RAW_RUNTIME_STATE =
           ["openai", "npm:4.48.1"],\
           ["zod", "npm:3.23.8"],\
           ["zod-stream", "virtual:18b93424e103eba93b8f81e8e49f81908d962a9cd9547b79ff8b05e6649a76ebab2de506f60f217d7a80c15b0b3bd6b173a9f9c4dc39062f9b5b2b5d7d307949#npm:1.0.2"],\
+          ["zod-validation-error", "virtual:18b93424e103eba93b8f81e8e49f81908d962a9cd9547b79ff8b05e6649a76ebab2de506f60f217d7a80c15b0b3bd6b173a9f9c4dc39062f9b5b2b5d7d307949#npm:2.1.0"]\
+        ],\
+        "packagePeers": [\
+          "@types/openai",\
+          "@types/zod",\
+          "openai",\
+          "zod"\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:1.5.0", {\
+        "packageLocation": "./.yarn/__virtual__/@instructor-ai-instructor-virtual-a2a2d3af62/0/cache/@instructor-ai-instructor-npm-1.5.0-3fccfeb5ad-287d5d40ef.zip/node_modules/@instructor-ai/instructor/",\
+        "packageDependencies": [\
+          ["@instructor-ai/instructor", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:1.5.0"],\
+          ["@types/openai", null],\
+          ["@types/zod", null],\
+          ["openai", "npm:4.48.1"],\
+          ["zod", "npm:3.23.8"],\
+          ["zod-stream", "virtual:a2a2d3af62523d29a53525902fce1b5f24fa9b87a41a039f50ebe87c54285bdcb5f7991511e9d5eec2c7b6d1bbf3cf9d8b737e2fc24954ff7c4a6cc4329a4252#npm:1.0.3"],\
           ["zod-validation-error", "virtual:18b93424e103eba93b8f81e8e49f81908d962a9cd9547b79ff8b05e6649a76ebab2de506f60f217d7a80c15b0b3bd6b173a9f9c4dc39062f9b5b2b5d7d307949#npm:2.1.0"]\
         ],\
         "packagePeers": [\
@@ -4148,7 +4174,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["assistants-cli", "workspace:cli"],\
           ["@digdir/assistant-lib", "workspace:packages/assistant-lib"],\
-          ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.2.1"],\
+          ["@instructor-ai/instructor", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:1.5.0"],\
           ["@types/node", "npm:20.14.2"],\
           ["commander", "npm:12.1.0"],\
           ["groq-sdk", "npm:0.3.3"],\
@@ -12441,10 +12467,36 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
+      ["npm:1.0.3", {\
+        "packageLocation": "./.yarn/cache/zod-stream-npm-1.0.3-37f896bd5c-d888f25537.zip/node_modules/zod-stream/",\
+        "packageDependencies": [\
+          ["zod-stream", "npm:1.0.3"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
       ["virtual:18b93424e103eba93b8f81e8e49f81908d962a9cd9547b79ff8b05e6649a76ebab2de506f60f217d7a80c15b0b3bd6b173a9f9c4dc39062f9b5b2b5d7d307949#npm:1.0.2", {\
         "packageLocation": "./.yarn/__virtual__/zod-stream-virtual-af8a9d8f16/0/cache/zod-stream-npm-1.0.2-6f8e792fa0-7420fe0168.zip/node_modules/zod-stream/",\
         "packageDependencies": [\
           ["zod-stream", "virtual:18b93424e103eba93b8f81e8e49f81908d962a9cd9547b79ff8b05e6649a76ebab2de506f60f217d7a80c15b0b3bd6b173a9f9c4dc39062f9b5b2b5d7d307949#npm:1.0.2"],\
+          ["@types/openai", null],\
+          ["@types/zod", null],\
+          ["openai", "npm:4.48.1"],\
+          ["schema-stream", "virtual:af8a9d8f16068055cbede004923bb0a408c34c37434963b1aa394ce77c3ef96b3ee5133fb73b2cda78ad2e6a5a1d2c37338cb77a645ca3947c4abe47c6d3c79b#npm:3.1.0"],\
+          ["zod", "npm:3.23.8"],\
+          ["zod-to-json-schema", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:3.23.0"]\
+        ],\
+        "packagePeers": [\
+          "@types/openai",\
+          "@types/zod",\
+          "openai",\
+          "zod"\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["virtual:a2a2d3af62523d29a53525902fce1b5f24fa9b87a41a039f50ebe87c54285bdcb5f7991511e9d5eec2c7b6d1bbf3cf9d8b737e2fc24954ff7c4a6cc4329a4252#npm:1.0.3", {\
+        "packageLocation": "./.yarn/__virtual__/zod-stream-virtual-368827243b/0/cache/zod-stream-npm-1.0.3-37f896bd5c-d888f25537.zip/node_modules/zod-stream/",\
+        "packageDependencies": [\
+          ["zod-stream", "virtual:a2a2d3af62523d29a53525902fce1b5f24fa9b87a41a039f50ebe87c54285bdcb5f7991511e9d5eec2c7b6d1bbf3cf9d8b737e2fc24954ff7c4a6cc4329a4252#npm:1.0.3"],\
           ["@types/openai", null],\
           ["@types/zod", null],\
           ["openai", "npm:4.48.1"],\

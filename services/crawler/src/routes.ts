@@ -16,7 +16,6 @@ export function createRouter(collectionName: string, urlFilter: FilterUrlsToCraw
   const localDefaultHandler = defaultHandler.bind(null, collectionName, urlFilter);
 
   router.addDefaultHandler(localDefaultHandler);
-  
 
   // router.addHandler('detail', async ({ request, page, log, pushData }) => {
   //     const title = await page.title();
@@ -36,8 +35,8 @@ export async function defaultHandler(
   urlFilter: FilterUrlsToCrawl,
   { page, request, log, crawler, pushData },
 ) {
-    const startUrl = request.url;
-    await page.waitForLoadState('networkidle');
+  const startUrl = request.url;
+  await page.waitForLoadState('networkidle');
 
   const fullPageUrl = page.url();
 
@@ -46,7 +45,7 @@ export async function defaultHandler(
     log.info(`Redirected from:\n${startUrl} to\n${fullPageUrl}`);
 
     await pushData({
-      status: "redirected",
+      status: 'redirected',
       originalUrl: startUrl,
       url: pageUrl_without_anchor,
       title: await page.title(),
@@ -86,7 +85,7 @@ export async function defaultHandler(
 
   const markdown = turndownService.turndown(contents.join('\n\n'));
   //   log.info('Generating sha1 hash: ' + hash);
-  
+
   const markdown_checksum = sha1(markdown);
   const urlHash = sha1(pageUrl_without_anchor);
 
@@ -117,26 +116,26 @@ export async function defaultHandler(
     currentDocs &&
     currentDocs.length > 0 &&
     currentDocs[0].id == urlHash &&
-    currentDocs[0].markdown_checksum == markdown_checksum    
+    currentDocs[0].markdown_checksum == markdown_checksum
   ) {
-       if (currentDocs[0].url_without_anchor != pageUrl_without_anchor) {
-        log.warning(`Possible redirect, not updating yet...\noriginal url: ${currentDocs[0].url_without_anchor}\nnew url:   ${pageUrl_without_anchor}`);
-       } else {
-          log.info(
-              `Tokens: ${updatedDoc.token_count}, no change for url: ${pageUrl_without_anchor}`,      
-          );
-        }
+    if (currentDocs[0].url_without_anchor != pageUrl_without_anchor) {
+      log.warning(
+        `Possible redirect, not updating yet...\noriginal url: ${currentDocs[0].url_without_anchor}\nnew url:   ${pageUrl_without_anchor}`,
+      );
+    } else {
+      log.info(`Tokens: ${updatedDoc.token_count}, no change for url: ${pageUrl_without_anchor}`);
+    }
   } else {
     log.info(`Tokens: ${updatedDoc.token_count}, updating doc for url '${pageUrl_without_anchor}'`);
     await updateDocs([updatedDoc], collectionName);
   }
 
   await pushData({
-    status: "success",
+    status: 'success',
     tokens: updatedDoc.token_count,
     url: pageUrl_without_anchor,
     title: await page.title(),
-  })
+  });
 }
 
 function getLocators(request, page): Locator[] {
@@ -171,12 +170,11 @@ function getLocators(request, page): Locator[] {
   return [];
 }
 
-
 export async function failedRequestHandler({ request, pushData }) {
   // This function is called when the crawling of a request failed too many times
   await pushData({
-      url: request.url,
-      status: "failed",
-      errors: request.errorMessages,
-  })
+    url: request.url,
+    status: 'failed',
+    errors: request.errorMessages,
+  });
 }

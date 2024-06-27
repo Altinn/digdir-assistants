@@ -1480,6 +1480,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@instructor-ai/instructor@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@instructor-ai/instructor@npm:1.5.0"
+  dependencies:
+    zod-stream: "npm:1.0.3"
+    zod-validation-error: "npm:^2.1.0"
+  peerDependencies:
+    openai: ">=4.28.0"
+    zod: ">=3.22.4"
+  checksum: 10c0/287d5d40ef8fb7422fc9d8b38e027045d26213751c20f456beb19887314549d3b3bee28b86150c323eeaba7e1bec6348c5ce5113f9feb90c78af552236c2f390
+  languageName: node
+  linkType: hard
+
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
   resolution: "@isaacs/cliui@npm:8.0.2"
@@ -3276,7 +3289,7 @@ __metadata:
   resolution: "assistants-cli@workspace:cli"
   dependencies:
     "@digdir/assistant-lib": "npm:1.0.0"
-    "@instructor-ai/instructor": "npm:1.2.1"
+    "@instructor-ai/instructor": "npm:^1.5.0"
     "@types/node": "npm:^20.14.2"
     commander: "npm:^12.1.0"
     groq-sdk: "npm:^0.3.3"
@@ -10568,6 +10581,19 @@ __metadata:
     openai: ">=4.24.1"
     zod: ">=3.22.4"
   checksum: 10c0/7420fe0168b1a3ab8241b1a377d37eed8b9ae9fd53daf09bc1f1f0de36e38fd10a260a54765f8a0c75d8a96e5968ab5c5bb9b69dd9efd4a4e29e14f1230c68e1
+  languageName: node
+  linkType: hard
+
+"zod-stream@npm:1.0.3":
+  version: 1.0.3
+  resolution: "zod-stream@npm:1.0.3"
+  dependencies:
+    schema-stream: "npm:^3.1.0"
+    zod-to-json-schema: "npm:^3.22.3"
+  peerDependencies:
+    openai: ">=4.24.1"
+    zod: ">=3.22.4"
+  checksum: 10c0/d888f25537343da1783d7ecdfb328298201a12ad42c8b27adfe7d6cd83cb32fcb570abe684c879b705d4cc3e4ba131955a4fc4c863090ffa9261e99f72ecddcd
   languageName: node
   linkType: hard
 
