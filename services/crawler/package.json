@@ -11,6 +11,7 @@
     "@crawlee/playwright": "*",
     "@crawlee/utils": "*",
     "@digdir/assistant-lib": "1.0.0",
+    "commander": "^12.1.0",
     "crawlee": "^3.10.5",
     "playwright": "1.45.0",
     "prettier": "^3.3.2",
