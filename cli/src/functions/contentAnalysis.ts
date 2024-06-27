@@ -155,9 +155,14 @@ async function analyzeContent(searchHit: SearchHit): Promise<SearchHit> {
         ],
         // max_retries: 0,
       });
+      let hitLanguage;
+
       if (queryResult && queryResult.choices && queryResult.choices.length > 0) {
-        searchHit.language = JSON.parse(queryResult?.choices[0]?.message?.content)?.language;
-      } else {
+        const content = queryResult?.choices[0]?.message?.content || '';
+        hitLanguage = JSON.parse(content)?.language;
+      }
+
+      if (!hitLanguage) {
         console.error(
           `Failed to extract content language for url: ${searchHit.url_without_anchor}`,
         );
