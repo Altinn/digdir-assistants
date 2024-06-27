@@ -342,7 +342,7 @@ async function generateSearchPhrases(
         if (queryResult && queryResult.choices && queryResult.choices.length > 0) {
           // use
 
-          const response = queryResult?.choices[0]?.message?.content;
+          const response = queryResult?.choices[0]?.message?.content || '';
           console.log(`Groq response:\n${response}`);
 
           const jsonExtracted = extractCodeBlockContents(response);
@@ -382,6 +382,4 @@ async function generateSearchPhrases(
       }
     }
   } else throw new Error(`unknown prompt name \'${prompt}\'`);
-
-  return { searchPhrases: [] };
 }

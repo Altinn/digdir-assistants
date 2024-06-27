@@ -6,7 +6,7 @@ import { RagDoc, updateDocs, getDocChecksums, countTokens } from '@digdir/assist
 import { URL } from 'url';
 
 const turndownService = new TurndownService();
-const tokenCountWarningThreshold = 100;
+const tokenCountWarningThreshold = 20;
 
 type FilterUrlsToCrawl = (urls: string[]) => string[];
 
@@ -30,14 +30,27 @@ export function createRouter(collectionName: string, urlFilter: FilterUrlsToCraw
   return router;
 }
 
-async function defaultHandler(
+export async function defaultHandler(
   collectionName: string,
   urlFilter: FilterUrlsToCrawl,
-  { page, request, log, crawler },
+  { page, request, log, crawler, pushData },
 ) {
-  log.info('Crawling ' + request.url);
-
+  const startUrl = request.url;
   await page.waitForLoadState('networkidle');
+
+  const fullPageUrl = page.url();
+
+  const pageUrl_without_anchor = new URL(page.url()).origin + new URL(page.url()).pathname;
+  if (pageUrl_without_anchor !== startUrl) {
+    log.info(`Redirected from:\n${startUrl} to\n${fullPageUrl}`);
+
+    await pushData({
+      status: 'redirected',
+      originalUrl: startUrl,
+      url: pageUrl_without_anchor,
+      title: await page.title(),
+    });
+  }
 
   const locators = getLocators(request, page);
   const contents = await Promise.all(
@@ -71,17 +84,16 @@ async function defaultHandler(
   );
 
   const markdown = turndownService.turndown(contents.join('\n\n'));
-  const hash = sha1(request.url);
   //   log.info('Generating sha1 hash: ' + hash);
 
   const markdown_checksum = sha1(markdown);
-  const url_without_anchor = new URL(request.url).origin + new URL(request.url).pathname;
+  const urlHash = sha1(pageUrl_without_anchor);
 
   const updatedDoc: RagDoc = {
-    id: hash,
+    id: urlHash,
     content_markdown: markdown,
-    url: url_without_anchor,
-    url_without_anchor: url_without_anchor,
+    url: pageUrl_without_anchor,
+    url_without_anchor: pageUrl_without_anchor,
     type: 'content',
     item_priority: 1,
     updated_at: Math.floor(new Date().getTime() / 1000),
@@ -89,31 +101,41 @@ async function defaultHandler(
     token_count: countTokens(markdown),
   };
   if (!markdown.trim()) {
-    log.error(`No content extracted from '${url_without_anchor}'`);
+    log.error(`No content extracted from '${pageUrl_without_anchor}'`);
     return;
   }
   if ((updatedDoc.token_count || 0) < tokenCountWarningThreshold) {
     log.warning(
-      `Only ${updatedDoc.token_count} tokens extracted\n from ${url_without_anchor}\n consider verifying the locators for this url.`,
+      `Only ${updatedDoc.token_count} tokens extracted\n from ${pageUrl_without_anchor}\n consider verifying the locators for this url.`,
     );
   }
 
-  const currentDocs = await getDocChecksums(collectionName, [hash]);
+  const currentDocs = await getDocChecksums(collectionName, [urlHash]);
 
   if (
     currentDocs &&
     currentDocs.length > 0 &&
-    currentDocs[0].id == hash &&
+    currentDocs[0].id == urlHash &&
     currentDocs[0].markdown_checksum == markdown_checksum
   ) {
-    // log.info(
-    //   `Tokens: ${updatedDoc.token_count}, content checksums match, skipping update for url '${url_without_anchor}'`,
-    // );
+    if (currentDocs[0].url_without_anchor != pageUrl_without_anchor) {
+      log.warning(
+        `Possible redirect, not updating yet...\noriginal url: ${currentDocs[0].url_without_anchor}\nnew url:   ${pageUrl_without_anchor}`,
+      );
+    } else {
+      log.info(`Tokens: ${updatedDoc.token_count}, no change for url: ${pageUrl_without_anchor}`);
+    }
   } else {
-    log.info(`Tokens: ${updatedDoc.token_count}, updating doc for url '${url_without_anchor}'`);
-    // log.info(markdown);
+    log.info(`Tokens: ${updatedDoc.token_count}, updating doc for url '${pageUrl_without_anchor}'`);
     await updateDocs([updatedDoc], collectionName);
   }
+
+  await pushData({
+    status: 'success',
+    tokens: updatedDoc.token_count,
+    url: pageUrl_without_anchor,
+    title: await page.title(),
+  });
 }
 
 function getLocators(request, page): Locator[] {
@@ -146,4 +168,13 @@ function getLocators(request, page): Locator[] {
     }
   }
   return [];
+}
+
+export async function failedRequestHandler({ request, pushData }) {
+  // This function is called when the crawling of a request failed too many times
+  await pushData({
+    url: request.url,
+    status: 'failed',
+    errors: request.errorMessages,
+  });
 }
