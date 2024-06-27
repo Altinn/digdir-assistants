@@ -32,7 +32,7 @@ function filterUrlsToCrawl(urls: string[]): string[] {
 
   const ignoreRoutes = [
     'https://docs.altinn.studio/app/app-dev-course',
-    'https://docs.altinn.studio/app/launched-apps',
+    'https://docs.altinn.studio/altinn-studio/news/launched-apps/',
     'https://docs.altinn.studio/tags',
     'https://docs.altinn.studio/api',
     'https://docs.altinn.studio/app/development/data/options/altinn2-codelists',
