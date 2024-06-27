@@ -16,7 +16,7 @@ const crawler = new PlaywrightCrawler({
   requestHandler: router,
   headless: true,
   failedRequestHandler: failedRequestHandler,
-  
+
   // Comment this option to scrape the full website.
   // maxRequestsPerCrawl: 10,
 });

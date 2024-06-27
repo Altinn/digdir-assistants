@@ -1027,7 +1027,7 @@ const RAW_RUNTIME_STATE =
           ["lodash", "npm:4.17.21"],\
           ["openai", "npm:4.48.1"],\
           ["prettier", "npm:3.3.0"],\
-          ["remeda", "npm:2.2.0"],\
+          ["remeda", "npm:2.2.1"],\
           ["tiktoken", "npm:1.0.15"],\
           ["typescript", "patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"],\
           ["typesense", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.8.2"],\
@@ -1068,7 +1068,7 @@ const RAW_RUNTIME_STATE =
           ["openai", "npm:4.48.1"],\
           ["prettier", "npm:3.3.2"],\
           ["ramda", "npm:0.30.1"],\
-          ["remeda", "npm:1.61.0"],\
+          ["remeda", "npm:2.2.1"],\
           ["ts-node", "virtual:a20587c5c30dd389a37ca4e307e53acdde0b18298a5e50a6e2a5c2be058069ab5cdba932fd9656e883313d381df18e1b0ff20704b5ca65ff278c6517a2b94927#npm:10.9.2"],\
           ["typescript", "patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"],\
           ["typesense", "virtual:a20587c5c30dd389a37ca4e307e53acdde0b18298a5e50a6e2a5c2be058069ab5cdba932fd9656e883313d381df18e1b0ff20704b5ca65ff278c6517a2b94927#npm:1.8.2"],\
@@ -10334,17 +10334,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["remeda", [\
-      ["npm:1.61.0", {\
-        "packageLocation": "./.yarn/cache/remeda-npm-1.61.0-d593ef4ea0-dc9995e740.zip/node_modules/remeda/",\
+      ["npm:2.2.1", {\
+        "packageLocation": "./.yarn/cache/remeda-npm-2.2.1-c7653a3062-7af4e8ea0b.zip/node_modules/remeda/",\
         "packageDependencies": [\
-          ["remeda", "npm:1.61.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:2.2.0", {\
-        "packageLocation": "./.yarn/cache/remeda-npm-2.2.0-9789a371f6-f60695bb0a.zip/node_modules/remeda/",\
-        "packageDependencies": [\
-          ["remeda", "npm:2.2.0"],\
+          ["remeda", "npm:2.2.1"],\
           ["type-fest", "npm:4.20.1"]\
         ],\
         "linkType": "HARD"\
