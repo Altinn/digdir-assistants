@@ -6,6 +6,7 @@
   "type": "module",
   "description": "Altinn Assistant crawler",
   "dependencies": {
+    "@babel/runtime": "^7.24.7",
     "@crawlee/browser": "*",
     "@crawlee/core": "*",
     "@crawlee/playwright": "*",
@@ -27,7 +28,7 @@
     "@types/turndown": "^5.0.4",
     "rimraf": "^5.0.7",
     "tsx": "^4.15.7",
-    "typescript": "^5.4.5"
+    "typescript": "5.4.5"
   },
   "scripts": {
     "clean": "rimraf ./dist/",
