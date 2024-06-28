@@ -6,7 +6,6 @@ import { createDocsCollectionIfNotExists, retrieveAllUrls } from '@digdir/assist
 import { createRouter, failedRequestHandler } from './routes.ts';
 import { Command } from 'commander';
 
-
 async function main() {
   const program = new Command();
   program
@@ -14,8 +13,7 @@ async function main() {
     .description('Crawl the Altinn Studio documentation site')
     .version('0.1.0');
 
-  program
-    .requiredOption('-c, --collection <string>', 'collection to update ');
+  program.requiredOption('-c, --collection <string>', 'collection to update ');
 
   program.parse(process.argv);
   const opts = program.opts();
@@ -167,7 +165,6 @@ async function main() {
 
   // console.log(`Urls to remove: ${urlsToRemove.size}`);
   // console.log(Array.from(urlsToRemove));
-
 }
 
 await main();

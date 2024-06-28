@@ -1,5 +1,5 @@
 // For more information, see https://crawlee.dev/
-import { Sitemap } from '@crawlee/utils';
+import { Sitemap } from 'crawlee';
 import { PlaywrightCrawler } from '@crawlee/playwright';
 import { createDocsCollectionIfNotExists } from '@digdir/assistant-lib';
 import { createRouter } from './routes.ts';
@@ -12,13 +12,12 @@ async function main() {
     .description('Crawl the Altinn Infoportal site')
     .version('0.1.0');
 
-  program
-    .requiredOption('-c, --collection <string>', 'collection to update ');
+  program.requiredOption('-c, --collection <string>', 'collection to update ');
 
   program.parse(process.argv);
   const opts = program.opts();
   let collectionName = opts.collection;
-  
+
   // make sure we have a target collection to update
   await createDocsCollectionIfNotExists(collectionName);
 
@@ -63,7 +62,6 @@ async function main() {
 
   // Run the crawler
   await crawler.run();
-
 }
 
 await main();
