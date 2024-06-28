@@ -4080,6 +4080,7 @@ const RAW_RUNTIME_STATE =
           ["@babel/runtime", "npm:7.24.7"],\
           ["@digdir/assistant-lib", "workspace:packages/assistant-lib"],\
           ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.5.0"],\
+          ["@supabase/supabase-js", "npm:2.44.1"],\
           ["@types/node", "npm:20.14.9"],\
           ["commander", "npm:12.1.0"],\
           ["groq-sdk", "npm:0.5.0"],\
@@ -4089,6 +4090,7 @@ const RAW_RUNTIME_STATE =
           ["sha1", "npm:1.1.1"],\
           ["tiktoken", "npm:1.0.15"],\
           ["ts-node", "virtual:a20587c5c30dd389a37ca4e307e53acdde0b18298a5e50a6e2a5c2be058069ab5cdba932fd9656e883313d381df18e1b0ff20704b5ca65ff278c6517a2b94927#npm:10.9.2"],\
+          ["tsx", "npm:4.15.7"],\
           ["typescript", "patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"],\
           ["typesense", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.8.2"],\
           ["zod", "npm:3.23.8"]\
