@@ -15,19 +15,8 @@ import * as yaml from "js-yaml";
 
 const stage_name = "DOCS_QA_RAG";
 const envVar = scopedEnvVar(stage_name);
-const cfg = typesenseConfig();
 // const azureClient = azure_client();
 const _openaiClient = openaiClient();
-
-const RagContextRefsSchema = z.object({
-  source: z.string().min(1),
-});
-
-const RagGenerateResultSchema = z.object({
-  helpful_answer: z.string(),
-  i_dont_know: z.boolean(),
-  relevant_contexts: z.array(RagContextRefsSchema),
-});
 
 const RagPromptSchema = z.object({
   queryRelax: z.string(),
