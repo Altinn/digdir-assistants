@@ -12,10 +12,10 @@
     "build": "cd ../ && yarn build:assistant-lib && cd cli/ && tsc -p .",
     "codestyle:check": "prettier src/ --check",
     "codestyle:fix": "prettier src/ --write",
-    "run:generateSearchPhrases": "ts-node src/functions/generateSearchPhrases.ts",
-    "run:contentAnalysis": "ts-node src/functions/contentAnalysis.ts",
-    "run:listMissingEnDocs": "ts-node src/functions/listMissingEnDocs.ts",
-    "run:listAllDocs": "ts-node src/functions/listAllDocs.ts",
+    "run:generateSearchPhrases": "tsx src/functions/generateSearchPhrases.ts",
+    "run:contentAnalysis": "tsx src/functions/contentAnalysis.ts",
+    "run:listMissingEnDocs": "tsx src/functions/listMissingEnDocs.ts",
+    "run:listAllDocs": "tsx src/functions/listAllDocs.ts",
     "run:evalRetrieval": "tsx src/functions/evalRetrievalStage.ts"
   },
   "dependencies": {
