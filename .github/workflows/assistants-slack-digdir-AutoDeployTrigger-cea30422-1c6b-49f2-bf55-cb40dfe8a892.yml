@@ -16,16 +16,17 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: prod-slack-digdir
     permissions: 
       id-token: write #This is required for requesting the OIDC JWT Token
       contents: read #Required when GH token is used to authenticate with private repo
 
     steps:
       - name: Checkout to the branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Azure Login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           client-id: ${{ secrets.ASSISTANTSSLACKDIGDIR_AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.ASSISTANTSSLACKDIGDIR_AZURE_TENANT_ID }}
@@ -41,7 +42,28 @@ jobs:
           containerAppName: assistants-slack-digdir
           resourceGroup: assistants-prod-norwayeast
           imageToBuild: altinnaicontainers.azurecr.io/assistants-slack-digdir:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
+          buildArguments: |
+            "VITE_SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
+            "VITE_SLACK_APP_SUPABASE_ANON_KEY=${{secrets.SLACK_APP_SUPABASE_ANON_KEY}}"
+          environmentVariables: >
+            "OPENAI_API_KEY=secretref:openai-api-key" 
+            "AZURE_OPENAI_API_KEY=secretref:azure-openai-api-key" 
+            "USE_AZURE_OPENAI_API=${{ vars.USE_AZURE_OPENAI_API}}"
+            "TYPESENSE_API_KEY=secretref:typesense-api-key" 
+            "TYPESENSE_API_HOST=${{ vars.TYPESENSE_API_HOST }}"
+            "SLACK_APP_TOKEN=secretref:slack-app-token" 
+            "SLACK_BOT_TOKEN=secretref:slack-bot-token" 
+            "SLACK_BOT_SIGNING_SECRET=secretref:slack-bot-signing-secret" 
+            "SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}" 
+            "SLACK_APP_SUPABASE_ANON_KEY=${{ secrets.SLACK_APP_SUPABASE_ANON_KEY }}"
+            "OPENAI_API_URL=${{ vars.OPENAI_API_URL }}"
+            "OPENAI_API_MODEL_NAME=${{ vars.OPENAI_API_MODEL_NAME }}"
+            "AZURE_OPENAI_API_URL=${{ vars.AZURE_OPENAI_API_URL }}"
+            "AZURE_OPENAI_DEPLOYMENT=${{ vars.AZURE_OPENAI_DEPLOYMENT }}"
+            "AZURE_OPENAI_VERSION=${{ vars.AZURE_OPENAI_VERSION }}"
+            "COLBERT_API_URL=${{ vars.COLBERT_API_URL }}"
+            "DEBUG_SLACK=${{ vars.DEBUG_SLACK }}"
+            "DEBUG_INSTRUCTOR=${{ vars.DEBUG_INSTRUCTOR }}"
+            "LOG_LEVEL=${{ vars.LOG_LEVEL }}"
 
 
