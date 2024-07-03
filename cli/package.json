@@ -6,15 +6,17 @@
   "main": "main.ts",
   "license": "MIT",
   "private": true,
+  "type": "module",
   "scripts": {
     "clean": "rimraf ./dist/",
     "build": "cd ../ && yarn build:assistant-lib && cd cli/ && tsc -p .",
     "codestyle:check": "prettier src/ --check",
     "codestyle:fix": "prettier src/ --write",
-    "run:generateSearchPhrases": "ts-node src/functions/generateSearchPhrases.ts",
-    "run:contentAnalysis": "ts-node src/functions/contentAnalysis.js",
-    "run:listMissingEnDocs": "ts-node src/functions/listMissingEnDocs.js",
-    "run:listAllDocs": "ts-node src/functions/listAllDocs.js"
+    "run:generateSearchPhrases": "tsx src/functions/generateSearchPhrases.ts",
+    "run:importKudos": "tsx src/functions/importKudos.ts",
+    "run:contentAnalysis": "tsx src/functions/contentAnalysis.ts",
+    "run:listMissingEnDocs": "tsx src/functions/listMissingEnDocs.ts",
+    "run:listAllDocs": "tsx src/functions/listAllDocs.ts"
   },
   "dependencies": {
     "@babel/runtime": "^7.24.7",
@@ -23,12 +25,13 @@
     "@types/node": "^20.14.9",
     "commander": "^12.1.0",
     "groq-sdk": "^0.5.0",
+    "mysql2": "^3.10.2",
     "openai": "^4.52.1",
     "prettier": "^3.3.2",
     "rimraf": "^5.0.7",
     "sha1": "^1.1.1",
     "tiktoken": "^1.0.15",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.15.7",
     "typescript": "^5.3.3",
     "typesense": "^1.8.2",
     "zod": "^3.22.4"

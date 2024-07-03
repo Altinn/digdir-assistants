@@ -50,6 +50,12 @@ Document:
 
 `;
 
+const keywordSearchPromptNew = `Please analyze the contents of the following documentation article and generate a list of keyword search phrases that you would expect to match the following document. 
+
+Document:
+
+`;
+
 // for use as system prompt in JSON mode with llama3-8b on Groq
 const typicalQsSysPrompt = `Generate a list of typical questions that a user might have, that can be answered by the following documentation article. Return only the list of questions as a JSON string array in a code block, do not include answers.`;
 
@@ -61,44 +67,48 @@ async function main() {
     .version('0.1.0');
 
   program
+    .requiredOption('-s, --source <string>', 'collection to extract from')
+    .requiredOption('-t, --target <string>', 'target collection name')
     .option('--prompt <string>, ', 'prompt name', 'original')
-    .option('-c, --collection <string>', 'collection to update (or -n for new)')
-    .option('-n', 'create new collection based on TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION env var');
+    .option('-n', 'create new target collection');
 
   program.parse(process.argv);
   const opts = program.opts();
 
   let promptName = opts.prompt;
-  let collectionNameTmp = opts.collection;
+  let targetCollectionName = opts.collection;
 
-  if (!['original', 'typicalqs'].includes(promptName)) {
-    console.error("Invalid prompt name. Prompt name must be 'original' or 'typicalqs'");
+  const promptNames = ['original', 'typicalqs', 'keyword-search'];
+  if (!promptNames.includes(promptName)) {
+    console.error(`Invalid prompt name. Prompt name must be one of: ${promptNames}`);
     process.exit(1);
   }
 
   const client = new Client(cfg.TYPESENSE_CONFIG);
+  targetCollectionName = opts.target;
+  const collectionFound = await typesenseSearch.lookupCollectionByNameExact(targetCollectionName);
 
   if (opts.n) {
-    collectionNameTmp = `${process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION}_${Date.now()}`;
-
-    await typesenseSearch.setupSearchPhraseSchema(collectionNameTmp);
+    if (collectionFound) {
+      console.error(`Collection '${targetCollectionName}' already exists, aborting.`);
+      return;
+    }
+    await typesenseSearch.setupSearchPhraseSchema(targetCollectionName);
+    console.log(`Collection '${targetCollectionName}' created.`);
   } else {
-    // TODO: verify that collection exists
-    collectionNameTmp = process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION;
-
-    const collectionFound = await typesenseSearch.lookupCollectionByNameExact(collectionNameTmp);
-
     if (!collectionFound) {
-      console.error(`Collection '${collectionNameTmp}' not found. To create, use the '-n' option.`);
+      console.error(
+        `Collection '${targetCollectionName}' not found. To create, use the '-n' option.`,
+      );
       return;
     }
 
-    if (collectionFound.name != collectionNameTmp) {
-      `Resolved alias '${collectionNameTmp}' to collection '${collectionFound.name}'`;
+    if (collectionFound.name != targetCollectionName) {
+      `Resolved alias '${targetCollectionName}' to collection '${collectionFound.name}'`;
     }
-    collectionNameTmp = collectionFound.name;
+    targetCollectionName = collectionFound.name;
 
-    console.log(`Will update existing search phrases in collection: '${collectionNameTmp}'`);
+    console.log(`Will update existing search phrases in collection: '${targetCollectionName}'`);
   }
 
   const durations = {
@@ -117,10 +127,14 @@ async function main() {
 
   while (jobPageSize < 0 || page <= jobPageSize) {
     console.log(
-      `Retrieving content_markdown for all urls from collection '${collectionNameTmp}', page ${page} (page_size=${pageSize})`,
+      `Retrieving content_markdown for all urls from collection '${opts.source}', page ${page} (page_size=${pageSize})`,
     );
 
-    const searchResponse = await typesenseSearch.typesenseRetrieveAllUrls(page, pageSize);
+    const searchResponse = await typesenseSearch.typesenseRetrieveAllUrls(
+      opts.source,
+      page,
+      pageSize,
+    );
     durations.queryDocs += Date.now() - totalStart;
 
     const searchHits: SearchHit[] = searchResponse.results.flatMap((result: any) =>
@@ -148,7 +162,7 @@ async function main() {
 
       // console.log(`searchHit: ${JSON.stringify(searchHit)}`);
 
-      const existingPhrases = await lookupSearchPhrases(url, collectionNameTmp, promptName);
+      const existingPhrases = await lookupSearchPhrases(url, targetCollectionName, promptName);
 
       // console.log(`existing phrases:\n${JSON.stringify(existingPhrases)}`);
 
@@ -162,7 +176,7 @@ async function main() {
         const checksumMatches = storedChecksum === checksumMd;
 
         if (checksumMatches) {
-          console.log(`Found existing phrases and checksum matches, skipping for url: ${url}`);
+          console.log(`Found ${existingPhraseCount} existing phrases and checksum matches, skipping for url: ${url}`);
           docIndex++;
           continue;
         }
@@ -193,12 +207,12 @@ async function main() {
         const phraseId = document.document?.id || '';
         if (phraseId) {
           try {
-            await client.collections(collectionNameTmp).documents(phraseId).delete();
+            await client.collections(targetCollectionName).documents(phraseId).delete();
             console.log(`Search phrase ID ${phraseId} deleted for url: ${url}`);
           } catch (error) {
             if (error instanceof Errors.ObjectNotFound) {
               console.log(
-                `Search phrase ID ${phraseId} not found in collection "${collectionNameTmp}"`,
+                `Search phrase ID ${phraseId} not found in collection "${targetCollectionName}"`,
               );
             } else {
               console.error(`Error occurred while removing existing search phrases: ${error}`);
@@ -231,7 +245,7 @@ async function main() {
 
       try {
         const results = await client
-          .collections(collectionNameTmp)
+          .collections(targetCollectionName)
           .documents()
           .import(uploadBatch, { action: 'upsert', return_id: true });
         const failedResults = results.filter((result: any) => !result.success);
@@ -242,7 +256,7 @@ async function main() {
         }
       } catch (error) {
         console.error(
-          `An error occurred while importing documents to '${collectionNameTmp}'\nERROR: ${error}`,
+          `An error occurred while importing documents to '${targetCollectionName}'\nERROR: ${error}`,
         );
 
         console.log(`Failed batch content:\n${JSON.stringify(uploadBatch)}`);
@@ -292,7 +306,8 @@ async function generateSearchPhrases(
 ): Promise<SearchPhraseList> {
   let retryCount = 0;
 
-  if (prompt == 'original') {
+  if (prompt == 'original' || prompt == 'keyword-search') {
+    const basePrompt = prompt == 'original' ? originalPrompt : keywordSearchPromptNew;
     while (true) {
       try {
         const content = searchHit.contentMarkdown || '';
@@ -306,7 +321,7 @@ async function generateSearchPhrases(
           temperature: 0.1,
           messages: [
             { role: 'system', content: 'You are a helpful assistant.' },
-            { role: 'user', content: originalPrompt + content },
+            { role: 'user', content: basePrompt + content },
           ],
           max_retries: 0,
         });

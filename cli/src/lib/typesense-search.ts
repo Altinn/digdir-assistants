@@ -124,6 +124,7 @@ export async function typesenseSearchMultipleVector(searchQueries: SearchPhrases
 }
 
 export async function typesenseRetrieveAllUrls(
+  collectionName: string,
   page: number,
   pageSize: number,
   includeFields: string = 'url_without_anchor,content_markdown,id',
@@ -133,7 +134,7 @@ export async function typesenseRetrieveAllUrls(
   const multiSearchArgs = {
     searches: [
       {
-        collection: process.env.TYPESENSE_DOCS_COLLECTION,
+        collection: collectionName,
         q: '*',
         query_by: 'url_without_anchor',
         include_fields: includeFields,
@@ -240,8 +241,8 @@ export async function lookupSearchPhrases(
         q: '*',
         query_by: 'url',
         include_fields: 'id,doc_id,url,search_phrase,sort_order,updated_at,checksum',
-        filter_by: `url:=${url} && prompt:=${prompt}`,
-        sort_by: 'sort_order:asc',
+        filter_by: `url:=\`${url}\` && prompt:=\`${prompt}\``,
+        sort_by: 'updated_at:desc',
         per_page: 30,
       },
     ],

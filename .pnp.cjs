@@ -4083,12 +4083,13 @@ const RAW_RUNTIME_STATE =
           ["@types/node", "npm:20.14.9"],\
           ["commander", "npm:12.1.0"],\
           ["groq-sdk", "npm:0.5.0"],\
+          ["mysql2", "npm:3.10.2"],\
           ["openai", "npm:4.52.1"],\
           ["prettier", "npm:3.3.2"],\
           ["rimraf", "npm:5.0.7"],\
           ["sha1", "npm:1.1.1"],\
           ["tiktoken", "npm:1.0.15"],\
-          ["ts-node", "virtual:a20587c5c30dd389a37ca4e307e53acdde0b18298a5e50a6e2a5c2be058069ab5cdba932fd9656e883313d381df18e1b0ff20704b5ca65ff278c6517a2b94927#npm:10.9.2"],\
+          ["tsx", "npm:4.15.7"],\
           ["typescript", "patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"],\
           ["typesense", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.8.2"],\
           ["zod", "npm:3.23.8"]\
@@ -5121,6 +5122,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/delayed-stream-npm-1.0.0-c5a4c4cc02-d758899da0.zip/node_modules/delayed-stream/",\
         "packageDependencies": [\
           ["delayed-stream", "npm:1.0.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["denque", [\
+      ["npm:2.1.0", {\
+        "packageLocation": "./.yarn/cache/denque-npm-2.1.0-578d0b6297-f9ef81aa0a.zip/node_modules/denque/",\
+        "packageDependencies": [\
+          ["denque", "npm:2.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -6448,6 +6458,16 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["generate-function", [\
+      ["npm:2.3.1", {\
+        "packageLocation": "./.yarn/cache/generate-function-npm-2.3.1-c839dc559c-4645cf1da9.zip/node_modules/generate-function/",\
+        "packageDependencies": [\
+          ["generate-function", "npm:2.3.1"],\
+          ["is-property", "npm:1.0.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["generative-bayesian-network", [\
       ["npm:2.1.52", {\
         "packageLocation": "./.yarn/cache/generative-bayesian-network-npm-2.1.52-e3d77148e7-9c3df0d313.zip/node_modules/generative-bayesian-network/",\
@@ -7528,6 +7548,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["is-property", [\
+      ["npm:1.0.2", {\
+        "packageLocation": "./.yarn/cache/is-property-npm-1.0.2-6eac53b30e-33ab65a136.zip/node_modules/is-property/",\
+        "packageDependencies": [\
+          ["is-property", "npm:1.0.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["is-regex", [\
       ["npm:1.1.4", {\
         "packageLocation": "./.yarn/cache/is-regex-npm-1.1.4-cca193ef11-bb72aae604.zip/node_modules/is-regex/",\
@@ -8092,6 +8121,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["long", [\
+      ["npm:5.2.3", {\
+        "packageLocation": "./.yarn/cache/long-npm-5.2.3-61dddb7586-6a0da658f5.zip/node_modules/long/",\
+        "packageDependencies": [\
+          ["long", "npm:5.2.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["longest-streak", [\
       ["npm:3.1.0", {\
         "packageLocation": "./.yarn/cache/longest-streak-npm-3.1.0-e2ab1c40ee-7c2f02d045.zip/node_modules/longest-streak/",\
@@ -8144,6 +8182,20 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["lru-cache", "npm:5.1.1"],\
           ["yallist", "npm:3.1.1"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:7.18.3", {\
+        "packageLocation": "./.yarn/cache/lru-cache-npm-7.18.3-e68be5b11c-b3a452b491.zip/node_modules/lru-cache/",\
+        "packageDependencies": [\
+          ["lru-cache", "npm:7.18.3"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:8.0.5", {\
+        "packageLocation": "./.yarn/cache/lru-cache-npm-8.0.5-bb030cd93e-cd95a9c384.zip/node_modules/lru-cache/",\
+        "packageDependencies": [\
+          ["lru-cache", "npm:8.0.5"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -8889,6 +8941,33 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/mute-stream-npm-1.0.0-b6e846d471-dce2a9ccda.zip/node_modules/mute-stream/",\
         "packageDependencies": [\
           ["mute-stream", "npm:1.0.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["mysql2", [\
+      ["npm:3.10.2", {\
+        "packageLocation": "./.yarn/cache/mysql2-npm-3.10.2-3f4684a67e-7d7a0a7037.zip/node_modules/mysql2/",\
+        "packageDependencies": [\
+          ["mysql2", "npm:3.10.2"],\
+          ["denque", "npm:2.1.0"],\
+          ["generate-function", "npm:2.3.1"],\
+          ["iconv-lite", "npm:0.6.3"],\
+          ["long", "npm:5.2.3"],\
+          ["lru-cache", "npm:8.0.5"],\
+          ["named-placeholders", "npm:1.1.3"],\
+          ["seq-queue", "npm:0.0.5"],\
+          ["sqlstring", "npm:2.3.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["named-placeholders", [\
+      ["npm:1.1.3", {\
+        "packageLocation": "./.yarn/cache/named-placeholders-npm-1.1.3-1b385febe5-cd83b4bbdf.zip/node_modules/named-placeholders/",\
+        "packageDependencies": [\
+          ["named-placeholders", "npm:1.1.3"],\
+          ["lru-cache", "npm:7.18.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10584,6 +10663,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["seq-queue", [\
+      ["npm:0.0.5", {\
+        "packageLocation": "./.yarn/cache/seq-queue-npm-0.0.5-d5064d9793-ec870fc392.zip/node_modules/seq-queue/",\
+        "packageDependencies": [\
+          ["seq-queue", "npm:0.0.5"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["serve-static", [\
       ["npm:1.15.0", {\
         "packageLocation": "./.yarn/cache/serve-static-npm-1.15.0-86c81879f5-fa9f0e21a5.zip/node_modules/serve-static/",\
@@ -10793,6 +10881,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/sprintf-js-npm-1.1.3-b99efd75b2-09270dc4f3.zip/node_modules/sprintf-js/",\
         "packageDependencies": [\
           ["sprintf-js", "npm:1.1.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["sqlstring", [\
+      ["npm:2.3.3", {\
+        "packageLocation": "./.yarn/cache/sqlstring-npm-2.3.3-2db6939570-3b5dd7badb.zip/node_modules/sqlstring/",\
+        "packageDependencies": [\
+          ["sqlstring", "npm:2.3.3"]\
         ],\
         "linkType": "HARD"\
       }]\

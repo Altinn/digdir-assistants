@@ -59,7 +59,7 @@ export async function lookupSearchPhrasesSimilar(
       q: query,
       query_by: "search_phrase,phrase_vec",
       include_fields: "search_phrase,url",
-      filter_by: `prompt:=${prompt}`,
+      filter_by: `prompt:=\`${prompt}\``,
       group_by: "url",
       group_limit: 1,
       limit: 20,
@@ -68,6 +68,12 @@ export async function lookupSearchPhrasesSimilar(
       drop_tokens_threshold: 5,
     })),
   };
+
+  if (true || envVar("LOG_LEVEL") === "debug-relaxation") {
+    console.log(
+      `lookupSearchPhraseSimilar query args:\n${JSON.stringify(multiSearchArgs)}`,
+    );
+  }
 
   const response = await client.multiSearch.perform(multiSearchArgs, {});
 
@@ -143,8 +149,8 @@ export async function retrieveAllByUrl(
     collection: docsCollectionName,
     q: rankedUrl["url"],
     query_by: "url_without_anchor",
-    include_fields: "id,url_without_anchor,type,content_markdown",
-    filter_by: `url_without_anchor:=${rankedUrl["url"]}`,
+    include_fields: "id,doc_id,url_without_anchor,type,content_markdown",
+    filter_by: `url_without_anchor:=\`${rankedUrl["url"]}\``,
     group_by: "url_without_anchor",
     group_limit: 1,
     page: 1,
@@ -357,7 +363,22 @@ export async function getDocChecksums(
     .search({
       q: "*",
       filter_by: idList.map((id) => `id:=${id}`).join(" || "),
-      include_fields: "id,doc_id,markdown_checksum,url_without_anchor",
+      include_fields: "id,markdown_checksum,url_without_anchor",
+    });
+
+  return documents.hits?.map((hit: any) => hit.document as RagDocQuery) || [];
+}
+
+export async function getDocsById(collectionName: string, idList: string[]) {
+  const client = new Typesense.Client(typesenseCfg);
+
+  const documents = await client
+    .collections<RagDocQuery>(collectionName)
+    .documents()
+    .search({
+      q: "*",
+      filter_by: idList.map((id) => `id:=${id}`).join(" || "),
+      include_fields: "id,title,url_without_anchor",
     });
 
   return documents.hits?.map((hit: any) => hit.document as RagDocQuery) || [];
