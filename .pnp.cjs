@@ -1739,25 +1739,6 @@ const RAW_RUNTIME_STATE =
           "zod"\
         ],\
         "linkType": "HARD"\
-      }],\
-      ["virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:1.5.0", {\
-        "packageLocation": "./.yarn/__virtual__/@instructor-ai-instructor-virtual-a2a2d3af62/0/cache/@instructor-ai-instructor-npm-1.5.0-3fccfeb5ad-287d5d40ef.zip/node_modules/@instructor-ai/instructor/",\
-        "packageDependencies": [\
-          ["@instructor-ai/instructor", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:1.5.0"],\
-          ["@types/openai", null],\
-          ["@types/zod", null],\
-          ["openai", "npm:4.52.1"],\
-          ["zod", "npm:3.23.8"],\
-          ["zod-stream", "virtual:a2a2d3af62523d29a53525902fce1b5f24fa9b87a41a039f50ebe87c54285bdcb5f7991511e9d5eec2c7b6d1bbf3cf9d8b737e2fc24954ff7c4a6cc4329a4252#npm:1.0.3"],\
-          ["zod-validation-error", "virtual:64e0da675fcaa641e6770272fdd4312b61bab61554cdbf392aee3654747b3269834e96da02f542a5bd29e5e8afff46fa12379d47190c15eb18f5bd198c780665#npm:2.1.0"]\
-        ],\
-        "packagePeers": [\
-          "@types/openai",\
-          "@types/zod",\
-          "openai",\
-          "zod"\
-        ],\
-        "linkType": "HARD"\
       }]\
     ]],\
     ["@isaacs/cliui", [\
@@ -4098,11 +4079,11 @@ const RAW_RUNTIME_STATE =
           ["assistants-cli", "workspace:cli"],\
           ["@babel/runtime", "npm:7.24.7"],\
           ["@digdir/assistant-lib", "workspace:packages/assistant-lib"],\
-          ["@instructor-ai/instructor", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:1.5.0"],\
+          ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.5.0"],\
           ["@types/node", "npm:20.14.9"],\
           ["commander", "npm:12.1.0"],\
           ["groq-sdk", "npm:0.5.0"],\
-          ["openai", "npm:4.52.1"],\
+          ["openai", "npm:4.52.3"],\
           ["prettier", "npm:3.3.2"],\
           ["rimraf", "npm:5.0.7"],\
           ["sha1", "npm:1.1.1"],\
@@ -9185,21 +9166,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["openai", [\
-      ["npm:4.52.1", {\
-        "packageLocation": "./.yarn/cache/openai-npm-4.52.1-4e7def6a2d-fc6fffa2a0.zip/node_modules/openai/",\
-        "packageDependencies": [\
-          ["openai", "npm:4.52.1"],\
-          ["@types/node", "npm:18.19.34"],\
-          ["@types/node-fetch", "npm:2.6.11"],\
-          ["abort-controller", "npm:3.0.0"],\
-          ["agentkeepalive", "npm:4.5.0"],\
-          ["form-data-encoder", "npm:1.7.2"],\
-          ["formdata-node", "npm:4.4.1"],\
-          ["node-fetch", "virtual:8602e818c7491250a7a9f6dd3f82878874e778d8cdd4f9f800f7e782be809b3cdfe298afacbbd3cbab9b84dc199206a641fb6bd0497d61869797423136650c5c#npm:2.7.0"],\
-          ["web-streams-polyfill", "npm:3.3.3"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:4.52.3", {\
         "packageLocation": "./.yarn/cache/openai-npm-4.52.3-8602e818c7-c066f6b861.zip/node_modules/openai/",\
         "packageDependencies": [\
@@ -12337,25 +12303,6 @@ const RAW_RUNTIME_STATE =
           ["@types/openai", null],\
           ["@types/zod", null],\
           ["openai", "npm:4.52.3"],\
-          ["schema-stream", "virtual:860df30692e2652168a35d04df8106bec950c4c5d6edd7f0799fdd18e7e3cfc6277a846f46628004652fcc2b59576ed31689b4bdcc365f5c5fc32bd042491fc9#npm:3.1.0"],\
-          ["zod", "npm:3.23.8"],\
-          ["zod-to-json-schema", "virtual:860df30692e2652168a35d04df8106bec950c4c5d6edd7f0799fdd18e7e3cfc6277a846f46628004652fcc2b59576ed31689b4bdcc365f5c5fc32bd042491fc9#npm:3.23.0"]\
-        ],\
-        "packagePeers": [\
-          "@types/openai",\
-          "@types/zod",\
-          "openai",\
-          "zod"\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["virtual:a2a2d3af62523d29a53525902fce1b5f24fa9b87a41a039f50ebe87c54285bdcb5f7991511e9d5eec2c7b6d1bbf3cf9d8b737e2fc24954ff7c4a6cc4329a4252#npm:1.0.3", {\
-        "packageLocation": "./.yarn/__virtual__/zod-stream-virtual-368827243b/0/cache/zod-stream-npm-1.0.3-37f896bd5c-d888f25537.zip/node_modules/zod-stream/",\
-        "packageDependencies": [\
-          ["zod-stream", "virtual:a2a2d3af62523d29a53525902fce1b5f24fa9b87a41a039f50ebe87c54285bdcb5f7991511e9d5eec2c7b6d1bbf3cf9d8b737e2fc24954ff7c4a6cc4329a4252#npm:1.0.3"],\
-          ["@types/openai", null],\
-          ["@types/zod", null],\
-          ["openai", "npm:4.52.1"],\
           ["schema-stream", "virtual:860df30692e2652168a35d04df8106bec950c4c5d6edd7f0799fdd18e7e3cfc6277a846f46628004652fcc2b59576ed31689b4bdcc365f5c5fc32bd042491fc9#npm:3.1.0"],\
           ["zod", "npm:3.23.8"],\
           ["zod-to-json-schema", "virtual:860df30692e2652168a35d04df8106bec950c4c5d6edd7f0799fdd18e7e3cfc6277a846f46628004652fcc2b59576ed31689b4bdcc365f5c5fc32bd042491fc9#npm:3.23.0"]\
