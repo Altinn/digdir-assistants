@@ -36,8 +36,6 @@ jobs:
           containerAppName: assistants-slack-digdir
           containerAppEnvironment: assistants-prod-env
           location: norwayeast
-          ingress: external
-          targetPort: 3000
           imageToBuild: assistantsprodcr.azurecr.io/assistants-slack-release:${{ github.sha }}
           buildArguments: |
             "VITE_SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
