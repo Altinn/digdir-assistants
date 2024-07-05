@@ -32,9 +32,9 @@ jobs:
         with:
           appSourcePath: ${{ github.workspace }} 
           acrName: cada39a32933acr
-          containerAppName: assistants-slack-altinn
+          containerAppName: assistants-slack-digdir
           resourceGroup: altinn-ai-assistant          
-          imageToBuild: cada39a32933acr.azurecr.io/assistants-slack-altinn:${{ github.sha }}
+          imageToBuild: cada39a32933acr.azurecr.io/assistants-slack-digdir:${{ github.sha }}
           buildArguments: |
             "VITE_SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
             "VITE_SLACK_APP_SUPABASE_ANON_KEY=${{secrets.SLACK_APP_SUPABASE_ANON_KEY}}"
