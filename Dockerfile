@@ -6,7 +6,7 @@ ARG VITE_SLACK_APP_SUPABASE_API_URL=default \
 
 
 USER root
-ENV YARN_VERSION 4.2.2
+ENV YARN_VERSION 4.3.1
 ENV YARN_CACHE_FOLDER .yarn/cache
 RUN corepack enable yarn
 RUN yarn policies set-version $YARN_VERSION \
