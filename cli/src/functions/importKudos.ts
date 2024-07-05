@@ -81,7 +81,7 @@ const kudosDocTypesenseSchema: CollectionCreateSchema = {
     { name: 'kudos_published_at', type: 'string', optional: true },
     { name: 'kudos_unpublishable_at', type: 'string', optional: true },
     { name: 'kudos_unpublished_at', type: 'string', optional: true },
-  ]
+  ],
 };
 
 const KudosDocSchema = z.object({
@@ -122,13 +122,13 @@ const KudosChunkSchema = z.object({
   markdown_checksum: z.string(),
   token_count: z.number(),
 });
-type KudosChunk = z.infef<typeof KudosChunkSchema>;
+type KudosChunk = z.infer<typeof KudosChunkSchema>;
 
 const kudosChunkTypesenseSchema = {
   name: 'kudos_chunks',
   fields: [
     { name: 'doc_id', type: 'string', sort: true },
-    { name: 'chunk_index', type: 'int32', sort: true },
+    { name: 'chunk_index', type: 'int64', sort: true },
     {
       name: 'content_markdown',
       type: 'string',
@@ -197,11 +197,11 @@ async function main() {
     .version('0.1.0');
 
   program
-    .requiredOption('-c, --collection <string>', 'typesense collection name for documents')
-    .option('--chunks <string>', 'typesense collection name for document chunks')
-    .option('--firstpage <number>', 'page number to start on (1-based)', 1)
-    .option('--pagesize <number>', 'page size', 10)
-    .option('--pages <number>', 'number of pages to import', 1)
+    .requiredOption('-c, --collection <string>', 'typesense collection name for documents', '')
+    .option('--chunks <string>', 'typesense collection name for document chunks', '')
+    .option('--firstpage <number>', 'page number to start on (1-based)', '1')
+    .option('--pagesize <number>', 'page size', '10')
+    .option('--pages <number>', 'number of pages to import', '1')
     .option('-n', 'create new collection')
     .option('-d, --dryrun', "don't make any changes in target typesense collection");
 
@@ -317,7 +317,7 @@ async function main() {
         ' LIMIT ? OFFSET ?',
       [opts.pagesize, (page - 1) * opts.pagesize],
     );
-    if (rows.length === 0) break;
+    if (rows.length == 0) break;
     if (opts.pages >= 0 && page - opts.firstpage >= opts.pages) break;
 
     for (let i = 0; i < rows.length; i++) {
@@ -361,7 +361,7 @@ async function main() {
         source_page_url: row.source_page_url,
         source_published_at: row.published_at ? row.published_at.toISOString() : null,
         source_created_at: row.created_at ? row.created_at.toISOString() : null,
-        source_updated_at: row.updated_at ? row.updated_at.toISOString() : null,        
+        source_updated_at: row.updated_at ? row.updated_at.toISOString() : null,
         kudos_published_at: row.kudos_published_at ? row.kudos_published_at.toISOString() : null,
         kudos_unpublishable_at: row.kudos_unpublishable_at
           ? row.kudos_unpublishable_at.toISOString()
@@ -398,7 +398,7 @@ async function main() {
 
         const outChunk: KudosChunk = {
           id: row.id + '-' + chunkIndex,
-          doc_id: "" + row.id,
+          doc_id: '' + row.id,
           chunk_index: chunkIndex,
           content_markdown: chunkText,
           url: row.id + '-' + chunkIndex,

@@ -176,7 +176,9 @@ async function main() {
         const checksumMatches = storedChecksum === checksumMd;
 
         if (checksumMatches) {
-          console.log(`Found ${existingPhraseCount} existing phrases and checksum matches, skipping for url: ${url}`);
+          console.log(
+            `Found ${existingPhraseCount} existing phrases and checksum matches, skipping for url: ${url}`,
+          );
           docIndex++;
           continue;
         }
