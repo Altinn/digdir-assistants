@@ -786,16 +786,16 @@ __metadata:
     "@azure/openai": "npm:^1.0.0-beta.12"
     "@babel/runtime": "npm:^7.24.7"
     "@instructor-ai/instructor": "npm:1.5.0"
-    "@supabase/supabase-js": "npm:^2.44.1"
+    "@supabase/supabase-js": "npm:^2.44.2"
     "@types/js-yaml": "npm:^4.0.9"
     "@types/node": "npm:^20.14.9"
     axios: "npm:^1.7.2"
     dataclass: "npm:^2.1.1"
     js-yaml: "npm:^4.1.0"
     lodash: "npm:^4.17.21"
-    openai: "npm:^4.52.1"
+    openai: "npm:^4.52.3"
     prettier: "npm:^3.3.2"
-    remeda: "npm:^2.2.1"
+    remeda: "npm:^2.3.0"
     tiktoken: "npm:^1.0.15"
     typescript: "npm:^5.3.3"
     typesense: "npm:^1.8.2"
@@ -815,7 +815,7 @@ __metadata:
     "@instructor-ai/instructor": "npm:1.5.0"
     "@slack/bolt": "npm:^3.19.0"
     "@slack/web-api": "npm:^6.12.0"
-    "@supabase/supabase-js": "npm:^2.44.1"
+    "@supabase/supabase-js": "npm:^2.44.2"
     "@types/express": "npm:^4.17.21"
     "@types/js-yaml": "npm:^4.0.9"
     "@types/node": "npm:^20.14.9"
@@ -831,10 +831,10 @@ __metadata:
     js-yaml: "npm:^4.1.0"
     lodash: "npm:^4.17.21"
     nodemon: "npm:^3.1.4"
-    openai: "npm:^4.52.1"
+    openai: "npm:^4.52.3"
     prettier: "npm:^3.3.2"
     ramda: "npm:^0.30.1"
-    remeda: "npm:^2.2.1"
+    remeda: "npm:^2.3.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.3.3"
     typesense: "npm:^1.8.2"
@@ -1309,7 +1309,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@instructor-ai/instructor@npm:1.5.0, @instructor-ai/instructor@npm:^1.5.0":
+"@instructor-ai/instructor@npm:1.5.0":
   version: 1.5.0
   resolution: "@instructor-ai/instructor@npm:1.5.0"
   dependencies:
@@ -1426,16 +1426,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/core-downloads-tracker@npm:^5.15.20":
-  version: 5.15.20
-  resolution: "@mui/core-downloads-tracker@npm:5.15.20"
-  checksum: 10c0/0e1f9aa9c85d5f60fa5937edc22dfbebd512671379e3adb7c99a8ef0928bf42daed98cede41a407e810a225554943675e9d976bc0ae17acdc20445c8d2f121b3
+"@mui/core-downloads-tracker@npm:^5.15.21":
+  version: 5.15.21
+  resolution: "@mui/core-downloads-tracker@npm:5.15.21"
+  checksum: 10c0/986d03f08253c839f142f15d2ec8f0b889eb802cdd0306e6fbc678b50689d42334bb8e1d85ca46fa7ff5c69a76657a91830e672059341dc7c1fd74b1cd134481
   languageName: node
   linkType: hard
 
-"@mui/icons-material@npm:^5.15.20":
-  version: 5.15.20
-  resolution: "@mui/icons-material@npm:5.15.20"
+"@mui/icons-material@npm:^5.15.21":
+  version: 5.15.21
+  resolution: "@mui/icons-material@npm:5.15.21"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
   peerDependencies:
@@ -1445,7 +1445,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/3765340625ad0c5181cffbec1a9a52185e9add4d2eda1f8c3e262b11bf9ca1e8cdf87f67f550b300d8c3c31277b7c8bb38261c964f6180d31b3e928a1dc03315
+  checksum: 10c0/28685825504a24aa497715ec519014e780e570d00e8edc8f3423da2cb55b2aa2c44e829429efc9059d82542035e6f121d79a9f503cb6ae19439aca9e5321e959
   languageName: node
   linkType: hard
 
@@ -1478,13 +1478,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/material@npm:^5.15.20":
-  version: 5.15.20
-  resolution: "@mui/material@npm:5.15.20"
+"@mui/material@npm:^5.15.21":
+  version: 5.15.21
+  resolution: "@mui/material@npm:5.15.21"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
     "@mui/base": "npm:5.0.0-beta.40"
-    "@mui/core-downloads-tracker": "npm:^5.15.20"
+    "@mui/core-downloads-tracker": "npm:^5.15.21"
     "@mui/system": "npm:^5.15.20"
     "@mui/types": "npm:^7.2.14"
     "@mui/utils": "npm:^5.15.20"
@@ -1507,7 +1507,7 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: 10c0/0882661f83f5b73c06d6402ddd9c0f8e471198b838c4a456db03a5256d8febc688abc41645156d155536106a44bd28798efcfdaec00b665ab91dbd5c9dee83eb
+  checksum: 10c0/005f8ec036f0742e35c7cf6e3bd6280cd996b416bfdc6ee05ba625d1a62a41bbc077a5244b71eba01016fa0df2b1ba115ef7028c962eed1bdd98108fab024a6e
   languageName: node
   linkType: hard
 
@@ -1744,10 +1744,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/router@npm:1.17.0":
-  version: 1.17.0
-  resolution: "@remix-run/router@npm:1.17.0"
-  checksum: 10c0/6f39cb81c5dec3d3cb901cfc05ef1c745d23192def7d83e6d1a53c43cbb5d7ff488055fd1418ac72f904ff41b3d3ca339d223677994150f276c648123ce166f7
+"@remix-run/router@npm:1.17.1":
+  version: 1.17.1
+  resolution: "@remix-run/router@npm:1.17.1"
+  checksum: 10c0/bee1631feb03975b64e1c7b574da432a05095dda2ff0f164c737e4952841a58d7b9861de87bd13a977fd970c74dcf8c558fc2d26c6ec01a9ae9041b1b4430869
   languageName: node
   linkType: hard
 
@@ -2105,15 +2105,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@supabase/realtime-js@npm:2.10.1":
-  version: 2.10.1
-  resolution: "@supabase/realtime-js@npm:2.10.1"
+"@supabase/realtime-js@npm:2.10.2":
+  version: 2.10.2
+  resolution: "@supabase/realtime-js@npm:2.10.2"
   dependencies:
     "@supabase/node-fetch": "npm:^2.6.14"
     "@types/phoenix": "npm:^1.5.4"
     "@types/ws": "npm:^8.5.10"
     ws: "npm:^8.14.2"
-  checksum: 10c0/5528795623b0464c7ce1e86f36732673f923413036a2173e716ababa64bd6fd31e9886c66a14e0102130a14c287c71e66379a3a5caa451e00ea2a5965302c0e8
+  checksum: 10c0/d33bb7c124c5014ad3f308bb9837f74a33e408976595bda2a8955e2685e89654259738cb2409c31a3aef3892d22d3986c2880437083a87f1a47e828dd2f27eb9
   languageName: node
   linkType: hard
 
@@ -2126,17 +2126,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@supabase/supabase-js@npm:^2.44.1":
-  version: 2.44.1
-  resolution: "@supabase/supabase-js@npm:2.44.1"
+"@supabase/supabase-js@npm:^2.44.2":
+  version: 2.44.2
+  resolution: "@supabase/supabase-js@npm:2.44.2"
   dependencies:
     "@supabase/auth-js": "npm:2.64.2"
     "@supabase/functions-js": "npm:2.4.1"
     "@supabase/node-fetch": "npm:2.6.15"
     "@supabase/postgrest-js": "npm:1.15.7"
-    "@supabase/realtime-js": "npm:2.10.1"
+    "@supabase/realtime-js": "npm:2.10.2"
     "@supabase/storage-js": "npm:2.6.0"
-  checksum: 10c0/6d500152573d41b7325299d32d669ed5362cc6ea13bf3d51ef25f167ce82258d4c7e578f816f8ae4f74a9d04929b6e96813fa812d1708ce86d361da9ea28872f
+  checksum: 10c0/49368f03d390c69a8c02d857bf49de50e80f75d3d449e1f096559788c55267391a6683df948bc22f07e8271ff2fc99e624c7c4edd36211d4f49ee693fb4bb4e3
   languageName: node
   linkType: hard
 
@@ -2149,21 +2149,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:5.48.0":
-  version: 5.48.0
-  resolution: "@tanstack/query-core@npm:5.48.0"
-  checksum: 10c0/7c21d91e326fdfe89077832d050cd13eac0e55796d88b6978ccc6e0d85571b22596c1f9364e2ac39a00739e1e63be559d2cf9d8faf0a954bdd25b0a55daa3311
+"@tanstack/query-core@npm:5.49.1":
+  version: 5.49.1
+  resolution: "@tanstack/query-core@npm:5.49.1"
+  checksum: 10c0/96cd7a22f16f9014083d60b136d430714b84cb06cbd8de863a787ca4e3bd58d3ddfa06fa6390e78fabf62878fdf593e342b9c0210ab443c329e5460134dfa90b
   languageName: node
   linkType: hard
 
-"@tanstack/react-query@npm:^5.48.0":
-  version: 5.48.0
-  resolution: "@tanstack/react-query@npm:5.48.0"
+"@tanstack/react-query@npm:^5.49.2":
+  version: 5.49.2
+  resolution: "@tanstack/react-query@npm:5.49.2"
   dependencies:
-    "@tanstack/query-core": "npm:5.48.0"
+    "@tanstack/query-core": "npm:5.49.1"
   peerDependencies:
     react: ^18.0.0
-  checksum: 10c0/dd4a6f9efaa4eda6767a0059da59d8a89a543d92f9f2236797f3a4dde6422b178a88c4051feac2d08bf4a469187a743330b45bf2bac53c36f5fa3459c9dd55ac
+  checksum: 10c0/c69702487e5e1c0a9758b96c21a7ce3bace1336a61c01f260d7927724a441f01c7d8074d89d317c8001480ac65e7b5762327ff3b3c9fe6d568186488f0dad430
   languageName: node
   linkType: hard
 
@@ -3157,15 +3157,15 @@ __metadata:
     "@fortawesome/fontawesome-svg-core": "npm:^6.5.2"
     "@fortawesome/free-solid-svg-icons": "npm:^6.5.2"
     "@fortawesome/react-fontawesome": "npm:^0.2.2"
-    "@mui/icons-material": "npm:^5.15.20"
+    "@mui/icons-material": "npm:^5.15.21"
     "@mui/lab": "npm:^5.0.0-alpha.170"
-    "@mui/material": "npm:^5.15.20"
+    "@mui/material": "npm:^5.15.21"
     "@mui/system": "npm:^5.15.20"
     "@slack/oauth": "npm:^3.0.0"
     "@supabase/auth-ui-react": "npm:^0.4.7"
     "@supabase/auth-ui-shared": "npm:^0.1.8"
-    "@supabase/supabase-js": "npm:^2.44.1"
-    "@tanstack/react-query": "npm:^5.48.0"
+    "@supabase/supabase-js": "npm:^2.44.2"
+    "@tanstack/react-query": "npm:^5.49.2"
     "@types/js-yaml": "npm:^4.0.9"
     "@types/node": "npm:^20.14.9"
     "@types/react": "npm:^18.3.3"
@@ -3178,7 +3178,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-markdown: "npm:^9.0.1"
-    react-router-dom: "npm:^6.24.0"
+    react-router-dom: "npm:^6.24.1"
     react-syntax-highlighter: "npm:^15.5.0"
     typescript: "npm:^5.4.3"
     vite: "npm:^5.3.2"
@@ -3192,11 +3192,11 @@ __metadata:
   dependencies:
     "@babel/runtime": "npm:^7.24.7"
     "@digdir/assistant-lib": "npm:1.0.0"
-    "@instructor-ai/instructor": "npm:^1.5.0"
+    "@instructor-ai/instructor": "npm:1.5.0"
     "@types/node": "npm:^20.14.9"
     commander: "npm:^12.1.0"
     groq-sdk: "npm:^0.5.0"
-    openai: "npm:^4.52.1"
+    openai: "npm:^4.52.3"
     prettier: "npm:^3.3.2"
     rimraf: "npm:^5.0.7"
     sha1: "npm:^1.1.1"
@@ -7691,9 +7691,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openai@npm:^4.52.1":
-  version: 4.52.1
-  resolution: "openai@npm:4.52.1"
+"openai@npm:^4.52.3":
+  version: 4.52.3
+  resolution: "openai@npm:4.52.3"
   dependencies:
     "@types/node": "npm:^18.11.18"
     "@types/node-fetch": "npm:^2.6.4"
@@ -7705,7 +7705,7 @@ __metadata:
     web-streams-polyfill: "npm:^3.2.1"
   bin:
     openai: bin/cli
-  checksum: 10c0/fc6fffa2a06795a51f3767fcb4b1f77e7c2c9f8b235b61c40d3bbed1ef13b0a704586eadf3b4a79d11e147b827a29417315566c2c305c83fd85582d095b17c46
+  checksum: 10c0/c066f6b861eb9ee485f2dd8b96af2ffaeb333c959e0829aa8a38f1f1711796906bcd00ac4af900df4d083b65df51e206d4b5ba66fbff4da6a761a7b1ce810a3e
   languageName: node
   linkType: hard
 
@@ -8378,27 +8378,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^6.24.0":
-  version: 6.24.0
-  resolution: "react-router-dom@npm:6.24.0"
+"react-router-dom@npm:^6.24.1":
+  version: 6.24.1
+  resolution: "react-router-dom@npm:6.24.1"
   dependencies:
-    "@remix-run/router": "npm:1.17.0"
-    react-router: "npm:6.24.0"
+    "@remix-run/router": "npm:1.17.1"
+    react-router: "npm:6.24.1"
   peerDependencies:
     react: ">=16.8"
     react-dom: ">=16.8"
-  checksum: 10c0/2cb41120c1ff58fd1e187807214cf581e78e2845e5f411aa6a04f4748bd100431fd1ac5f8a45db281ea03d0d2354b66896b938c0b77adf7b343a6c1be52411de
+  checksum: 10c0/458c6c539304984c47b0ad8d5d5b1f8859cc0845e47591d530cb4fcb13498f70a89b42bc4daeea55d57cfa08408b453bcf601cabb2c987f554cdcac13805caa8
   languageName: node
   linkType: hard
 
-"react-router@npm:6.24.0":
-  version: 6.24.0
-  resolution: "react-router@npm:6.24.0"
+"react-router@npm:6.24.1":
+  version: 6.24.1
+  resolution: "react-router@npm:6.24.1"
   dependencies:
-    "@remix-run/router": "npm:1.17.0"
+    "@remix-run/router": "npm:1.17.1"
   peerDependencies:
     react: ">=16.8"
-  checksum: 10c0/ad9c924d16dc4f5c90dff588e9a69d37488d2ad537de1ddbdf3b68561658c6e3fd1b8b12d16d50f19177f6547748c54e948d477e921f9230799ac71acfec24cf
+  checksum: 10c0/f50c78ca52c5154ab933c17708125e8bf71ccf2072993a80302526a0a23db9ceac6e36d5c891d62ccd16f13e60cd1b6533a2036523d1b09e0148ac49e34b2e83
   languageName: node
   linkType: hard
 
@@ -8540,12 +8540,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"remeda@npm:^2.2.1":
-  version: 2.2.1
-  resolution: "remeda@npm:2.2.1"
+"remeda@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "remeda@npm:2.3.0"
   dependencies:
     type-fest: "npm:^4.20.1"
-  checksum: 10c0/7af4e8ea0b6962a7f5cf836e3823fc58c268a30bea8f202ca9545e4a613211ad1f0abb865dfbaf8b6a9b95d80aa390e634f35ec854c3fed0ceda8f0c7b92834b
+  checksum: 10c0/9b064ebdfeb8b78af7a12dc7a07784104e69305694e3537dca50dc31e5f7f3291dfafb50c68adb46494c83838160b7c5073c2fa238bb4a23afd630457c2abf26
   languageName: node
   linkType: hard
 
