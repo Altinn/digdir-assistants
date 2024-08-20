@@ -51,6 +51,7 @@ async function main() {
       'https://docs.altinn.studio/community/changelog/app-nuget',
       'https://docs.altinn.studio/community/about/slide/',
       'https://docs.altinn.studio/nb/',
+      'https://docs.altinn.studio/community/contributing/intro/',
     ];
 
     return urls.filter(
