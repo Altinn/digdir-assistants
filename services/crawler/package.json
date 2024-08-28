@@ -1,6 +1,6 @@
 {
   "name": "assistant-crawler",
-  "packageManager": "yarn@4.3.1",
+  "packageManager": "yarn@4.4.1",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
     "@digdir/assistant-lib": "1.0.0",
     "commander": "^12.1.0",
     "crawlee": "^3.10.5",
-    "playwright": "1.45.0",
+    "playwright": "1.46.1",
     "prettier": "^3.3.2",
     "sha1": "^1.1.1",
     "tiktoken": "^1.0.15",
@@ -22,7 +22,7 @@
     "typesense": "^1.8.2"
   },
   "devDependencies": {
-    "@playwright/test": "1.45.0",
+    "@playwright/test": "1.46.1",
     "@types/node": "^20.14.9",
     "@types/sha1": "^1.1.5",
     "@types/turndown": "^5.0.4",

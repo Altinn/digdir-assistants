@@ -1,6 +1,6 @@
 {
   "name": "@digdir/assistant-lib",
-  "packageManager": "yarn@4.3.1",
+  "packageManager": "yarn@4.4.1",
   "private": true,
   "version": "1.0.0",
   "description": "Core assistant library",
