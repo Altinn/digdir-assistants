@@ -28,7 +28,7 @@
     "@types/turndown": "^5.0.4",
     "rimraf": "^6.0.0",
     "tsx": "^4.15.7",
-    "typescript": "5.4.5"
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "clean": "rimraf ./dist/",
