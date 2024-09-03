@@ -10,7 +10,7 @@
 
 (defn import-collection [collection-name filename]
   (let [url (str "https://" (get-in typesense-config [:nodes 0 :host]) "/collections/" collection-name "/documents/import")
-        curl-command (str "curl -X POST -H \"X-TYPESENSE-API-KEY: " (:api-key typesense-config) "\" -H \"Content-Type: application/jsonl\" --data-binary @" filename " " url)]
+        curl-command (str "curl -X POST -H \"X-TYPESENSE-API-KEY: " (:api-key typesense-config) "\" -H \"Content-Type: application/jsonl\" -T " filename " " url)]
     (-> (shell {:out :string} curl-command)
         :out)))
 

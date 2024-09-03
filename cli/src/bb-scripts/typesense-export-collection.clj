@@ -8,25 +8,24 @@
             :protocol "https"}]
    :api-key (System/getenv "TYPESENSE_API_KEY_ADMIN")})
 
-(defn export-collection [collection-name]
+(defn export-collection [collection-name output-file]
   (let [url (str "https://" (get-in typesense-config [:nodes 0 :host]) "/collections/" collection-name "/documents/export")
-        curl-command (str "curl -H \"X-TYPESENSE-API-KEY: " (:api-key typesense-config) "\" " url)]
-    (-> (shell {:out :string} curl-command)
-        :out
-        #_str/split-lines)))
-
-(defn save-to-file [data filename]
-  (if (.exists (java.io.File. filename))
-    (do
-      (print (str "File " filename " already exists. Overwrite? (y/n): "))
-      (flush)
-      (let [response (read-line)]
-        (if (= (clojure.string/lower-case response) "y")
-          (spit filename data)
-          (do
-            (println "Export cancelled.")
-            (System/exit 0)))))
-    (spit filename data)))
+        curl-command (str "curl -H \"X-TYPESENSE-API-KEY: " (:api-key typesense-config) "\" " url " -o " output-file)]
+    (if (.exists (java.io.File. output-file))
+      (do
+        (print (str "File " output-file " already exists. Overwrite? (y/n): "))
+        (flush)
+        (let [response (read-line)]
+          (if (= (clojure.string/lower-case response) "y")
+            (do
+              (shell curl-command)
+              true)
+            (do
+              (println "Export cancelled.")
+              false))))
+      (do
+        (shell curl-command)
+        true))))
 
 (let [collection-name (first *command-line-args*)
       current-date (-> (java.time.LocalDate/now)
@@ -35,9 +34,24 @@
   (if collection-name
     (do
       (println "Exporting collection:" collection-name)
-      (let [exported-data (export-collection collection-name)
-            newline-count (count (filter #(= % \newline) exported-data))
-            ]
-        (save-to-file exported-data output-file)
-        (println "Exported" newline-count "documents to" output-file)))
+      (if (export-collection collection-name output-file)
+        (do
+          (println "Export completed. File saved as" output-file)
+
+          (let [file-size (.length (java.io.File. output-file))
+                size-mb (/ file-size (* 1024 1024))]
+            (if (> size-mb 500)
+              (do
+                (print "The file is larger than 500 MB. Do you want to count the number of documents? This may take a while. (y/n): ")
+                (flush)
+                (let [response (read-line)]
+                  (if (= (clojure.string/lower-case response) "y")
+                    (let [line-count (with-open [rdr (clojure.java.io/reader output-file)]
+                                       (count (line-seq rdr)))]
+                      (println "Exported" line-count "documents to" output-file))
+                    (println "Skipped counting documents."))))
+              (let [line-count (with-open [rdr (clojure.java.io/reader output-file)]
+                                 (count (line-seq rdr)))]
+                (println "Exported" line-count "documents to" output-file)))))
+        (System/exit 1)))
     (println "Please provide a collection name as an argument.")))
