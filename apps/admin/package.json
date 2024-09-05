@@ -22,7 +22,7 @@
     "@mui/icons-material": "^5.15.21",
     "@mui/lab": "^5.0.0-alpha.170",
     "@mui/material": "^5.15.21",
-    "@mui/system": "^5.15.20",
+    "@mui/system": "^6.0.0",
     "@slack/oauth": "^3.0.1",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
