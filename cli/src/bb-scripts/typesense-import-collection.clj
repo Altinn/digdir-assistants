@@ -38,11 +38,10 @@
       (println "Importing documents into collection:" collection-name)
       (when (and field value)
         (println "Applying filter:" field "=" value))
-      (let [temp-file (str #_(System/getProperty "java.io.tmpdir") 
-                           "."
+      (let [temp-file (str (System/getProperty "java.io.tmpdir")
                            "/typesense_import_temp.jsonl")]
         (filter-documents input-file temp-file field value)
         (let [imported-data (import-collection collection-name temp-file)]
           (println "Import result:" imported-data)
-          #_(io/delete-file temp-file))))
+          (io/delete-file temp-file))))
     (println "Usage: <collection-name> <input-file> [field] [value]")))
