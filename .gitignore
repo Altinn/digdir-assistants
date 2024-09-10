@@ -16,3 +16,4 @@ temp/
 .lsp
 .nrepl-port
 .shadow-cljs
+**/.calva/
