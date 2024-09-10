@@ -11,16 +11,17 @@
             :protocol "https"}]
    :api-key (System/getenv "TYPESENSE_API_KEY_ADMIN")})
  
-(defn filter-documents [input-file output-file field value take]
+(defn filter-documents [input-file output-file field value take skip]
   (with-open [rdr (io/reader input-file)
               wtr (io/writer output-file)]
     (->> (line-seq rdr)
+         (drop (or skip 0)) ;; Skip the specified number of documents
          (keep (fn [line]
                  (let [doc (json/parse-string line true)]
                    (when (or (nil? field)
                              (= (get doc (keyword field)) value))
                      line))))
-         (clojure.core/take (or take Long/MAX_VALUE))  ;; Updated this line to handle the take logic
+         (clojure.core/take (or take Long/MAX_VALUE))
          (run! #(.write wtr (str % "\n"))))))
 
 
@@ -37,6 +38,8 @@
    ["-v" "--value VALUE" "Value to filter by"]
    ["-t" "--take TAKE" "Number of documents to import"
     :parse-fn #(Integer/parseInt %)]
+   ["-s" "--skip SKIP" "Number of documents to skip"
+    :parse-fn #(Integer/parseInt %)] ;; Added skip option
    ["-h" "--help"]])
 
 (defn -main [& args]
@@ -50,20 +53,22 @@
                                   (System/exit 1))
       :else
       (let [[collection-name input-file] arguments
-            {:keys [field value take]} options]
+            {:keys [field value take skip]} options] ;; Added skip to options
         (println "Importing documents into collection:" collection-name)
         (when (and field value)
           (println "Applying filter:" field "=" value))
         (when take
           (println "Limiting import to" take "documents"))
+        (when skip
+          (println "Skipping first" skip "documents"))
         (let [temp-file (str #_(System/getProperty "java.io.tmpdir")
-                             "."
+                         "."
                              "/typesense_import_temp.jsonl")]
-          (filter-documents input-file temp-file field value take)
+          (filter-documents input-file temp-file field value take skip) ;; Pass skip to filter-documents
 
           (let [imported-data (import-collection collection-name temp-file)
-                parsed-data (json/parse-string imported-data true) ;; Parse the imported data
-                code-counts (frequencies (map :code parsed-data))] ;; Count occurrences of :code
+                parsed-data (json/parse-string imported-data true)
+                code-counts (frequencies (map :code parsed-data))]
             (println "Import result:" parsed-data)
-            (println "Summary of :code counts:" code-counts) ;; Display the summary
+            (println "Summary of :code counts:" code-counts)
             #_(io/delete-file temp-file)))))))
