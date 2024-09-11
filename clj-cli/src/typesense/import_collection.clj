@@ -67,9 +67,9 @@
         (when (contains? existing-key-field-values value)
           (.write wtr (str (json/generate-string doc) "\n"))
           (swap! written-count inc)))) ;; Increment the counter
-    (prn "Imported " @written-count " documents"))) ;; Print the count after processing
+    (println "Searched for " (count unique-key-field-values) ", found " @written-count " existing parent documents"))) ;; Print the count after processing
 
-(defn filter-existing-documents [target-collection-name target-field-name input-file output-file]
+(defn filter-existing-documents [target-collection-name target-field-name input-file output-file batch-size]
   (let [reference-info (get-reference-info target-collection-name target-field-name)]
     (if-not reference-info
       (println "No reference information found for" target-field-name "in" target-collection-name)
@@ -77,17 +77,34 @@
             _ (prn " lookup-collection: " collection " lookup-field-name: " field-name)]
         (with-open [rdr (io/reader input-file)
                     wtr (io/writer output-file)]
-          (doseq [batch (partition-all 100 (line-seq rdr))]
+          (doseq [batch (partition-all batch-size (line-seq rdr))]
             (process-batch collection target-field-name field-name 
                            (map #(json/parse-string % true) batch) wtr)))))))
 
 
-(defn import-collection [collection-name filename]
-  (let [url (str "https://" (get-in typesense-config [:nodes 0 :host]) "/collections/" collection-name "/documents/import")]
-    (:body (http/post url
-                      {:headers {"X-TYPESENSE-API-KEY" (:api-key typesense-config)
-                                 "Content-Type" "application/jsonl"}
-                       :body (slurp filename)}))))
+(defn import-collection [collection-name filename batch-size max-batches]
+  (let [url (str "https://" (get-in typesense-config [:nodes 0 :host]) "/collections/" collection-name "/documents/import")
+        batch-counter (atom 0)
+        max-batches (or max-batches Integer/MAX_VALUE)] 
+    (with-open [rdr (io/reader filename)]
+      (doseq [batch (partition-all batch-size (line-seq rdr))]
+        (let [temp-file (str "." "/typesense_import_batch_temp.jsonl")] 
+          (when (< @batch-counter max-batches)
+            (swap! batch-counter inc)
+            (with-open [wtr (io/writer temp-file)] 
+              (doseq [line batch]
+                (.write wtr (str line "\n"))))
+          ;; Import the batch
+            (let [response
+                  (:body
+                   (http/post url
+                              {:headers {"X-TYPESENSE-API-KEY" (:api-key typesense-config)
+                                         "Content-Type" "application/jsonl"}
+                               :body (slurp temp-file)}))]
+              (when (not= "{\"success\":true}" response)
+                (println "Batch import result:" response)))
+          ;; Optionally delete the temp file after each batch
+            (io/delete-file temp-file)))))))
 
 (def cli-options
   [["-f" "--field FIELD" "Field to filter on"]
@@ -127,8 +144,8 @@
             (let [next-input-file @next-output-file
                   _ (reset! next-output-file (str "." "/typesense_import_exists.jsonl"))]
               (prn "Only inserting documents that match in parent collection.")
-              (filter-existing-documents collection-name key-field next-input-file @next-output-file)))
-          (let [imported-data (import-collection collection-name @next-output-file)
+              (filter-existing-documents collection-name key-field next-input-file @next-output-file 100)))
+          (let [imported-data (import-collection collection-name @next-output-file 100 nil)
                 parsed-data (json/parse-string imported-data true)
                 code-counts (frequencies (map :code parsed-data))]
             (println "Import result:" parsed-data)
@@ -136,3 +153,29 @@
             #_(io/delete-file temp-file))
           ;;
           )))))
+
+(comment
+
+  (filter-documents
+   "./STAGING_kudos-phrases_2024-09-03_export_20240909_fixed.jsonl" ;; input-file
+   "./STAGING_kodus-phrases_2024-09-03_filtered.jsonl" ;; output-file
+   nil ;; field to filter on
+   nil ;; value to filter on
+   nil ;; take all
+   0  ;; skip none)
+   )
+
+  (filter-existing-documents
+   "DEV_kudos-phrases_2024-09-09"
+   "chunk_id" ;; key-field
+   "./STAGING_kodus-phrases_2024-09-03_filtered.jsonl"
+   "./STAGING_kudos-phrases_2024-09-03_ready-to-import.jsonl"
+   100)
+
+  (import-collection
+   "DEV_kudos-phrases_2024-09-09"
+   "STAGING_kudos-phrases_2024-09-03_ready-to-import.jsonl"
+   100 nil)
+  
+  ;;
+  )
