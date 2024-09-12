@@ -22,7 +22,7 @@
     "@instructor-ai/instructor": "1.5.0",
     "@types/node": "^22.5.1",
     "commander": "^12.1.0",
-    "groq-sdk": "^0.6.0",
+    "groq-sdk": "^0.7.0",
     "openai": "^4.56.1",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
