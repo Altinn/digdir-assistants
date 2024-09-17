@@ -312,8 +312,8 @@ async function main() {
   while (true) {
     console.log(`Loading ${opts.pagesize} documents from page ${page}`);
     const [rows] = await connection.execute(
-      "SELECT * FROM documents WHERE (type = 'Tildelingsbrev' OR type = 'Årsrapport')" +
-        " AND (published_at > '2022-01-01 00:00:00.000') AND (published_at < '2023-01-01 00:00:00.000')" +
+      "SELECT * FROM documents WHERE (type = 'Evaluering')" +
+        " AND (published_at > '2021-01-01 00:00:00.000') AND (published_at < '2023-01-01 00:00:00.000')" +
         ' LIMIT ? OFFSET ?',
       [opts.pagesize, (page - 1) * opts.pagesize],
     );
@@ -348,7 +348,7 @@ async function main() {
       const doc: KudosDoc = {
         id: '' + row.id,
         uuid: row.uuid,
-        url_without_anchor: row.source_document_url,
+        url_without_anchor: row.source_document_url ? row.source_document_url : "https://unknown",
         updated_at: Math.floor(new Date().getTime() / 1000),
         type: row.type,
         title: row.title,
@@ -397,12 +397,12 @@ async function main() {
         const markdown_checksum = sha1(chunkText);
 
         const outChunk: KudosChunk = {
-          id: row.id + '-' + chunkIndex,
+          id: '' + row.id + '-' + chunkIndex,
           doc_id: '' + row.id,
           chunk_index: chunkIndex,
           content_markdown: chunkText,
           url: row.id + '-' + chunkIndex,
-          url_without_anchor: row.id + '-' + chunkIndex,
+          url_without_anchor: '' + row.id + '-' + chunkIndex,
           type: 'content',
           item_priority: 1,
           language: 'no',
