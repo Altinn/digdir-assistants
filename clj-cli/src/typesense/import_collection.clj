@@ -156,6 +156,26 @@
 
 (comment
 
+  (import-collection
+   "DEV_kudos-docs_2024-09-09"
+   "STAGING_kudos-docs_2024-09-03_export_20240909_fixed.jsonl"
+   100 nil)
+
+  ;;DEV_kudos-chunks_2024-09-09  --key-field doc_num
+
+  (filter-existing-documents
+   "DEV_kudos-chunks_2024-09-09"
+   "doc_num"
+   "./STAGING_kudos-chunks_2024-09-03_export_20240909_fixed.jsonl"
+   "./STAGING_kodus-chunks_2024-09-03_filtered.jsonl"
+   100)
+
+  (import-collection
+   "DEV_kudos-chunks_2024-09-09"
+   "./STAGING_kodus-chunks_2024-09-03_filtered.jsonl"
+   100 nil)
+
+
   (filter-documents
    "./STAGING_kudos-phrases_2024-09-03_export_20240909_fixed.jsonl" ;; input-file
    "./STAGING_kodus-phrases_2024-09-03_filtered.jsonl" ;; output-file
@@ -175,7 +195,10 @@
   (import-collection
    "DEV_kudos-phrases_2024-09-09"
    "STAGING_kudos-phrases_2024-09-03_ready-to-import.jsonl"
-   100 nil)
-  
+   5000 nil)
+
+
+
+  (+ 1 1)
   ;;
   )
