@@ -708,19 +708,19 @@ async function debugMessageBlocks(
     console.log('source_urls:', JSON.stringify(loadedChunksResponse, null, 2));
   }
 
-  const docIdsForChunks = flatMap(loadedChunksResponse.results, (result: any) =>
+  const docNumsForChunks = flatMap(loadedChunksResponse.results, (result: any) =>
     flatMap(result.grouped_hits, (grouped_hit: any) =>
       grouped_hit.hits.map((hit: any) => {
-        return hit.document.doc_id;
+        return hit.document.doc_num;
       }),
     ),
   );
 
-  const uniqueDocIdsForChunks = [...new Set(docIdsForChunks)];
+  const uniqueDocNumsForChunks = [...new Set(docNumsForChunks)];
 
-  console.log(`docIdsForChunks: ${JSON.stringify(uniqueDocIdsForChunks)}`);
+  console.log(`docIdsForChunks: ${JSON.stringify(uniqueDocNumsForChunks)}`);
 
-  const chunkDocs = await getDocsById('NEXT_kudos-docs_2024-07-02', uniqueDocIdsForChunks);
+  const chunkDocs = await getDocsById('NEXT_kudos-docs_2024-07-02', uniqueDocNumsForChunks);
 
   console.log(`Retrieved ${chunkDocs.length} docs.`);
 
@@ -733,7 +733,7 @@ async function debugMessageBlocks(
         let result = hit.document.content_markdown || '';
         result = result.replace(/(?<!\n)\n(?!\n)/g, ' '); // .replace('\f', '');
 
-        const chunkDoc = chunkDocs.find((doc) => doc.id == hit.document.doc_id);
+        const chunkDoc = chunkDocs.find((doc) => doc.doc_num == hit.document.doc_num);
         const header = `Source (${hit.document.url_without_anchor}): [${chunkDoc?.title || ''}](${chunkDoc?.url_without_anchor || ''}) \n\n`;
         return header + '```\n' + result + '\n```\n';
         // return result;

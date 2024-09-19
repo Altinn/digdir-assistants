@@ -229,7 +229,8 @@ async function main() {
       for (const [index, phrase] of searchPhrases.entries()) {
         console.log(phrase);
         const entry: SearchPhraseEntry = {
-          doc_id: searchHit.id || '',
+          id: '' + searchHit.id + '-' + index,
+          chunk_id: '' + searchHit.id || '',
           url: url,
           search_phrase: phrase,
           sort_order: index,

@@ -13,7 +13,8 @@ export interface SearchPhraseDoc {
 
 export interface SearchPhraseEntry {
   id?: string;
-  doc_id: string;
+  chunk_id?: string;
+  doc_num: string;
   url: string;
   search_phrase: string;
   sort_order: number;
@@ -178,7 +179,7 @@ export async function setupSearchPhraseSchema(collectionNameTmp: string): Promis
   const schema: CollectionCreateSchema = {
     name: collectionNameTmp,
     fields: [
-      { name: 'doc_id', type: 'string', optional: false },
+      { name: 'doc_num', type: 'string', optional: false },
       {
         name: 'url',
         type: 'string',
@@ -240,7 +241,7 @@ export async function lookupSearchPhrases(
         collection: collectionName,
         q: '*',
         query_by: 'url',
-        include_fields: 'id,doc_id,url,search_phrase,sort_order,updated_at,checksum',
+        include_fields: 'id,doc_num,url,search_phrase,sort_order,updated_at,checksum',
         filter_by: `url:=\`${url}\` && prompt:=\`${prompt}\``,
         sort_by: 'updated_at:desc',
         per_page: 30,

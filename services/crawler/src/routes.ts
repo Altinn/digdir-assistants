@@ -1,12 +1,28 @@
 import { createPlaywrightRouter } from '@crawlee/playwright';
+import * as apifyLog from '@apify/log';
 import { Locator } from '@playwright/test';
 import TurndownService from 'turndown';
 import sha1 from 'sha1';
-import { RagDoc, updateDocs, getDocChecksums, countTokens } from '@digdir/assistant-lib';
+import { get_encoding } from 'tiktoken';
+import { RagDoc, RagChunk, updateDocs, updateChunks, getDocChecksums, findChunks, ImportResponse } from '@digdir/assistant-lib';
 import { URL } from 'url';
 
 const turndownService = new TurndownService();
 const tokenCountWarningThreshold = 20;
+
+const chunkImportBatchSize = 40;
+const maxChunkLength = 4000;
+const minChunkLength = 3000;
+
+const sectionDelim = '\n\n';
+const sectionDelimLen = sectionDelim.length;
+
+let sumTokens = 0;
+let sumDocs = 0;
+let sumChunks = 0;
+let chunksCollectionName = '';
+
+const encoding = get_encoding('cl100k_base');
 
 type FilterUrlsToCrawl = (urls: string[]) => string[];
 
@@ -36,6 +52,8 @@ export async function defaultHandler(
   { page, request, log, crawler, pushData },
 ) {
   const startUrl = request.url;
+
+  chunksCollectionName = collectionName.replace('docs', 'chunks');
   await page.waitForLoadState('networkidle');
 
   const fullPageUrl = page.url();
@@ -52,9 +70,20 @@ export async function defaultHandler(
     });
   }
 
-  const locators = getLocators(request, page);
+  const titleLocator = getTitleLocator(request, page);
+  const titleElements = await Promise.all(
+    titleLocator.map(async (locator) => {
+      const elements = await locator.all();
+      const textContents = await Promise.all(elements.map((element) => element.innerText()));
+      log.info(`found title: ${textContents.join(' / ')}`);
+      return textContents.join(' / ');
+    }),
+  );
+  const title = titleElements.join(" / ");  
+
+  const contentLocators = getContentLocators(request, page);
   const contents = await Promise.all(
-    locators.map(async (locator) => {
+    contentLocators.map(async (locator) => {
       const elements = await locator.all();
       const innerHTMLs = await Promise.all(elements.map((element) => element.innerHTML()));
 
@@ -83,33 +112,34 @@ export async function defaultHandler(
     }),
   );
 
+
   const markdown = turndownService.turndown(contents.join('\n\n'));
-  //   log.info('Generating sha1 hash: ' + hash);
 
   const markdown_checksum = sha1(markdown);
   const urlHash = sha1(pageUrl_without_anchor);
+  const tokens = encoding.encode(markdown);
+  sumTokens += tokens.length;
+
+  sumDocs += 1;
 
   const updatedDoc: RagDoc = {
-    id: urlHash,
-    content_markdown: markdown,
+    id: '' + urlHash,
+    doc_num: '' + urlHash,
+    uuid: '' + urlHash,
+    title: title,
     url: pageUrl_without_anchor,
     url_without_anchor: pageUrl_without_anchor,
+    source_document_url: pageUrl_without_anchor,
+    source_updated_at: new Date().toISOString(),
     type: 'content',
     item_priority: 1,
     updated_at: Math.floor(new Date().getTime() / 1000),
     markdown_checksum: markdown_checksum,
-    token_count: countTokens(markdown),
   };
   if (!markdown.trim()) {
     log.error(`No content extracted from '${pageUrl_without_anchor}'`);
     return;
   }
-  if ((updatedDoc.token_count || 0) < tokenCountWarningThreshold) {
-    log.warning(
-      `Only ${updatedDoc.token_count} tokens extracted\n from ${pageUrl_without_anchor}\n consider verifying the locators for this url.`,
-    );
-  }
-
   const currentDocs = await getDocChecksums(collectionName, [urlHash]);
 
   if (
@@ -123,22 +153,120 @@ export async function defaultHandler(
         `Possible redirect, not updating yet...\noriginal url: ${currentDocs[0].url_without_anchor}\nnew url:   ${pageUrl_without_anchor}`,
       );
     } else {
-      log.info(`Tokens: ${updatedDoc.token_count}, no change for url: ${pageUrl_without_anchor}`);
+      log.info(`  [NO CHANGE] tokens: ${tokens.length}, No change for url: ${pageUrl_without_anchor}`);
     }
   } else {
-    log.info(`Tokens: ${updatedDoc.token_count}, updating doc for url '${pageUrl_without_anchor}'`);
-    await updateDocs([updatedDoc], collectionName);
+    log.info(`[UPDATED] tokens: ${tokens.length}, Updating doc for url '${pageUrl_without_anchor}'`);
+
+    const docResults = await updateDocs([updatedDoc], collectionName);
+
+    const failedDocs = docResults.filter((result: any) => !result.success);
+    if (failedDocs.length > 0) {
+      log.error(
+        `Upsert to typesense failed for the following urls:\n${failedDocs}`,
+      );
+    }
+
+    const chunkResults = await chunkDocContents(markdown, urlHash, log);
+    const failedChunks = chunkResults.filter((result: any) => !result.success);
+    if (failedChunks.length > 0) {
+      log.error(
+        `Upsert to typesense failed for the following urls:\n${failedChunks}`,
+      );
+    }
   }
 
   await pushData({
     status: 'success',
-    tokens: updatedDoc.token_count,
+    tokens: tokens.length,
     url: pageUrl_without_anchor,
     title: await page.title(),
   });
+
+  log.info(`    -- tokens: ${sumTokens}, docs: ${sumDocs}, chunks: ${sumChunks}`);
+
 }
 
-function getLocators(request, page): Locator[] {
+async function chunkDocContents(markdown: string, urlHash: string, log: apifyLog.Log) {
+
+  const chunkLengths = await findChunks(
+    markdown,
+    sectionDelim,
+    minChunkLength,
+    maxChunkLength,
+  );
+
+  sumChunks += chunkLengths.length;
+  let batch: RagChunk[] = [];
+
+  if ((chunkLengths.length || 0) < tokenCountWarningThreshold) {
+    log.warning(
+      `Only ${chunkLengths.length} tokens extracted\n from doc_num ${urlHash}\n consider verifying the locators for this url.`,
+    );
+  } else {
+    log.info(`   Found ${chunkLengths.length} chunks, uploading...`)
+  }
+
+  let allChunkResults: ImportResponse[] = [];
+
+  let chunkStart = 0;
+  for (let chunkIndex = 0; chunkIndex < chunkLengths.length; chunkIndex++) {
+    const chunkText = markdown.substring(chunkStart, chunkLengths[chunkIndex]);
+    const tokens = encoding.encode(chunkText);
+    sumTokens += tokens.length;
+    log.info(
+      `  -- doc_num: ${urlHash}, chunk_index: ${chunkIndex + 1} of ${chunkLengths.length} ` +
+      `-- tokens: ${tokens.length} -- length: ${chunkLengths[chunkIndex] - chunkStart} ---------------`,
+    );
+    // log.info(chunkText);
+    chunkStart = chunkLengths[chunkIndex] + 1;
+
+    const markdown_checksum = sha1(chunkText);
+
+    const outChunk: RagChunk = {
+      id: urlHash + '-' + chunkIndex,
+      doc_num: '' + urlHash,
+      chunk_id: urlHash + '-' + chunkIndex,
+      chunk_index: chunkIndex,
+      content_markdown: chunkText,
+      url: urlHash + '-' + chunkIndex,
+      url_without_anchor: urlHash + '-' + chunkIndex,
+      type: 'content',
+      item_priority: 1,
+      language: 'no',
+      updated_at: Math.floor(Date.now() / 1000),
+      markdown_checksum: markdown_checksum,
+      token_count: tokens.length,
+    };
+    batch.push(outChunk);
+
+    if (batch.length === chunkImportBatchSize || chunkIndex === chunkLengths.length - 1) {
+
+      log.info(`Uploading ${batch.length} chunks for doc id ${urlHash}`);
+
+      log.info(`Batch[0]: ${JSON.stringify(batch[0], null, 2)}`);
+
+      const results = await updateChunks(batch, chunksCollectionName)
+      allChunkResults = allChunkResults.concat(results);
+
+      const failedResults = results.filter((result: any) => !result.success);
+      if (failedResults.length > 0) {
+        log.error(
+          `Upsert to typesense failed for the following urls:\n${failedResults}`,
+        );
+      }
+
+      batch = [];
+    }
+  }
+  return allChunkResults;
+}
+
+// TODO: add a locator for getting the title from a Studio doc url
+//  full xpath to links selector: /html/body/div[2]/div/div[2]/div[1]/section/div[1]/div[2]/div[1]/div/span[2]
+// section #body, div #content, div #top-bar, div #breadcrumbs, .links
+
+function getContentLocators(request, page): Locator[] {
   const locatorMap = {
     'https://info.altinn.no/en/forms-overview/': [
       page
@@ -162,6 +290,22 @@ function getLocators(request, page): Locator[] {
     'https://github.com/digdir/roadmap/issues/': [page.locator('//div[@data-turbo-frame"]')],
   };
 
+  for (const url in locatorMap) {
+    if (request.url.startsWith(url)) {
+      return locatorMap[url];
+    }
+  }
+  return [];
+}
+
+function getTitleLocator(request, page): Locator[] {
+
+
+
+  const locatorMap = {
+    'https://docs.altinn.studio/': [page.locator('//*/div[@id="breadcrumbs"]/span[@class="links"]/a')],
+    'https://info.altinn.no/en/forms-overview/': [page.locator('//*/section[@id="content"]/*/ol[@class="a-breadcrumb"]')],
+  }
   for (const url in locatorMap) {
     if (request.url.startsWith(url)) {
       return locatorMap[url];

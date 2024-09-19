@@ -22,6 +22,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@apify/consts@npm:^2.29.0":
+  version: 2.29.0
+  resolution: "@apify/consts@npm:2.29.0"
+  checksum: 10c0/d0618487cbd91e6c755650050663a77f188ebd3c7eef45d10c957c5e5d439231587dd51e0cdbf2e80c680565c577e4c5d1c0c8136e4e94ef84737921a94da0e3
+  languageName: node
+  linkType: hard
+
 "@apify/datastructures@npm:^2.0.0":
   version: 2.0.2
   resolution: "@apify/datastructures@npm:2.0.2"
@@ -36,6 +43,16 @@ __metadata:
     "@apify/consts": "npm:^2.27.0"
     ansi-colors: "npm:^4.1.1"
   checksum: 10c0/c465fc1a2c3a7fda11490ea07463cf17c6646c5763f4b67dc3e3f8e69cc965f36aa839fe5bd26cad416ae4e4b333887f184135e9bcdf9d57b2c3f7f6401f895e
+  languageName: node
+  linkType: hard
+
+"@apify/log@npm:^2.5.5":
+  version: 2.5.5
+  resolution: "@apify/log@npm:2.5.5"
+  dependencies:
+    "@apify/consts": "npm:^2.29.0"
+    ansi-colors: "npm:^4.1.1"
+  checksum: 10c0/3c0f85f4005e68a987b60d223e9cef9cb94b1cd8b90798a7fd6834ba4f308925e4eb527eb66d3edfb09341656fe2320a60cce47c4fa3d840049794ae9b802c30
   languageName: node
   linkType: hard
 
@@ -3124,6 +3141,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "assistant-crawler@workspace:services/crawler"
   dependencies:
+    "@apify/log": "npm:^2.5.5"
     "@babel/runtime": "npm:^7.24.7"
     "@crawlee/browser": "npm:*"
     "@crawlee/core": "npm:*"

@@ -77,6 +77,13 @@ const RAW_RUNTIME_STATE =
           ["@apify/consts", "npm:2.27.0"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:2.29.0", {\
+        "packageLocation": "./.yarn/cache/@apify-consts-npm-2.29.0-e78bbf887b-d0618487cb.zip/node_modules/@apify/consts/",\
+        "packageDependencies": [\
+          ["@apify/consts", "npm:2.29.0"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["@apify/datastructures", [\
@@ -94,6 +101,15 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@apify/log", "npm:2.5.1"],\
           ["@apify/consts", "npm:2.27.0"],\
+          ["ansi-colors", "npm:4.1.3"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:2.5.5", {\
+        "packageLocation": "./.yarn/cache/@apify-log-npm-2.5.5-25d254975a-3c0f85f400.zip/node_modules/@apify/log/",\
+        "packageDependencies": [\
+          ["@apify/log", "npm:2.5.5"],\
+          ["@apify/consts", "npm:2.29.0"],\
           ["ansi-colors", "npm:4.1.3"]\
         ],\
         "linkType": "HARD"\
@@ -4007,6 +4023,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./services/crawler/",\
         "packageDependencies": [\
           ["assistant-crawler", "workspace:services/crawler"],\
+          ["@apify/log", "npm:2.5.5"],\
           ["@babel/runtime", "npm:7.24.7"],\
           ["@crawlee/browser", "virtual:93de7ac422244803c188066537ae624c326819cee75009ae09b380c101ff0fbad4ad4d7ffab22b030756d2b37e6f5879c0f5ccd96e4bfdf338e7937638d2e891#npm:3.10.5"],\
           ["@crawlee/core", "npm:3.10.5"],\

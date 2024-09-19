@@ -8,6 +8,7 @@ import { z } from 'zod';
 import sha1 from 'sha1';
 import zlib from 'zlib';
 import { get_encoding } from 'tiktoken';
+import { findChunks } from '@digdir/assistant-lib';
 
 // create a document schema i Typesense that matches the following MariaDB table schema:
 
@@ -110,7 +111,7 @@ type KudosDoc = z.infer<typeof KudosDocSchema>;
 
 const KudosChunkSchema = z.object({
   id: z.string().optional(),
-  doc_id: z.string(),
+  doc_num: z.string(),
   chunk_index: z.number(),
   content_markdown: z.string(),
   url: z.string(),
@@ -124,62 +125,160 @@ const KudosChunkSchema = z.object({
 });
 type KudosChunk = z.infer<typeof KudosChunkSchema>;
 
-const kudosChunkTypesenseSchema = {
-  name: 'kudos_chunks',
-  fields: [
-    { name: 'doc_id', type: 'string', sort: true },
-    { name: 'chunk_index', type: 'int64', sort: true },
-    {
-      name: 'content_markdown',
-      type: 'string',
-      index: true,
-      locale: 'no',
-      stem: true,
-    },
-    {
-      name: 'url',
-      type: 'string',
-      facet: true,
-      index: true,
-    },
-    {
-      name: 'url_without_anchor',
-      type: 'string',
-      facet: true,
-      index: true,
-    },
-    {
-      name: 'type',
-      type: 'string',
-      facet: true,
-      index: true,
-      locale: 'en',
-    },
-    {
-      name: 'item_priority',
-      type: 'int64',
-      index: true,
-      sort: true,
-    },
-    {
-      name: 'updated_at',
-      type: 'int64',
-      facet: true,
-      index: true,
-      sort: true,
-    },
-    { name: 'language', type: 'string', facet: true },
-    { name: 'markdown_checksum', type: 'string', optional: true },
-    {
-      name: 'token_count',
-      type: 'int64',
-      facet: true,
-      optional: true,
-      index: true,
-      sort: true,
-    },
-  ],
-  default_sorting_field: 'chunk_index',
+const kudosChunkTypesenseSchema = (
+  collectionName: string,
+): CollectionCreateSchema => {
+  return {
+    name: 'kudos_chunks',
+    "fields": [
+      {
+        "facet": false,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "chunk_id",
+        "optional": false,
+        "sort": true,
+        "stem": false,
+        "store": true,
+        "type": "string"
+      },
+      {
+        "facet": false,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "doc_num",
+        "optional": false,
+        "reference": collectionName + ".doc_num",
+        "sort": false,
+        "stem": false,
+        "store": true,
+        "type": "string"
+      },
+      {
+        "facet": true,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "chunk_index",
+        "optional": false,
+        "sort": true,
+        "stem": false,
+        "store": true,
+        "type": "int32"
+      },
+      {
+        "facet": false,
+        "index": true,
+        "infix": false,
+        "locale": "no",
+        "name": "content_markdown",
+        "optional": false,
+        "sort": false,
+        "stem": false,
+        "store": true,
+        "type": "string"
+      },
+      {
+        "facet": true,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "url",
+        "optional": false,
+        "sort": false,
+        "stem": false,
+        "store": true,
+        "type": "string"
+      },
+      {
+        "facet": true,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "url_without_anchor",
+        "optional": false,
+        "sort": false,
+        "stem": false,
+        "store": true,
+        "type": "string"
+      },
+      {
+        "facet": true,
+        "index": true,
+        "infix": false,
+        "locale": "en",
+        "name": "type",
+        "optional": false,
+        "sort": false,
+        "stem": false,
+        "store": true,
+        "type": "string"
+      },
+      {
+        "facet": false,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "item_priority",
+        "optional": false,
+        "sort": true,
+        "stem": false,
+        "store": true,
+        "type": "int64"
+      },
+      {
+        "facet": true,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "updated_at",
+        "optional": false,
+        "sort": true,
+        "stem": false,
+        "store": true,
+        "type": "int64"
+      },
+      {
+        "facet": true,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "language",
+        "optional": false,
+        "sort": false,
+        "stem": false,
+        "store": true,
+        "type": "string"
+      },
+      {
+        "facet": false,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "markdown_checksum",
+        "optional": true,
+        "sort": false,
+        "stem": false,
+        "store": true,
+        "type": "string"
+      },
+      {
+        "facet": true,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "token_count",
+        "optional": true,
+        "sort": true,
+        "stem": false,
+        "store": true,
+        "type": "int64"
+      }
+    ],
+    default_sorting_field: 'chunk_index',
+  }
 };
 
 const cfg = config();
@@ -398,7 +497,7 @@ async function main() {
 
         const outChunk: KudosChunk = {
           id: '' + row.id + '-' + chunkIndex,
-          doc_id: '' + row.id,
+          doc_num: '' + row.id,
           chunk_index: chunkIndex,
           content_markdown: chunkText,
           url: row.id + '-' + chunkIndex,
@@ -432,48 +531,3 @@ async function main() {
   await connection.end();
 }
 
-async function findChunks(
-  text: string,
-  delim: string,
-  minLength: number,
-  maxLength: number,
-): Promise<number[]> {
-  const sectionLengths: number[] = [];
-  const delimLen = delim.length;
-  let start = 0;
-  while (start < text.length) {
-    let end = start + minLength;
-
-    // Ensure the section is not longer than maxLength
-    if (end > text.length) {
-      end = text.length;
-      sectionLengths.push(end);
-      start = end;
-    } else {
-      // Find the next delimiter character within the maxLength limit
-      while (
-        end < text.length &&
-        end - start <= maxLength &&
-        text.substring(end, end + delimLen) !== delim
-      ) {
-        end++;
-      }
-
-      // If we reached the maxLength limit without finding a delimiter, backtrack to the last delimiter
-      if (end - start > maxLength) {
-        let tempEnd = end;
-        while (tempEnd > start && text.substring(tempEnd, tempEnd + delimLen) !== delim) {
-          tempEnd--;
-        }
-        if (tempEnd > start) {
-          end = tempEnd;
-        }
-      }
-      sectionLengths.push(end);
-      // Move to the next section, skipping the delimiter
-      start = end + delimLen;
-    }
-  }
-
-  return sectionLengths;
-}

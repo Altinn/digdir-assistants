@@ -1,7 +1,7 @@
 // For more information, see https://crawlee.dev/
 import { Sitemap } from 'crawlee';
 import { PlaywrightCrawler } from '@crawlee/playwright';
-import { createDocsCollectionIfNotExists } from '@digdir/assistant-lib';
+import { ensureDocsAndChunksCollections } from '@digdir/assistant-lib';
 import { createRouter } from './routes.ts';
 import { Command } from 'commander';
 
@@ -16,14 +16,15 @@ async function main() {
 
   program.parse(process.argv);
   const opts = program.opts();
-  let collectionName = opts.collection;
+  let docsCollectionName = opts.collection;
+  const chunksCollectionName = docsCollectionName.replace('docs', 'chunks');
 
   // make sure we have a target collection to update
-  await createDocsCollectionIfNotExists(collectionName);
+  await ensureDocsAndChunksCollections(docsCollectionName);
 
   const crawler = new PlaywrightCrawler({
     // proxyConfiguration: new ProxyConfiguration({ proxyUrls: ['...'] }),
-    requestHandler: createRouter(collectionName, filterUrlsToCrawl),
+    requestHandler: createRouter(docsCollectionName, filterUrlsToCrawl),
     headless: true,
     // Comment this option to scrape the full website.
     // maxRequestsPerCrawl: 5,
