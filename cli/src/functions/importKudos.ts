@@ -87,6 +87,7 @@ const kudosDocTypesenseSchema: CollectionCreateSchema = {
 
 const KudosDocSchema = z.object({
   id: z.string().optional(),
+  doc_num: z.string(),
   url_without_anchor: z.string(),
   updated_at: z.number(),
   uuid: z.string(),
@@ -112,6 +113,7 @@ type KudosDoc = z.infer<typeof KudosDocSchema>;
 const KudosChunkSchema = z.object({
   id: z.string().optional(),
   doc_num: z.string(),
+  chunk_id: z.string(),
   chunk_index: z.number(),
   content_markdown: z.string(),
   url: z.string(),
@@ -126,7 +128,7 @@ const KudosChunkSchema = z.object({
 type KudosChunk = z.infer<typeof KudosChunkSchema>;
 
 const kudosChunkTypesenseSchema = (
-  collectionName: string,
+  docsCollectionName: string,
 ): CollectionCreateSchema => {
   return {
     name: 'kudos_chunks',
@@ -150,7 +152,7 @@ const kudosChunkTypesenseSchema = (
         "locale": "",
         "name": "doc_num",
         "optional": false,
-        "reference": collectionName + ".doc_num",
+        "reference": docsCollectionName + ".doc_num",
         "sort": false,
         "stem": false,
         "store": true,
@@ -314,7 +316,7 @@ async function main() {
   const docCollectionFound = await typesenseSearch.lookupCollectionByNameExact(docCollectionName);
 
   if (!chunkCollectionName) {
-    chunkCollectionName = docCollectionName + '_chunks';
+    chunkCollectionName = docCollectionName.replace('docs', 'chunks');
   }
   const chunkCollectionFound =
     await typesenseSearch.lookupCollectionByNameExact(chunkCollectionName);
@@ -349,8 +351,8 @@ async function main() {
         } catch (error) {
           if (error instanceof Errors.ObjectNotFound) {
             console.log('Creating new collection:', chunkCollectionName);
-            kudosChunkTypesenseSchema.name = chunkCollectionName;
-            await typesenseClient.collections().create(kudosChunkTypesenseSchema);
+            let chunkSchema = kudosChunkTypesenseSchema(docCollectionName);
+            await typesenseClient.collections().create(chunkSchema);
             console.log(`Kudos chunk collection ${chunkCollectionName} created successfully.`);
           } else {
             throw error;
@@ -410,13 +412,18 @@ async function main() {
 
   while (true) {
     console.log(`Loading ${opts.pagesize} documents from page ${page}`);
-    const [rows] = await connection.execute(
-      "SELECT * FROM documents WHERE (type = 'Evaluering')" +
-        " AND (published_at > '2021-01-01 00:00:00.000') AND (published_at < '2023-01-01 00:00:00.000')" +
-        ' LIMIT ? OFFSET ?',
+    const [rowResults] = await connection.execute(
+        "SELECT * FROM documents " +
+        "WHERE ((type = 'Evaluering')  OR (type = 'Årsrapport')) " +
+        " AND (published_at > '2020-01-01 00:00:00.000') " + 
+        " AND (published_at < '2024-01-01 00:00:00.000') " +
+        //" ORDER BY published_at asc " +
+        " LIMIT ? OFFSET ?",
       [opts.pagesize, (page - 1) * opts.pagesize],
     );
-    if (rows.length == 0) break;
+    const rows = rowResults as mysql.RowDataPacket[];
+    // console.log(`query results metadata: ${JSON.stringify(metadata)}`);
+    if (!Array.isArray(rows) || rows.length === 0) break;
     if (opts.pages >= 0 && page - opts.firstpage >= opts.pages) break;
 
     for (let i = 0; i < rows.length; i++) {
@@ -446,6 +453,7 @@ async function main() {
 
       const doc: KudosDoc = {
         id: '' + row.id,
+        doc_num: '' + row.id,
         uuid: row.uuid,
         url_without_anchor: row.source_document_url ? row.source_document_url : "https://unknown",
         updated_at: Math.floor(new Date().getTime() / 1000),
@@ -480,7 +488,7 @@ async function main() {
           .import([doc], { action: 'upsert' });
       }
 
-      let batch = [];
+      let batch: KudosChunk[] = [];
 
       let chunkStart = 0;
       for (let chunkIndex = 0; chunkIndex < chunkLengths.length; chunkIndex++) {
@@ -490,13 +498,14 @@ async function main() {
         console.log(
           `--- Doc id: ${row.id}, chunk: ${chunkIndex + 1} of ${chunkLengths.length} -- Tokens: ${tokens.length} -- Length: ${chunkLengths[chunkIndex] - chunkStart} ------------------------`,
         );
-        console.log(chunkText);
+        // console.log(chunkText);
         chunkStart = chunkLengths[chunkIndex] + 1;
 
         const markdown_checksum = sha1(chunkText);
 
         const outChunk: KudosChunk = {
           id: '' + row.id + '-' + chunkIndex,
+          chunk_id: '' + row.id + '-' + chunkIndex,
           doc_num: '' + row.id,
           chunk_index: chunkIndex,
           content_markdown: chunkText,
@@ -509,10 +518,15 @@ async function main() {
           markdown_checksum: markdown_checksum,
           token_count: tokens.length,
         };
+
         batch.push(outChunk);
 
         if (!opts.dryrun) {
-          if (batch.length === chunkImportBatchSize || chunkIndex === chunkLengths.length - 1) {
+          if (batch.length == 0) {
+            console.log(`No chunks found for doc_num: ${row.id}`);
+          } else if (
+            batch.length === chunkImportBatchSize 
+            || chunkIndex === chunkLengths.length - 1) {
             console.log(`Uploading ${batch.length} chunks for doc id ${row.id}`);
             await typesenseClient
               .collections(chunkCollectionName)

@@ -14,6 +14,7 @@ export interface SearchPhraseDoc {
 export interface SearchPhraseEntry {
   id?: string;
   chunk_id?: string;
+  chunk_index?: number;
   doc_num: string;
   url: string;
   search_phrase: string;
@@ -128,7 +129,7 @@ export async function typesenseRetrieveAllUrls(
   collectionName: string,
   page: number,
   pageSize: number,
-  includeFields: string = 'url_without_anchor,content_markdown,id',
+  includeFields: string = 'doc_num,url_without_anchor,content_markdown,id',
 ): Promise<any> {
   const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
 

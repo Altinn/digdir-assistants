@@ -40,6 +40,7 @@ type SearchPhraseList = z.infer<typeof SearchPhraseListSchema>;
 
 type SearchHit = {
   id: string;
+  doc_num: string;
   url: string;
   contentMarkdown: string;
 };
@@ -70,7 +71,9 @@ async function main() {
     .requiredOption('-s, --source <string>', 'collection to extract from')
     .requiredOption('-t, --target <string>', 'target collection name')
     .option('--prompt <string>, ', 'prompt name', 'original')
-    .option('-n', 'create new target collection');
+    .option('-n', 'create new target collection')
+    .option('--partitions <number>', 'number of partitions to divide the work into')
+    .option('--partition <number>', 'partition number for this process [0 < partition < partitions]');
 
   program.parse(process.argv);
   const opts = program.opts();
@@ -141,6 +144,7 @@ async function main() {
       result.grouped_hits.flatMap((hit: any) =>
         hit.hits.map((document: any) => ({
           id: document.document.id,
+          doc_num: document.document.doc_num,
           url: document.document.url_without_anchor,
           contentMarkdown: document.document.content_markdown || '',
         })),
@@ -159,6 +163,13 @@ async function main() {
     while (docIndex < searchHits.length) {
       const searchHit = searchHits[docIndex];
       const url = searchHit.url;
+
+      const partitionId = parseInt(searchHit.doc_num) % opts.partitions;
+      if (partitionId != opts.partition) {
+        console.log(`Skipping document ${searchHit.doc_num} (partition ${partitionId})`);
+        docIndex++;
+        continue;
+      }
 
       // console.log(`searchHit: ${JSON.stringify(searchHit)}`);
 
@@ -230,7 +241,9 @@ async function main() {
         console.log(phrase);
         const entry: SearchPhraseEntry = {
           id: '' + searchHit.id + '-' + index,
+          doc_num: '' + searchHit.id,
           chunk_id: '' + searchHit.id || '',
+          chunk_index: index,
           url: url,
           search_phrase: phrase,
           sort_order: index,
