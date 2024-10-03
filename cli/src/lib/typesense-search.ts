@@ -143,7 +143,7 @@ export async function typesenseRetrieveAllUrls(
         filter_by: 'type:=content',
         group_by: 'url_without_anchor',
         group_limit: 1,
-        sort_by: 'item_priority:asc',
+        sort_by: 'updated_at:desc',
         page: page,
         per_page: pageSize,
       },
@@ -251,6 +251,32 @@ export async function lookupSearchPhrases(
   };
 
   const response = await client.multiSearch.perform<SearchPhraseEntry[]>(multiSearchArgs, {});
+  return response;
+}
+
+export async function lookupSearchPhrasesForDocChunks(
+  chunk_ids: string[],
+  collectionName?: string,
+  prompt: string = 'original',
+  maxPhraseCount: number = 30,
+): Promise<MultiSearchResponse<SearchPhraseEntry[]>> {
+  const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
+
+  const multiSearchArgs = {
+    searches: chunk_ids.map(chunk_id => ({
+      collection: collectionName,
+      q: chunk_id,
+      query_by: 'url',
+      // can't use chunk_id yet, because corrupt schema, url has same data.
+      include_fields: 'id,doc_num,url,search_phrase,sort_order,updated_at,checksum',
+      filter_by: `url:=\`${chunk_id}\` && prompt:=\`${prompt}\``,
+      // sort_by: 'updated_at:desc',
+      per_page: maxPhraseCount,
+      highlight: false,
+    })),
+  };
+  const response = await client.multiSearch.perform<SearchPhraseEntry[]>(multiSearchArgs, {});
+
   return response;
 }
 
