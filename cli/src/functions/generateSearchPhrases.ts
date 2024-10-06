@@ -200,17 +200,30 @@ async function main() {
         const searchHit = searchHits[docIndex];
         const url = searchHit.url;
 
+        // Check if the current searchHit.id is in the uniqueChunkIds list
+        if (!uniqueChunkIds.includes(searchHit.id)) {
+          console.log(`Skipping url: ${url} as it's not in the filtered chunk IDs`);
+          docIndex++;
+          continue;
+        }
+
         const contentMd = searchHit.contentMarkdown;
         const checksumMd = contentMd ? sha1(contentMd) : null;
 
-        const existingPhraseList = existingPhrases.results 
-          ? existingPhrases.results.find(result => result.request.q === searchHit.id)?.hits || []
-          : [];
+        const existingPhrasesForChunk = existingPhrases[searchHit.id];
+        let existingPhraseCount = 0;
 
-        const existingPhraseCount = existingPhraseList.count;
-        if (existingPhraseCount > 0) {
-          const storedChecksum = existingPhraseList[0]?.document?.checksum || '';
+        if (existingPhrasesForChunk && existingPhrasesForChunk.hits) {
+          existingPhraseCount = existingPhrasesForChunk.hits.length;
+          console.log(`Found existing phrases for chunk ID: ${searchHit.id}`);
+        } else {
+          console.log(`No existing phrases found for chunk ID: ${searchHit.id}`);
+        }
+        if (existingPhraseCount > 0 && existingPhrasesForChunk?.hits) {
+          const storedChecksum = existingPhrasesForChunk?.hits[0].document?.checksum || '';
           const checksumMatches = storedChecksum === checksumMd;
+
+          // console.log(`Phrase list count: ${existingPhraseCount}, checksum: ${checksumMd} ${ (checksumMatches ? ' === ' : ' != ') } stored checksum: ${storedChecksum}, `)
 
           if (checksumMatches) {
             console.log(
@@ -221,7 +234,7 @@ async function main() {
           }
         }
 
-        console.log(`Generating search phrases for url: ${url}`);
+        console.log(`Generating search phrases for chunk: ${url}`);
 
         const start = performance.now();
 
@@ -241,30 +254,30 @@ async function main() {
           continue;
         }
 
-        // delete existing search phrases before uploading new
-        for (const document of existingPhraseList) {
-          const phraseId = document.document?.id || '';
-          if (phraseId) {
-            try {
-              await client.collections(targetCollectionName).documents(phraseId).delete();
-              console.log(`Search phrase ID ${phraseId} deleted for url: ${url}`);
-            } catch (error) {
-              if (error instanceof Errors.ObjectNotFound) {
-                console.log(
-                  `Search phrase ID ${phraseId} not found in collection "${targetCollectionName}"`,
-                );
-              } else {
-                console.error(`Error occurred while removing existing search phrases: ${error}`);
+        if (existingPhraseCount > 0 && existingPhrasesForChunk?.hits) {
+          // delete existing search phrases before uploading new
+          for (const document of existingPhrasesForChunk?.hits) {
+            const phraseId = document.document?.id || '';
+            if (phraseId) {
+              try {
+                await client.collections(targetCollectionName).documents(phraseId).delete();
+                console.log(`Search phrase ID ${phraseId} deleted for url: ${url}`);
+              } catch (error) {
+                if (error instanceof Errors.ObjectNotFound) {
+                  console.log(
+                    `Search phrase ID ${phraseId} not found in collection "${targetCollectionName}"`,
+                  );
+                } else {
+                  console.error(`Error occurred while removing existing search phrases: ${error}`);
+                }
               }
             }
           }
         }
-        console.log(`Search phrases:`);
-
         const uploadBatch: SearchPhraseEntry[] = [];
 
+        let phraseCount = 0;
         for (const [index, phrase] of searchPhrases.entries()) {
-          console.log(phrase);
           const entry: SearchPhraseEntry = {
             id: '' + searchHit.id + '-' + index,
             doc_num: '' + searchHit.id,
@@ -284,6 +297,13 @@ async function main() {
             console.error(`Empty search phrase generated in entry: ${JSON.stringify(entry)}`);
           }
         }
+        console.log(`Generated ${uploadBatch.length} search phrases for chunk ${url}`);
+        // Log each phrase
+        uploadBatch.forEach((entry, index) => {
+          console.log(`${entry.search_phrase}`);
+        });
+        console.log('\n');
+
 
         try {
           const results = await client
@@ -360,7 +380,13 @@ async function lookupSearchPhrasesForDocChunks(
         acc[chunkId] = lookupResults.results[index];
         return acc;
       }, {} as Record<string, SearchResponse<SearchPhraseEntry>>);
-
+    
+      // // Log the number of search phrases for each chunk_id
+      // for (const chunkId of chunk_ids) {
+      //   const phraseCount = existingPhrasesByChunkId[chunkId]?.hits?.length || 0;
+      //   console.log(`Chunk ID ${chunkId}: ${phraseCount} search phrases`);
+      // }
+      
       return existingPhrasesByChunkId;
     } catch (e) {
       console.error(
