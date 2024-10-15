@@ -215,9 +215,9 @@ async function main() {
 
         if (existingPhrasesForChunk && existingPhrasesForChunk.hits) {
           existingPhraseCount = existingPhrasesForChunk.hits.length;
-          console.log(`Found existing phrases for chunk ID: ${searchHit.id}`);
+          // console.log(`Found existing phrases for chunk ID: ${searchHit.id}`);
         } else {
-          console.log(`No existing phrases found for chunk ID: ${searchHit.id}`);
+          // console.log(`No existing phrases found for chunk ID: ${searchHit.id}`);
         }
         if (existingPhraseCount > 0 && existingPhrasesForChunk?.hits) {
           const storedChecksum = existingPhrasesForChunk?.hits[0].document?.checksum || '';
