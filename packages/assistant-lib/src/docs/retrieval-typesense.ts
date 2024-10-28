@@ -161,7 +161,7 @@ export async function retrieveAllUrls(
         include_fields: "url_without_anchor,id",
         group_by: "url_without_anchor",
         group_limit: 1,
-        sort_by: "item_priority:asc",
+        // sort_by: "item_priority:asc",
         page: page,
         per_page: pageSize,
       },
@@ -169,6 +169,11 @@ export async function retrieveAllUrls(
   };
 
   const response = await client.multiSearch.perform(multiSearchArgs, {});
+
+  if (envVar("LOG_LEVEL") === "debug") {
+    console.log(`retrieveAllUrls response:\n${JSON.stringify(response)}`);
+  }
+
   const searchPhraseHits = flatMap(response.results, (result: any) =>
     flatMap(result.grouped_hits, (group: any) =>
       flatMap(group.hits, (hit: any) => hit.document.url_without_anchor),
