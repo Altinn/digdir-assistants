@@ -1,6 +1,6 @@
 {
   "name": "assistant-crawler",
-  "packageManager": "yarn@4.3.1",
+  "packageManager": "yarn@4.5.1",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -17,6 +17,7 @@
     "crawlee": "^3.10.5",
     "playwright": "1.45.0",
     "prettier": "^3.3.2",
+    "remeda": "^2.2.1",
     "sha1": "^1.1.1",
     "tiktoken": "^1.0.15",
     "turndown": "^7.2.0",
@@ -35,6 +36,7 @@
     "clean": "rimraf ./dist/",
     "crawl:studio": "tsx src/studio.ts",
     "crawl:infoportal": "tsx src/infoportal.ts",
+    "crawl:ai-guide": "tsx src/ai-guide.ts",
     "codestyle:check": "prettier src/ --check",
     "codestyle:fix": "prettier src/ --write",
     "build": "cd ../../ && yarn build:assistant-lib && cd services/crawler/ && tsc -p .",
