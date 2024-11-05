@@ -6,6 +6,7 @@ import sha1 from 'sha1';
 import { get_encoding } from 'tiktoken';
 import { RagDoc, RagChunk, updateDocs, updateChunks, getDocChecksums, findChunks, ImportResponse } from '@digdir/assistant-lib';
 import { URL } from 'url';
+import { flatMap } from 'remeda';
 
 const turndownService = new TurndownService();
 const tokenCountWarningThreshold = 20;
@@ -82,9 +83,12 @@ export async function defaultHandler(
   const title = titleElements.join(" / ");  
 
   const contentLocators = getContentLocators(request, page);
+
+  log.info(`contentLocators: ${contentLocators.map(locator => locator.toString())}`);
+
   const contents = await Promise.all(
     contentLocators.map(async (locator) => {
-      const elements = await locator.all();
+      const elements = await locator.all();      
       const innerHTMLs = await Promise.all(elements.map((element) => element.innerHTML()));
 
       // extract links
@@ -94,24 +98,24 @@ export async function defaultHandler(
 
           return await Promise.all(linkElements.map((link) => link.getAttribute('href')));
         }),
-      );
-      const links = linksList.flatMap((link) => link).filter((link) => link !== null) as string[];
+      );      
+      
+      // const links = flatMap(linksList, (link) => link).filter((link) => link !== null) as string[];
 
-      const filteredUrls = urlFilter(links);
+      // const filteredUrls = urlFilter(links);
 
-      if (filteredUrls.length > 0) {
-        log.info(`Adding ${filteredUrls.length} links:\n${JSON.stringify(filteredUrls)}`);
-        await crawler.addRequests(
-          filteredUrls.map((url: string) => {
-            return { url: url || '' };
-          }),
-        );
-      }
+      // if (filteredUrls.length > 0) {
+      //   log.info(`Adding ${filteredUrls.length} links:\n${JSON.stringify(filteredUrls)}`);
+      //   await crawler.addRequests(
+      //     filteredUrls.map((url: string) => {
+      //       return { url: url || '' };
+      //     }),
+      //   );
+      // }
 
       return innerHTMLs.join('\n');
     }),
   );
-
 
   const markdown = turndownService.turndown(contents.join('\n\n'));
 
@@ -287,11 +291,15 @@ function getContentLocators(request, page): Locator[] {
     'https://github.com/Altinn/altinn-studio/releases': [
       page.locator('//*[@id="repo-content-turbo-frame"]/div[1]'), // data-hpc
     ],
-    'https://github.com/digdir/roadmap/issues/': [page.locator('//div[@data-turbo-frame"]')],
+    'https://github.com/digdir/roadmap/issues/': [page.locator('//div[@data-turbo-frame"]')],    
+    'https://www.digdir.no/kunstig-intelligens/': [
+      // page.locator('/html/body/div[2]/div/main/div/article/div/div/div/div[2]'),
+      page.locator('//*/div[@class="modules node-page__modules"]')
+    ]
   };
 
   for (const url in locatorMap) {
-    if (request.url.startsWith(url)) {
+    if (request.url.startsWith(url)) {      
       return locatorMap[url];
     }
   }
@@ -300,11 +308,10 @@ function getContentLocators(request, page): Locator[] {
 
 function getTitleLocator(request, page): Locator[] {
 
-
-
   const locatorMap = {
     'https://docs.altinn.studio/': [page.locator('//*/div[@id="breadcrumbs"]/span[@class="links"]/a')],
     'https://info.altinn.no/en/forms-overview/': [page.locator('//*/section[@id="content"]/*/ol[@class="a-breadcrumb"]')],
+    'https://www.digdir.no/kunstig-intelligens/': [page.locator('//*/h1[@class="node-page__title fds-typography-heading-xlarge"]')]
   }
   for (const url in locatorMap) {
     if (request.url.startsWith(url)) {
@@ -322,3 +329,4 @@ export async function failedRequestHandler({ request, pushData }) {
     errors: request.errorMessages,
   });
 }
+
