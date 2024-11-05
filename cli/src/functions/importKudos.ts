@@ -414,7 +414,7 @@ async function main() {
     console.log(`Loading ${opts.pagesize} documents from page ${page}`);
     const [rowResults] = await connection.execute(
         "SELECT * FROM documents " +
-        "WHERE ((type = 'Evaluering')  OR (type = 'Årsrapport')) " +
+        "WHERE ((type = 'Tildelingsbrev') OR (type = 'Evaluering') OR  (type = 'Årsrapport')) " +
         " AND (published_at > '2020-01-01 00:00:00.000') " + 
         " AND (published_at < '2024-01-01 00:00:00.000') " +
         //" ORDER BY published_at asc " +
