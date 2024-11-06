@@ -10,7 +10,9 @@ node_modules
 !.yarn/cache/.gitkeep
 
 temp/
-.clj-kondo/
-.cpcache/
-.lsp/
-.calva/
+**/.clj-kondo/
+**/.cpcache/
+**/.calva/
+**/.lsp
+**/.nrepl-port
+**/.shadow-cljs
