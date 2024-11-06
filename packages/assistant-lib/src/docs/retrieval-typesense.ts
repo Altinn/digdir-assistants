@@ -641,7 +641,6 @@ export async function ensureCollectionExists(
 }
 
 export async function updateDocs(docs: RagDoc[], collectionName: string) {
-  console.log(`Updating docs:\n${JSON.stringify(docs, null, 2)}`);
 
   const typesenseCfg = typesenseConfig();
   const localTypesenseConfig = { ...typesenseCfg };

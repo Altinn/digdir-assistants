@@ -6,6 +6,22 @@ import { ensureDocsAndChunksCollections, retrieveAllUrls } from '@digdir/assista
 import { createRouter, failedRequestHandler } from './routes.ts';
 import { Command } from 'commander';
 
+
+function filterUrlsToCrawl(urls: string[]): string[] {
+    
+  const allowedPrefixes = [
+    'https://www.digdir.no/kunstig-intelligens/',
+  ];
+
+  const ignoreRoutes = [ ];
+
+  return urls.filter(
+    (url) =>
+      allowedPrefixes.some((route => url.startsWith(route))) &&
+      !ignoreRoutes.some((route) => url.startsWith(route)),
+  );
+}
+
 async function main() {
   const program = new Command();
   program
@@ -23,15 +39,11 @@ async function main() {
   // make sure we have a target collection to update
   await ensureDocsAndChunksCollections(docsCollectionName);
   
-
   const router = createRouter(docsCollectionName, filterUrlsToCrawl);
   const crawler = new PlaywrightCrawler({
-    // proxyConfiguration: new ProxyConfiguration({ proxyUrls: ['...'] }),
     requestHandler: router,
     headless: true,
     failedRequestHandler: failedRequestHandler,
-
-    // Comment this option to scrape the full website.
     // maxRequestsPerCrawl: 10,
   });
 
@@ -45,20 +57,6 @@ async function main() {
     'https://www.digdir.no/kunstig-intelligens/ki-ressurser/4145'
   ];
 
-  function filterUrlsToCrawl(urls: string[]): string[] {
-    
-    const allowedPrefixes = [
-      'https://www.digdir.no/kunstig-intelligens/',
-    ];
-
-    const ignoreRoutes = [ ];
-
-    return urls.filter(
-      (url) =>
-        allowedPrefixes.some((route => url.startsWith(route))) &&
-        !ignoreRoutes.some((route) => url.startsWith(route)),
-    );
-  }
 
   await crawler.addRequests(filterUrlsToCrawl(urls));
 

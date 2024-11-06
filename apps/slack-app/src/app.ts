@@ -720,7 +720,7 @@ async function debugMessageBlocks(
 
   console.log(`docIdsForChunks: ${JSON.stringify(uniqueDocNumsForChunks)}`);
 
-  const chunkDocs = await getDocsById('NEXT_kudos-docs_2024-07-02', uniqueDocNumsForChunks);
+  const chunkDocs = await getDocsById(docsCollectionName, uniqueDocNumsForChunks);
 
   console.log(`Retrieved ${chunkDocs.length} docs.`);
 

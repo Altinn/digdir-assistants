@@ -84,7 +84,6 @@ export async function defaultHandler(
 
   const contentLocators = getContentLocators(request, page);
 
-  log.info(`contentLocators: ${contentLocators.map(locator => locator.toString())}`);
 
   const contents = await Promise.all(
     contentLocators.map(async (locator) => {
@@ -247,8 +246,6 @@ async function chunkDocContents(markdown: string, urlHash: string, log: apifyLog
     if (batch.length === chunkImportBatchSize || chunkIndex === chunkLengths.length - 1) {
 
       log.info(`Uploading ${batch.length} chunks for doc id ${urlHash}`);
-
-      log.info(`Batch[0]: ${JSON.stringify(batch[0], null, 2)}`);
 
       const results = await updateChunks(batch, chunksCollectionName)
       allChunkResults = allChunkResults.concat(results);
