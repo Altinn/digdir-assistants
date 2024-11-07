@@ -3881,7 +3881,7 @@ const RAW_RUNTIME_STATE =
           ["@types/babel__core", "npm:7.20.5"],\
           ["@types/vite", null],\
           ["react-refresh", "npm:0.14.2"],\
-          ["vite", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.4.2"]\
+          ["vite", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.4.10"]\
         ],\
         "packagePeers": [\
           "@types/vite",\
@@ -4320,7 +4320,7 @@ const RAW_RUNTIME_STATE =
           ["react-router-dom", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:6.26.1"],\
           ["react-syntax-highlighter", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:15.6.1"],\
           ["typescript", "patch:typescript@npm%3A5.5.4#optional!builtin<compat/typescript>::version=5.5.4&hash=379a07"],\
-          ["vite", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.4.2"],\
+          ["vite", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.4.10"],\
           ["zod", "npm:3.23.8"]\
         ],\
         "linkType": "SOFT"\
@@ -9997,13 +9997,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["picocolors", [\
-      ["npm:1.0.1", {\
-        "packageLocation": "./.yarn/cache/picocolors-npm-1.0.1-39442f3da8-c63cdad2bf.zip/node_modules/picocolors/",\
-        "packageDependencies": [\
-          ["picocolors", "npm:1.0.1"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:1.1.1", {\
         "packageLocation": "./.yarn/cache/picocolors-npm-1.1.1-4fede47cf1-e2e3e8170a.zip/node_modules/picocolors/",\
         "packageDependencies": [\
@@ -10071,13 +10064,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["postcss", [\
-      ["npm:8.4.41", {\
-        "packageLocation": "./.yarn/cache/postcss-npm-8.4.41-1607021b28-c1828fc59e.zip/node_modules/postcss/",\
+      ["npm:8.4.47", {\
+        "packageLocation": "./.yarn/cache/postcss-npm-8.4.47-2f4d4be1fa-929f68b508.zip/node_modules/postcss/",\
         "packageDependencies": [\
-          ["postcss", "npm:8.4.41"],\
+          ["postcss", "npm:8.4.47"],\
           ["nanoid", "npm:3.3.7"],\
-          ["picocolors", "npm:1.0.1"],\
-          ["source-map-js", "npm:1.2.0"]\
+          ["picocolors", "npm:1.1.1"],\
+          ["source-map-js", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -11248,10 +11241,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["source-map-js", [\
-      ["npm:1.2.0", {\
-        "packageLocation": "./.yarn/cache/source-map-js-npm-1.2.0-6e63f357e5-7e5f896ac1.zip/node_modules/source-map-js/",\
+      ["npm:1.2.1", {\
+        "packageLocation": "./.yarn/cache/source-map-js-npm-1.2.1-b9a47d7e1a-7bda1fc4c1.zip/node_modules/source-map-js/",\
         "packageDependencies": [\
-          ["source-map-js", "npm:1.2.0"]\
+          ["source-map-js", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -12365,17 +12358,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["vite", [\
-      ["npm:5.4.2", {\
-        "packageLocation": "./.yarn/cache/vite-npm-5.4.2-65a106d8cf-23e347ca8a.zip/node_modules/vite/",\
+      ["npm:5.4.10", {\
+        "packageLocation": "./.yarn/cache/vite-npm-5.4.10-30d2e3a4e2-4ef4807d2f.zip/node_modules/vite/",\
         "packageDependencies": [\
-          ["vite", "npm:5.4.2"]\
+          ["vite", "npm:5.4.10"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.4.2", {\
-        "packageLocation": "./.yarn/__virtual__/vite-virtual-fa5031e584/0/cache/vite-npm-5.4.2-65a106d8cf-23e347ca8a.zip/node_modules/vite/",\
+      ["virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.4.10", {\
+        "packageLocation": "./.yarn/__virtual__/vite-virtual-f0f4fa5893/0/cache/vite-npm-5.4.10-30d2e3a4e2-4ef4807d2f.zip/node_modules/vite/",\
         "packageDependencies": [\
-          ["vite", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.4.2"],\
+          ["vite", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.4.10"],\
           ["@types/less", null],\
           ["@types/lightningcss", null],\
           ["@types/node", "npm:22.5.1"],\
@@ -12388,7 +12381,7 @@ const RAW_RUNTIME_STATE =
           ["fsevents", "patch:fsevents@npm%3A2.3.3#optional!builtin<compat/fsevents>::version=2.3.3&hash=df0bf1"],\
           ["less", null],\
           ["lightningcss", null],\
-          ["postcss", "npm:8.4.41"],\
+          ["postcss", "npm:8.4.47"],\
           ["rollup", "npm:4.24.4"],\
           ["sass", null],\
           ["sass-embedded", null],\
