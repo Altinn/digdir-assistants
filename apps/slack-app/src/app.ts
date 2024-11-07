@@ -18,7 +18,7 @@ import { envVar, round, lapTimer, timeoutPromise } from '@digdir/assistant-lib';
 import {
   userInputAnalysis,
   UserQueryAnalysis,
-  retrieveAllByUrl,
+  retrieveChunksById,
   getDocsById,
 } from '@digdir/assistant-lib';
 import { ragPipeline, qaTemplate } from '@digdir/assistant-lib';
@@ -92,11 +92,17 @@ app.message(async ({ message, say }) => {
   }
 
   // we have eliminated as many message types as we can
-
   const docsCollectionName = await lookupConfig(
     slackApp,
     srcEvtContext,
     'search.docs.collection',
+    '',
+  );
+
+  const chunksCollectionName = await lookupConfig(
+    slackApp,
+    srcEvtContext,
+    'search.chunks.collection',
     '',
   );
   const phrasesCollectionName = await lookupConfig(
@@ -344,6 +350,7 @@ app.message(async ({ message, say }) => {
       promptRagQueryRelax: promptRagQueryRelax || '',
       promptRagGenerate: promptRagGenerate || '',
       docsCollectionName: docsCollectionName,
+      chunksCollectionName: chunksCollectionName,
       phrasesCollectionName: phrasesCollectionName,
       stream_callback_msg1: originalMsgCallback,
       stream_callback_msg2: translatedMsgCallback,
@@ -492,6 +499,7 @@ async function handleReactionEvents(eventBody: any) {
   var itemContext: SlackContext;
   var messageInfo: ReactionsGetResponse;
   let docsCollectionName = '';
+  let chunksCollectionName = '';
 
   try {
     itemContext = await getReactionItemContext(app.client, eventBody);
@@ -506,6 +514,20 @@ async function handleReactionEvents(eventBody: any) {
     if (!docsCollectionName) {
       console.error(
         `handleReactionEvents: unable to resolve configuration value for 'search.docs.collection'.`,
+      );
+      return;
+    }
+
+    chunksCollectionName = await lookupConfig(
+      slackApp,
+      itemContext,
+      'search.chunks.collection',
+      '',
+    );
+
+    if (!chunksCollectionName) {
+      console.error(
+        `handleReactionEvents: unable to resolve configuration value for 'search.chunks.collection'.`,
       );
       return;
     }
@@ -558,7 +580,7 @@ async function handleReactionEvents(eventBody: any) {
         thread_ts: itemContext.ts_date + '.' + itemContext.ts_time,
         user: eventBody?.body?.event?.user,
         text: 'Performance data',
-        blocks: await debugMessageBlocks(docsCollectionName, dbLog!),
+        blocks: await debugMessageBlocks(docsCollectionName, chunksCollectionName, dbLog!),
       });
     }
   } catch (e) {
@@ -691,6 +713,7 @@ async function finalizeAnswer(
 
 async function debugMessageBlocks(
   docsCollectionName: string,
+  chunksCollectionName: string,
   botLog: BotLogEntry,
 ): Promise<Array<Block>> {
   const content = botLog.content as any;
@@ -703,7 +726,7 @@ async function debugMessageBlocks(
   if (envVar('LOG_LEVEL') === 'debug-reactions') {
     console.log('source_urls:', JSON.stringify(sourceUrls, null, 2));
   }
-  const loadedChunksResponse = await retrieveAllByUrl(docsCollectionName, sourceUrls);
+  const loadedChunksResponse = await retrieveChunksById(chunksCollectionName, sourceUrls);
   if (envVar('LOG_LEVEL') === 'debug-reactions') {
     console.log('source_urls:', JSON.stringify(loadedChunksResponse, null, 2));
   }
@@ -718,6 +741,7 @@ async function debugMessageBlocks(
 
   const uniqueDocNumsForChunks = [...new Set(docNumsForChunks)];
 
+  console.log(`looking up source docs from collection: ${docsCollectionName}`);
   console.log(`docIdsForChunks: ${JSON.stringify(uniqueDocNumsForChunks)}`);
 
   const chunkDocs = await getDocsById(docsCollectionName, uniqueDocNumsForChunks);
@@ -731,10 +755,10 @@ async function debugMessageBlocks(
         //   console.log('hits:', JSON.stringify(hit));
         // }
         let result = hit.document.content_markdown || '';
-        result = result.replace(/(?<!\n)\n(?!\n)/g, ' '); // .replace('\f', '');
+        result = result.replace(/(?<!\n)\n(?!\n)/g, ' ');
 
         const chunkDoc = chunkDocs.find((doc) => doc.doc_num == hit.document.doc_num);
-        const header = `Source (${hit.document.url_without_anchor}): [${chunkDoc?.title || ''}](${chunkDoc?.url_without_anchor || ''}) \n\n`;
+        const header = `Source (${chunkDoc?.source_document_url}): [${chunkDoc?.title || ''}](${chunkDoc?.source_document_url || ''}) \n\n`;
         return header + '```\n' + result + '\n```\n';
         // return result;
       }),

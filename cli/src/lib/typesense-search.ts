@@ -38,30 +38,6 @@ interface VectorQuery {
   // Define the structure for vector queries if needed
 }
 
-export async function typesenseSearchMultiple(searchQueries: SearchPhrases): Promise<any> {
-  const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
-
-  console.log(`incoming queries: ${searchQueries}`);
-
-  const multiSearchArgs = {
-    searches: searchQueries.searchQueries.map((query) => ({
-      collection: process.env.TYPESENSE_DOCS_COLLECTION,
-      q: query,
-      query_by: 'content,embedding',
-      include_fields: 'id,url_without_anchor,type,content_markdown',
-      group_by: 'url_without_anchor',
-      group_limit: 3,
-      limit: 10,
-      prioritize_exact_match: false,
-      sort_by: '_text_match:desc',
-      drop_tokens_threshold: 5,
-    })),
-  };
-
-  const response = await client.multiSearch.perform(multiSearchArgs, {});
-  return response;
-}
-
 export async function lookupSearchPhrasesSimilar(
   searchQueries: SearchPhrases,
 ): Promise<SearchPhraseDoc[]> {
@@ -106,30 +82,11 @@ export async function lookupSearchPhrasesSimilar(
   return uniqueUrls;
 }
 
-export async function typesenseSearchMultipleVector(searchQueries: SearchPhrases): Promise<any> {
-  const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
-
-  // Vector conversion logic would be here
-  let vectorQueries: VectorQuery[] = []; // Placeholder for vector queries
-
-  const multiSearchArgs = {
-    searches: vectorQueries.map((query) => ({
-      collection: process.env.TYPESENSE_DOCS_COLLECTION,
-      q: '*',
-      vector_query: `embedding:([${query}], k:10)`,
-      include_fields: 'id,url_without_anchor,type,content_markdown',
-    })),
-  };
-
-  const response = await client.multiSearch.perform(multiSearchArgs, {});
-  return response;
-}
-
-export async function typesenseRetrieveAllUrls(
+export async function retrieveAllChunks(
   collectionName: string,
   page: number,
   pageSize: number,
-  includeFields: string = 'doc_num,url_without_anchor,content_markdown,id',
+  includeFields: string = 'doc_num,chunk_id,content_markdown,id',
 ): Promise<any> {
   const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
 
@@ -138,10 +95,10 @@ export async function typesenseRetrieveAllUrls(
       {
         collection: collectionName,
         q: '*',
-        query_by: 'url_without_anchor',
+        query_by: 'chunk_id',
         include_fields: includeFields,
         filter_by: 'type:=content',
-        group_by: 'url_without_anchor',
+        group_by: 'chunk_id',
         group_limit: 1,
         sort_by: 'updated_at:desc',
         page: page,
@@ -149,27 +106,6 @@ export async function typesenseRetrieveAllUrls(
       },
     ],
   };
-
-  const response = await client.multiSearch.perform(multiSearchArgs, {});
-  return response;
-}
-
-export async function typesenseRetrieveAllByUrl(urlList: { url: string }[]): Promise<any> {
-  const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
-
-  const urlSearches = urlList.slice(0, 20).map((rankedUrl) => ({
-    collection: process.env.TYPESENSE_DOCS_COLLECTION,
-    q: rankedUrl.url,
-    query_by: 'url_without_anchor',
-    include_fields: 'id,url_without_anchor,type,content_markdown',
-    filter_by: `url_without_anchor:=${rankedUrl.url}`,
-    group_by: 'url_without_anchor',
-    group_limit: 1,
-    page: 1,
-    per_page: 1,
-  }));
-
-  const multiSearchArgs = { searches: urlSearches };
 
   const response = await client.multiSearch.perform(multiSearchArgs, {});
   return response;

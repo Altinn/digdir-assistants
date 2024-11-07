@@ -21,8 +21,6 @@ const RagDocSchema = z.object({
   uuid: z.string(),
   doc_num: z.string(),
   title: z.string().optional(),
-  url: z.string(),
-  url_without_anchor: z.string(),
   source_document_url: z.string(),
   type: z.string().optional(),
   language: z.string().optional(),
@@ -37,8 +35,7 @@ export type RagDocQuery = DocumentSchema & {
   id?: string;
   doc_num?: string;
   content_markdown?: string;
-  url?: string;
-  url_without_anchor?: string;
+  source_document_url?: string;
   type?: string;
   language?: string;
   item_priority?: number;
@@ -53,8 +50,6 @@ const RagChunkSchema = z.object({
   chunk_id: z.string(),
   doc_num: z.string(),
   chunk_index: z.number(),
-  url: z.string(),
-  url_without_anchor: z.string(),
   content_markdown: z.string().optional(),
   markdown_checksum: z.string().optional(),
   type: z.string().optional(),
@@ -87,7 +82,7 @@ export async function lookupSearchPhrasesSimilar(
   prompt: string,
 ): Promise<RankedUrl[]> {
   if (!relaxedQueries || !relaxedQueries.searchQueries) {
-    console.warn(`typesenseSearchMultiple() - search terms not provided`);
+    console.warn(`lookupSearchPhrasesSimilar() - search terms not provided`);
     return [];
   }
   const client = new Typesense.Client(typesenseCfg);
@@ -157,11 +152,10 @@ export async function retrieveAllUrls(
       {
         collection: docsCollectionName,
         q: "*",
-        query_by: "url_without_anchor",
-        include_fields: "url_without_anchor,id",
-        group_by: "url_without_anchor",
+        query_by: "doc_num",
+        include_fields: "doc_num,source_document_url",
+        group_by: "doc_num",
         group_limit: 1,
-        // sort_by: "item_priority:asc",
         page: page,
         per_page: pageSize,
       },
@@ -174,28 +168,28 @@ export async function retrieveAllUrls(
     console.log(`retrieveAllUrls response:\n${JSON.stringify(response)}`);
   }
 
-  const searchPhraseHits = flatMap(response.results, (result: any) =>
+  const searchResults = flatMap(response.results, (result: any) =>
     flatMap(result.grouped_hits, (group: any) =>
-      flatMap(group.hits, (hit: any) => hit.document.url_without_anchor),
+      flatMap(group.hits, (hit: any) => hit.document.source_document_url),
     ),
   );
 
-  return searchPhraseHits;
+  return searchResults;
 }
 
-export async function retrieveAllByUrl(
-  docsCollectionName: string,
+export async function retrieveChunksById(
+  chunksCollectionName: string,
   urlList: RankedUrl[],
 ) {
   const client = new Typesense.Client(typesenseCfg);
 
   const urlSearches = urlList.slice(0, 20).map((rankedUrl) => ({
-    collection: docsCollectionName,
+    collection: chunksCollectionName,
     q: rankedUrl["url"],
-    query_by: "url_without_anchor",
-    include_fields: "id,doc_num,url_without_anchor,type,content_markdown",
-    filter_by: `url_without_anchor:=\`${rankedUrl["url"]}\``,
-    group_by: "url_without_anchor",
+    query_by: "chunk_id",
+    include_fields: "id,doc_num,chunk_id,type,content_markdown",
+    filter_by: `chunk_id:=\`${rankedUrl["url"]}\``,
+    group_by: "chunk_id",
     group_limit: 1,
     page: 1,
     per_page: 1,
@@ -224,18 +218,6 @@ const docsCollectionSchema = (
         name: "doc_num",
         optional: false,
         sort: true,
-        stem: false,
-        store: true,
-        type: "string",
-      },
-      {
-        facet: true,
-        index: true,
-        infix: false,
-        locale: "",
-        name: "url_without_anchor",
-        optional: false,
-        sort: false,
         stem: false,
         store: true,
         type: "string",
@@ -435,7 +417,7 @@ const chunksCollectionSchema = (
     enable_nested_fields: false,
     fields: [
       {
-        facet: false,
+        facet: true,
         index: true,
         infix: false,
         locale: "",
@@ -477,30 +459,6 @@ const chunksCollectionSchema = (
         infix: false,
         locale: "no",
         name: "content_markdown",
-        optional: false,
-        sort: false,
-        stem: false,
-        store: true,
-        type: "string",
-      },
-      {
-        facet: true,
-        index: true,
-        infix: false,
-        locale: "",
-        name: "url",
-        optional: false,
-        sort: false,
-        stem: false,
-        store: true,
-        type: "string",
-      },
-      {
-        facet: true,
-        index: true,
-        infix: false,
-        locale: "",
-        name: "url_without_anchor",
         optional: false,
         sort: false,
         stem: false,
@@ -641,7 +599,6 @@ export async function ensureCollectionExists(
 }
 
 export async function updateDocs(docs: RagDoc[], collectionName: string) {
-
   const typesenseCfg = typesenseConfig();
   const localTypesenseConfig = { ...typesenseCfg };
   localTypesenseConfig.apiKey = envVar("TYPESENSE_API_KEY_ADMIN");
@@ -683,7 +640,7 @@ export async function getDocChecksums(
     .search({
       q: "*",
       filter_by: idList.map((id) => `id:=${id}`).join(" || "),
-      include_fields: "id,markdown_checksum,url_without_anchor",
+      include_fields: "id,chunk_id,markdown_checksum",
     });
 
   return documents.hits?.map((hit: any) => hit.document as RagDocQuery) || [];
@@ -698,7 +655,7 @@ export async function getDocsById(collectionName: string, idList: string[]) {
     .search({
       q: "*",
       filter_by: idList.map((id) => `id:=${id}`).join(" || "),
-      include_fields: "id,title,url_without_anchor",
+      include_fields: "id,title,source_document_url",
     });
 
   return documents.hits?.map((hit: any) => hit.document as RagDocQuery) || [];

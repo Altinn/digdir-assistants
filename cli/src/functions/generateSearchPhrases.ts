@@ -142,7 +142,7 @@ async function main() {
       `Retrieving chunk content '${opts.source}', page ${page} (page_size=${pageSize})`,
     );
 
-    const searchResponse = await typesenseSearch.typesenseRetrieveAllUrls(
+    const searchResponse = await typesenseSearch.retrieveAllChunks(
       opts.source,
       page,
       pageSize,
@@ -154,7 +154,7 @@ async function main() {
         hit.hits.map((document: any) => ({
           id: document.document.id,
           doc_num: document.document.doc_num,
-          url: document.document.url_without_anchor,
+          url: document.document.chunk_id,
           contentMarkdown: document.document.content_markdown || '',
         })),
       ),
@@ -331,34 +331,6 @@ async function main() {
 }
 
 main();
-
-async function lookupSearchPhrases(
-  url: string,
-  collectionNameTmp: string,
-  prompt: string,
-): Promise<SearchResponse<SearchPhraseEntry>> {
-  let retryCount = 0;
-
-  while (true) {
-    try {
-      const lookupResults: MultiSearchResponse<SearchPhraseEntry[]> =
-        await typesenseSearch.lookupSearchPhrases(url, collectionNameTmp, prompt);
-      const existingPhrases = lookupResults.results[0];
-      return existingPhrases;
-    } catch (e) {
-      console.error(
-        `Exception occurred while looking up search phrases for url: ${url}\n Error: ${e}`,
-      );
-      if (retryCount < 10) {
-        retryCount++;
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        continue;
-      } else {
-        throw e;
-      }
-    }
-  }
-}
 
 async function lookupSearchPhrasesForDocChunks(
   chunk_ids: string[],

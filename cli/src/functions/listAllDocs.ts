@@ -31,7 +31,7 @@ async function main() {
     `Retrieving all docs from collection '${collectionName}', page ${page} (page_size=${pageSize})\n\n`,
   );
 
-  console.log(`token_count;actual_language;url_without_anchor`);
+  console.log(`token_count;actual_language;doc_num`);
 
   while (jobPageSize < 0 || page <= jobPageSize) {
     const multiSearchArgs = {
@@ -39,8 +39,8 @@ async function main() {
         {
           collection: process.env.TYPESENSE_DOCS_COLLECTION,
           q: '*',
-          query_by: 'url_without_anchor',
-          include_fields: 'language,url_without_anchor,token_count',
+          query_by: 'doc_num',
+          include_fields: 'language,doc_num,token_count',
           sort_by: 'token_count:desc',
           page: page,
           per_page: pageSize,
@@ -61,7 +61,7 @@ async function main() {
     }
 
     allDocs.forEach((doc) => {
-      console.log(`${doc.token_count};${doc.language};${doc.url_without_anchor};`);
+      console.log(`${doc.token_count};${doc.language};${doc.doc_num};`);
     });
 
     page++;

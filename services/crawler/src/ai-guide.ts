@@ -6,30 +6,26 @@ import { ensureDocsAndChunksCollections, retrieveAllUrls } from '@digdir/assista
 import { createRouter, failedRequestHandler } from './routes.ts';
 import { Command } from 'commander';
 
-
 function filterUrlsToCrawl(urls: string[]): string[] {
-    
-  const allowedPrefixes = [
-    'https://www.digdir.no/kunstig-intelligens/',
-  ];
+  const allowedPrefixes = ['https://www.digdir.no/kunstig-intelligens/'];
 
-  const ignoreRoutes = [ ];
+  const ignoreRoutes = [];
 
   return urls.filter(
     (url) =>
-      allowedPrefixes.some((route => url.startsWith(route))) &&
+      allowedPrefixes.some((route) => url.startsWith(route)) &&
       !ignoreRoutes.some((route) => url.startsWith(route)),
   );
 }
 
 async function main() {
   const program = new Command();
-  program
-    .name('crawl-studio-docs')
-    .description('Crawl the Digdir AI Guide site')
-    .version('0.1.0');
+  program.name('crawl-studio-docs').description('Crawl the Digdir AI Guide site').version('0.1.0');
 
-  program.requiredOption('-c, --collection <string>', 'docs collection to update.\n   Chunks collections name will be derived by replacing \'docs\' with \'chunks\'.');
+  program.requiredOption(
+    '-c, --collection <string>',
+    "docs collection to update.\n   Chunks collections name will be derived by replacing 'docs' with 'chunks'.",
+  );
 
   program.parse(process.argv);
   const opts = program.opts();
@@ -38,7 +34,7 @@ async function main() {
 
   // make sure we have a target collection to update
   await ensureDocsAndChunksCollections(docsCollectionName);
-  
+
   const router = createRouter(docsCollectionName, filterUrlsToCrawl);
   const crawler = new PlaywrightCrawler({
     requestHandler: router,
@@ -54,9 +50,8 @@ async function main() {
     'https://www.digdir.no/kunstig-intelligens/bruk-av-generativ-kunstig-intelligens-i-offentlig-sektor/4670',
     'https://www.digdir.no/kunstig-intelligens/utvikler-eller-bruker-du-kunstig-intelligens/4600',
     'https://www.digdir.no/kunstig-intelligens/veiledning-ansvarlig-bruk-og-utvikling-av-kunstig-intelligens/4601',
-    'https://www.digdir.no/kunstig-intelligens/ki-ressurser/4145'
+    'https://www.digdir.no/kunstig-intelligens/ki-ressurser/4145',
   ];
-
 
   await crawler.addRequests(filterUrlsToCrawl(urls));
 

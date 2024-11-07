@@ -64,10 +64,10 @@ CREATE TABLE `documents` (
 const kudosDocTypesenseSchema: CollectionCreateSchema = {
   name: 'documents',
   fields: [
-    { name: 'url_without_anchor', type: 'string', facet: true },
+    { name: "doc_num", type: 'string', facet: true, optional: false, sort: true },
     { name: 'updated_at', type: 'int64', optional: false, sort: true },
     { name: 'uuid', type: 'string' },
-    { name: 'type', type: 'string', optional: true },
+    { name: 'type', type: 'string', facet: true, optional: true },
     { name: 'title', type: 'string', optional: true, sort: true },
     { name: 'subtitle', type: 'string', optional: true },
     { name: 'isbn', type: 'string', optional: true },
@@ -302,8 +302,8 @@ async function main() {
     .requiredOption('--dbuser <string>', 'database username', '') 
     .requiredOption('--dbpass <string>', 'database password', '')
     .requiredOption('--dbname <string>', 'database name', '')
-    .requiredOption('-c, --collection <string>', 'typesense collection name for documents', '')
-    .option('--chunks <string>', 'typesense collection name for document chunks', '')
+    .requiredOption('-c, --collection <string>', 'typesense collection name for documents (not alias name)', '')
+    .option('--chunks <string>', 'typesense collection name for document chunks (not alias name)', '')
     .option('--firstpage <number>', 'page number to start on (1-based)', '1')
     .option('--pagesize <number>', 'page size', '10')
     .option('--pages <number>', 'number of pages to import', '1')
@@ -312,52 +312,56 @@ async function main() {
 
   program.parse(process.argv);
   const opts = program.opts();
-  let docCollectionName = opts.collection;
-  let chunkCollectionName = opts.chunks;
+  let docsCollectionName = opts.collection;
+  let chunksCollectionName = opts.chunks;
   let docCollectionVerified = false;
 
   const typesenseClient = new Client(cfg.TYPESENSE_CONFIG);
-  const docCollectionFound = await typesenseSearch.lookupCollectionByNameExact(docCollectionName);
+  const docCollectionFound = await typesenseSearch.lookupCollectionByNameExact(docsCollectionName);
 
-  if (!chunkCollectionName) {
-    chunkCollectionName = docCollectionName.replace('docs', 'chunks');
+  if (!chunksCollectionName) {
+    chunksCollectionName = docsCollectionName.replace('docs', 'chunks');
   }
   const chunkCollectionFound =
-    await typesenseSearch.lookupCollectionByNameExact(chunkCollectionName);
+    await typesenseSearch.lookupCollectionByNameExact(chunksCollectionName);
 
   if (!opts.dryrun) {
     if (opts.n) {
       if (docCollectionFound) {
-        console.error(`Collection '${docCollectionName}' already exists, aborting.`);
+        console.error(`Collection '${docsCollectionName}' already exists, aborting.`);
         return;
       } else {
         // create new collection
         try {
-          await typesenseClient.collections(docCollectionName).retrieve();
+          await typesenseClient.collections(docsCollectionName).retrieve();
         } catch (error) {
           if (error instanceof Errors.ObjectNotFound) {
-            console.log('Creating new collection:', docCollectionName);
-            kudosDocTypesenseSchema.name = docCollectionName;
-            await typesenseClient.collections().create(kudosDocTypesenseSchema);
-            console.log(`Kudos doc collection ${docCollectionName} created successfully.`);
+            if (!opts.dryrun) {
+              console.log('Creating new collection:', docsCollectionName);
+              kudosDocTypesenseSchema.name = docsCollectionName;
+              await typesenseClient.collections().create(kudosDocTypesenseSchema);
+              console.log(`Kudos doc collection ${docsCollectionName} created successfully.`);
+            } else {
+              console.log(`Dry run, won't attempt to create new docs collection '${docsCollectionName}'`)
+            }
           } else {
             throw error;
           }
         }
       }
       if (chunkCollectionFound) {
-        console.error(`Chunck collection '${chunkCollectionName}' already exists, aborting.`);
+        console.error(`Chunck collection '${chunksCollectionName}' already exists, aborting.`);
         return;
       } else {
         // create new collection
         try {
-          await typesenseClient.collections(chunkCollectionName).retrieve();
+          await typesenseClient.collections(chunksCollectionName).retrieve();
         } catch (error) {
           if (error instanceof Errors.ObjectNotFound) {
-            console.log('Creating new collection:', chunkCollectionName);
-            let chunkSchema = kudosChunkTypesenseSchema(docCollectionName);
+            console.log('Creating new collection:', chunksCollectionName);
+            let chunkSchema = kudosChunkTypesenseSchema(docsCollectionName);
             await typesenseClient.collections().create(chunkSchema);
-            console.log(`Kudos chunk collection ${chunkCollectionName} created successfully.`);
+            console.log(`Kudos chunk collection ${chunksCollectionName} created successfully.`);
           } else {
             throw error;
           }
@@ -366,29 +370,29 @@ async function main() {
     } else {
       if (!docCollectionFound) {
         console.error(
-          `Collection '${docCollectionName}' not found. To create, use the '-n' option.`,
+          `Collection '${docsCollectionName}' not found. To create, use the '-n' option.`,
         );
         return;
       }
       if (!chunkCollectionFound) {
-        console.error(`Kudos doc chunk collection '${chunkCollectionName}' not found, aborting.`);
+        console.error(`Kudos doc chunk collection '${chunksCollectionName}' not found, aborting.`);
         return;
       }
 
-      if (docCollectionFound.name != docCollectionName) {
+      if (docCollectionFound.name != docsCollectionName) {
         console.log(
-          `Resolved alias '${docCollectionName}' to collection '${docCollectionFound.name}'`,
+          `Resolved alias '${docsCollectionName}' to collection '${docCollectionFound.name}'`,
         );
-        docCollectionName = docCollectionFound.name;
+        docsCollectionName = docCollectionFound.name;
       }
-      if (chunkCollectionFound.name != chunkCollectionName) {
+      if (chunkCollectionFound.name != chunksCollectionName) {
         console.log(
-          `Resolved alias '${chunkCollectionName}' to collection '${chunkCollectionFound.name}'`,
+          `Resolved alias '${chunksCollectionName}' to collection '${chunkCollectionFound.name}'`,
         );
-        chunkCollectionName = chunkCollectionFound.name;
+        chunksCollectionName = chunkCollectionFound.name;
       }
 
-      console.log(`Will update existing search phrases in collection: '${docCollectionName}'`);
+      console.log(`Will update existing search phrases in collection: '${docsCollectionName}'`);
     }
   }
 
@@ -487,7 +491,7 @@ async function main() {
       );
       if (!opts.dryrun) {
         await typesenseClient
-          .collections(docCollectionName)
+          .collections(docsCollectionName)
           .documents()
           .import([doc], { action: 'upsert' });
       }
@@ -533,7 +537,7 @@ async function main() {
             || chunkIndex === chunkLengths.length - 1) {
             console.log(`Uploading ${batch.length} chunks for doc id ${row.id}`);
             await typesenseClient
-              .collections(chunkCollectionName)
+              .collections(chunksCollectionName)
               .documents()
               .import(batch, { action: 'upsert' });
             batch = [];

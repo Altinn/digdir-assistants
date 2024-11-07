@@ -5,7 +5,6 @@ import { ensureDocsAndChunksCollections } from '@digdir/assistant-lib';
 import { createRouter, failedRequestHandler } from './routes.ts';
 import { Command } from 'commander';
 
-
 function filterUrlsToCrawl(urls: string[]): string[] {
   const crawlRoutes = [
     'https://info.altinn.no/en/forms-overview/',
@@ -44,7 +43,7 @@ async function main() {
   // make sure we have a target collection to update
   await ensureDocsAndChunksCollections(docsCollectionName);
 
-  const router = createRouter(docsCollectionName, filterUrlsToCrawl)
+  const router = createRouter(docsCollectionName, filterUrlsToCrawl);
   const crawler = new PlaywrightCrawler({
     requestHandler: router,
     headless: true,

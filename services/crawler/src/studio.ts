@@ -13,7 +13,10 @@ async function main() {
     .description('Crawl the Altinn Studio documentation site')
     .version('0.1.0');
 
-  program.requiredOption('-c, --collection <string>', 'docs collection to update.\n   Chunks collections name will be derived by replacing \'docs\' with \'chunks\'.');
+  program.requiredOption(
+    '-c, --collection <string>',
+    "docs collection to update.\n   Chunks collections name will be derived by replacing 'docs' with 'chunks'.",
+  );
 
   program.parse(process.argv);
   const opts = program.opts();
@@ -22,7 +25,6 @@ async function main() {
 
   // make sure we have a target collection to update
   await ensureDocsAndChunksCollections(docsCollectionName);
-  
 
   const router = createRouter(docsCollectionName, filterUrlsToCrawl);
   const crawler = new PlaywrightCrawler({
