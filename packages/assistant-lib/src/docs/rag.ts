@@ -1,7 +1,7 @@
 import { queryRelaxation } from "./query-relaxation";
 import {
   lookupSearchPhrasesSimilar,
-  retrieveAllByUrl,
+  retrieveChunksById,
 } from "./retrieval-typesense";
 import { translate } from "./translate";
 import { isValidUrl, lapTimer, scopedEnvVar, round } from "../general";
@@ -45,6 +45,7 @@ const RagPipelineParamsSchema = z.object({
   maxContextLength: z.number(),
   maxSourceLength: z.number(),
   docsCollectionName: z.string(),
+  chunksCollectionName: z.string(),
   phrasesCollectionName: z.string(),
   stream_callback_msg1: z.any().nullable(),
   stream_callback_msg2: z.any().nullable(),
@@ -121,8 +122,8 @@ export async function ragPipeline(
     );
   }
   start = performance.now();
-  const search_response = await retrieveAllByUrl(
-    params.docsCollectionName,
+  const search_response = await retrieveChunksById(
+    params.chunksCollectionName,
     search_phrase_hits,
   );
   durations["execute_searches"] = round(lapTimer(start));
@@ -136,7 +137,7 @@ export async function ragPipeline(
         // console.log('hits:', JSON.stringify(hit));
         return {
           id: hit.document.id,
-          url: hit.document.url_without_anchor,
+          url: hit.document.chunk_id,
           content_markdown: hit.document.content_markdown || "",
         };
       }),
@@ -151,21 +152,21 @@ export async function ragPipeline(
     }
   }
 
-  let allUrls: string[] = [];
+  let allChunkIds: string[] = [];
   let allDocs: any[] = [];
   let loadedDocs: any[] = [];
-  let loadedUrls: string[] = [];
+  let loadedChunkIds: string[] = [];
   let loadedSearchHits: any[] = [];
-  let docIndex = 0;
+  let chunkIndex = 0;
   let docsLength = 0;
 
   // Make list of all markdown content
-  while (docIndex < searchHits.length) {
-    const searchHit = searchHits[docIndex];
-    docIndex += 1;
-    const uniqueUrl = searchHit.url;
+  while (chunkIndex < searchHits.length) {
+    const searchHit = searchHits[chunkIndex];
+    chunkIndex += 1;
+    const currentChunkId = searchHit.url;
 
-    if (allUrls.includes(uniqueUrl)) {
+    if (allChunkIds.includes(currentChunkId)) {
       continue;
     }
 
@@ -177,11 +178,11 @@ export async function ragPipeline(
     const loadedDoc = {
       page_content: docMd,
       metadata: {
-        source: uniqueUrl,
+        source: currentChunkId,
       },
     };
     allDocs.push(loadedDoc);
-    allUrls.push(uniqueUrl);
+    allChunkIds.push(currentChunkId);
   }
 
   // Rerank results using ColBERT
@@ -221,20 +222,20 @@ export async function ragPipeline(
   durations.colbert_rerank = round(lapTimer(start));
 
   // Need to preserve order in documents list
-  docIndex = 0;
+  chunkIndex = 0;
 
-  while (docIndex < searchHitsReranked.length) {
-    const searchHit = searchHitsReranked[docIndex];
-    docIndex += 1;
-    const uniqueUrl = searchHit.url;
+  while (chunkIndex < searchHitsReranked.length) {
+    const searchHit = searchHitsReranked[chunkIndex];
+    chunkIndex += 1;
+    const chunk_id = searchHit.url;
 
-    if (loadedUrls.includes(uniqueUrl)) {
+    if (loadedChunkIds.includes(chunk_id)) {
       continue;
     }
 
     let docMd = searchHit.content_markdown;
 
-    const sourceDesc = "\n```\nSource URL: " + uniqueUrl + "\n```\n\n";
+    const sourceDesc = "\n```\nLoading chunk_id  '" + chunk_id + "'\n```\n\n";
 
     console.log("Source desc: " + sourceDesc);
 
@@ -253,18 +254,18 @@ export async function ragPipeline(
     const loadedDoc = {
       page_content: sourceDesc + docTrimmed,
       metadata: {
-        source: uniqueUrl,
+        source: chunk_id,
       },
     };
     if (envVar("LOG_LEVEL") === "debug") {
       console.log(
-        `loaded markdown doc, length= ${docTrimmed.length}, url= ${uniqueUrl}`,
+        `loaded markdown doc, length= ${docTrimmed.length}, chunk_id= ${chunk_id}`,
       );
     }
 
     docsLength += docTrimmed.length;
     loadedDocs.push(loadedDoc);
-    loadedUrls.push(uniqueUrl);
+    loadedChunkIds.push(chunk_id);
     loadedSearchHits.push(searchHit);
 
     // TODO: add actual doc length, loaded doc length to dedicated lists and return
@@ -278,11 +279,11 @@ export async function ragPipeline(
     }
   }
 
-  let notLoadedUrls: string[] = [];
+  let notLoadedChunkIds: string[] = [];
   for (const hit of searchHits) {
     const url = hit.url;
-    if (!loadedUrls.includes(url) && !notLoadedUrls.includes(url)) {
-      notLoadedUrls.push(url);
+    if (!loadedChunkIds.includes(url) && !notLoadedChunkIds.includes(url)) {
+      notLoadedChunkIds.push(url);
     }
   }
 
@@ -386,10 +387,10 @@ export async function ragPipeline(
     translated_answer: translated_answer || "",
     rag_success,
     search_queries: extract_search_queries?.searchQueries || [],
-    source_urls: loadedUrls,
+    source_urls: loadedChunkIds,
     source_documents: loadedDocs,
     relevant_urls: relevant_sources,
-    not_loaded_urls: notLoadedUrls,
+    not_loaded_urls: notLoadedChunkIds,
     durations,
     prompts: {
       queryRelax: params.promptRagQueryRelax || "",

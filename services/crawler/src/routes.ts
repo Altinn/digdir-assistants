@@ -4,7 +4,15 @@ import { Locator } from '@playwright/test';
 import TurndownService from 'turndown';
 import sha1 from 'sha1';
 import { get_encoding } from 'tiktoken';
-import { RagDoc, RagChunk, updateDocs, updateChunks, getDocChecksums, findChunks, ImportResponse } from '@digdir/assistant-lib';
+import {
+  RagDoc,
+  RagChunk,
+  updateDocs,
+  updateChunks,
+  getDocChecksums,
+  findChunks,
+  ImportResponse,
+} from '@digdir/assistant-lib';
 import { URL } from 'url';
 import { flatMap } from 'remeda';
 
@@ -53,6 +61,7 @@ export async function defaultHandler(
   { page, request, log, crawler, pushData },
 ) {
   const startUrl = request.url;
+  const processLinks = false;
 
   chunksCollectionName = collectionName.replace('docs', 'chunks');
   await page.waitForLoadState('networkidle');
@@ -80,14 +89,13 @@ export async function defaultHandler(
       return textContents.join(' / ');
     }),
   );
-  const title = titleElements.join(" / ");  
+  const title = titleElements.join(' / ');
 
   const contentLocators = getContentLocators(request, page);
 
-
   const contents = await Promise.all(
     contentLocators.map(async (locator) => {
-      const elements = await locator.all();      
+      const elements = await locator.all();
       const innerHTMLs = await Promise.all(elements.map((element) => element.innerHTML()));
 
       // extract links
@@ -97,20 +105,24 @@ export async function defaultHandler(
 
           return await Promise.all(linkElements.map((link) => link.getAttribute('href')));
         }),
-      );      
-      
-      // const links = flatMap(linksList, (link) => link).filter((link) => link !== null) as string[];
+      );
 
-      // const filteredUrls = urlFilter(links);
+      if (processLinks) {
+        const links = flatMap(linksList, (link) => link).filter(
+          (link) => link !== null,
+        ) as string[];
 
-      // if (filteredUrls.length > 0) {
-      //   log.info(`Adding ${filteredUrls.length} links:\n${JSON.stringify(filteredUrls)}`);
-      //   await crawler.addRequests(
-      //     filteredUrls.map((url: string) => {
-      //       return { url: url || '' };
-      //     }),
-      //   );
-      // }
+        const filteredUrls = urlFilter(links);
+
+        if (filteredUrls.length > 0) {
+          log.info(`Adding ${filteredUrls.length} links:\n${JSON.stringify(filteredUrls)}`);
+          await crawler.addRequests(
+            filteredUrls.map((url: string) => {
+              return { url: url || '' };
+            }),
+          );
+        }
+      }
 
       return innerHTMLs.join('\n');
     }),
@@ -130,8 +142,6 @@ export async function defaultHandler(
     doc_num: '' + urlHash,
     uuid: '' + urlHash,
     title: title,
-    url: pageUrl_without_anchor,
-    url_without_anchor: pageUrl_without_anchor,
     source_document_url: pageUrl_without_anchor,
     source_updated_at: new Date().toISOString(),
     type: 'content',
@@ -151,31 +161,31 @@ export async function defaultHandler(
     currentDocs[0].id == urlHash &&
     currentDocs[0].markdown_checksum == markdown_checksum
   ) {
-    if (currentDocs[0].url_without_anchor != pageUrl_without_anchor) {
+    if (currentDocs[0].source_document_url != pageUrl_without_anchor) {
       log.warning(
-        `Possible redirect, not updating yet...\noriginal url: ${currentDocs[0].url_without_anchor}\nnew url:   ${pageUrl_without_anchor}`,
+        `Possible redirect, not updating yet...\noriginal url: ${currentDocs[0].source_document_url}\nnew url:   ${pageUrl_without_anchor}`,
       );
     } else {
-      log.info(`  [NO CHANGE] tokens: ${tokens.length}, No change for url: ${pageUrl_without_anchor}`);
+      log.info(
+        `  [NO CHANGE] tokens: ${tokens.length}, No change for url: ${pageUrl_without_anchor}`,
+      );
     }
   } else {
-    log.info(`[UPDATED] tokens: ${tokens.length}, Updating doc for url '${pageUrl_without_anchor}'`);
+    log.info(
+      `[UPDATED] tokens: ${tokens.length}, Updating doc for url '${pageUrl_without_anchor}'`,
+    );
 
     const docResults = await updateDocs([updatedDoc], collectionName);
 
     const failedDocs = docResults.filter((result: any) => !result.success);
     if (failedDocs.length > 0) {
-      log.error(
-        `Upsert to typesense failed for the following urls:\n${failedDocs}`,
-      );
+      log.error(`Upsert to typesense failed for the following urls:\n${failedDocs}`);
     }
 
     const chunkResults = await chunkDocContents(markdown, urlHash, log);
     const failedChunks = chunkResults.filter((result: any) => !result.success);
     if (failedChunks.length > 0) {
-      log.error(
-        `Upsert to typesense failed for the following urls:\n${failedChunks}`,
-      );
+      log.error(`Upsert to typesense failed for the following urls:\n${failedChunks}`);
     }
   }
 
@@ -187,17 +197,10 @@ export async function defaultHandler(
   });
 
   log.info(`    -- tokens: ${sumTokens}, docs: ${sumDocs}, chunks: ${sumChunks}`);
-
 }
 
 async function chunkDocContents(markdown: string, urlHash: string, log: apifyLog.Log) {
-
-  const chunkLengths = await findChunks(
-    markdown,
-    sectionDelim,
-    minChunkLength,
-    maxChunkLength,
-  );
+  const chunkLengths = await findChunks(markdown, sectionDelim, minChunkLength, maxChunkLength);
 
   sumChunks += chunkLengths.length;
   let batch: RagChunk[] = [];
@@ -207,7 +210,7 @@ async function chunkDocContents(markdown: string, urlHash: string, log: apifyLog
       `Only ${chunkLengths.length} tokens extracted\n from doc_num ${urlHash}\n consider verifying the locators for this url.`,
     );
   } else {
-    log.info(`   Found ${chunkLengths.length} chunks, uploading...`)
+    log.info(`   Found ${chunkLengths.length} chunks, uploading...`);
   }
 
   let allChunkResults: ImportResponse[] = [];
@@ -219,7 +222,7 @@ async function chunkDocContents(markdown: string, urlHash: string, log: apifyLog
     sumTokens += tokens.length;
     log.info(
       `  -- doc_num: ${urlHash}, chunk_index: ${chunkIndex + 1} of ${chunkLengths.length} ` +
-      `-- tokens: ${tokens.length} -- length: ${chunkLengths[chunkIndex] - chunkStart} ---------------`,
+        `-- tokens: ${tokens.length} -- length: ${chunkLengths[chunkIndex] - chunkStart} ---------------`,
     );
     // log.info(chunkText);
     chunkStart = chunkLengths[chunkIndex] + 1;
@@ -232,8 +235,6 @@ async function chunkDocContents(markdown: string, urlHash: string, log: apifyLog
       chunk_id: urlHash + '-' + chunkIndex,
       chunk_index: chunkIndex,
       content_markdown: chunkText,
-      url: urlHash + '-' + chunkIndex,
-      url_without_anchor: urlHash + '-' + chunkIndex,
       type: 'content',
       item_priority: 1,
       language: 'no',
@@ -244,17 +245,14 @@ async function chunkDocContents(markdown: string, urlHash: string, log: apifyLog
     batch.push(outChunk);
 
     if (batch.length === chunkImportBatchSize || chunkIndex === chunkLengths.length - 1) {
-
       log.info(`Uploading ${batch.length} chunks for doc id ${urlHash}`);
 
-      const results = await updateChunks(batch, chunksCollectionName)
+      const results = await updateChunks(batch, chunksCollectionName);
       allChunkResults = allChunkResults.concat(results);
 
       const failedResults = results.filter((result: any) => !result.success);
       if (failedResults.length > 0) {
-        log.error(
-          `Upsert to typesense failed for the following urls:\n${failedResults}`,
-        );
+        log.error(`Upsert to typesense failed for the following urls:\n${failedResults}`);
       }
 
       batch = [];
@@ -288,15 +286,15 @@ function getContentLocators(request, page): Locator[] {
     'https://github.com/Altinn/altinn-studio/releases': [
       page.locator('//*[@id="repo-content-turbo-frame"]/div[1]'), // data-hpc
     ],
-    'https://github.com/digdir/roadmap/issues/': [page.locator('//div[@data-turbo-frame"]')],    
+    'https://github.com/digdir/roadmap/issues/': [page.locator('//div[@data-turbo-frame"]')],
     'https://www.digdir.no/kunstig-intelligens/': [
       // page.locator('/html/body/div[2]/div/main/div/article/div/div/div/div[2]'),
-      page.locator('//*/div[@class="modules node-page__modules"]')
-    ]
+      page.locator('//*/div[@class="modules node-page__modules"]'),
+    ],
   };
 
   for (const url in locatorMap) {
-    if (request.url.startsWith(url)) {      
+    if (request.url.startsWith(url)) {
       return locatorMap[url];
     }
   }
@@ -304,12 +302,17 @@ function getContentLocators(request, page): Locator[] {
 }
 
 function getTitleLocator(request, page): Locator[] {
-
   const locatorMap = {
-    'https://docs.altinn.studio/': [page.locator('//*/div[@id="breadcrumbs"]/span[@class="links"]/a')],
-    'https://info.altinn.no/en/forms-overview/': [page.locator('//*/section[@id="content"]/*/ol[@class="a-breadcrumb"]')],
-    'https://www.digdir.no/kunstig-intelligens/': [page.locator('//*/h1[@class="node-page__title fds-typography-heading-xlarge"]')]
-  }
+    'https://docs.altinn.studio/': [
+      page.locator('//*/div[@id="breadcrumbs"]/span[@class="links"]/a'),
+    ],
+    'https://info.altinn.no/en/forms-overview/': [
+      page.locator('//*/section[@id="content"]/*/ol[@class="a-breadcrumb"]'),
+    ],
+    'https://www.digdir.no/kunstig-intelligens/': [
+      page.locator('//*/h1[@class="node-page__title fds-typography-heading-xlarge"]'),
+    ],
+  };
   for (const url in locatorMap) {
     if (request.url.startsWith(url)) {
       return locatorMap[url];
@@ -326,4 +329,3 @@ export async function failedRequestHandler({ request, pushData }) {
     errors: request.errorMessages,
   });
 }
-

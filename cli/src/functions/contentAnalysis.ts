@@ -57,7 +57,7 @@ async function main() {
       `Retrieving content_markdown for all urls from collection '${collectionName}', page ${page} (page_size=${pageSize})`,
     );
 
-    const searchResponse = await typesenseSearch.typesenseRetrieveAllUrls(
+    const searchResponse = await typesenseSearch.retrieveAllChunks(
       collectionName,
       page,
       pageSize,
