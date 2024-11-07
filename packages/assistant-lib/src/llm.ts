@@ -177,3 +177,52 @@ export function countTokens(text: string): number {
 
   return tokens.length ?? 0;
 }
+
+export async function findChunks(
+  text: string,
+  delim: string,
+  minLength: number,
+  maxLength: number,
+): Promise<number[]> {
+  const sectionLengths: number[] = [];
+  const delimLen = delim.length;
+  let start = 0;
+  while (start < text.length) {
+    let end = start + minLength;
+
+    // Ensure the section is not longer than maxLength
+    if (end > text.length) {
+      end = text.length;
+      sectionLengths.push(end);
+      start = end;
+    } else {
+      // Find the next delimiter character within the maxLength limit
+      while (
+        end < text.length &&
+        end - start <= maxLength &&
+        text.substring(end, end + delimLen) !== delim
+      ) {
+        end++;
+      }
+
+      // If we reached the maxLength limit without finding a delimiter, backtrack to the last delimiter
+      if (end - start > maxLength) {
+        let tempEnd = end;
+        while (
+          tempEnd > start &&
+          text.substring(tempEnd, tempEnd + delimLen) !== delim
+        ) {
+          tempEnd--;
+        }
+        if (tempEnd > start) {
+          end = tempEnd;
+        }
+      }
+      sectionLengths.push(end);
+      // Move to the next section, skipping the delimiter
+      start = end + delimLen;
+    }
+  }
+
+  return sectionLengths;
+}

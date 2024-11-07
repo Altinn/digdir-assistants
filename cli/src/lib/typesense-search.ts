@@ -13,7 +13,9 @@ export interface SearchPhraseDoc {
 
 export interface SearchPhraseEntry {
   id?: string;
-  doc_id: string;
+  chunk_id?: string;
+  chunk_index?: number;
+  doc_num: string;
   url: string;
   search_phrase: string;
   sort_order: number;
@@ -124,23 +126,24 @@ export async function typesenseSearchMultipleVector(searchQueries: SearchPhrases
 }
 
 export async function typesenseRetrieveAllUrls(
+  collectionName: string,
   page: number,
   pageSize: number,
-  includeFields: string = 'url_without_anchor,content_markdown,id',
+  includeFields: string = 'doc_num,url_without_anchor,content_markdown,id',
 ): Promise<any> {
   const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
 
   const multiSearchArgs = {
     searches: [
       {
-        collection: process.env.TYPESENSE_DOCS_COLLECTION,
+        collection: collectionName,
         q: '*',
         query_by: 'url_without_anchor',
         include_fields: includeFields,
         filter_by: 'type:=content',
         group_by: 'url_without_anchor',
         group_limit: 1,
-        sort_by: 'item_priority:asc',
+        sort_by: 'updated_at:desc',
         page: page,
         per_page: pageSize,
       },
@@ -177,7 +180,7 @@ export async function setupSearchPhraseSchema(collectionNameTmp: string): Promis
   const schema: CollectionCreateSchema = {
     name: collectionNameTmp,
     fields: [
-      { name: 'doc_id', type: 'string', optional: false },
+      { name: 'doc_num', type: 'string', optional: false },
       {
         name: 'url',
         type: 'string',
@@ -239,15 +242,41 @@ export async function lookupSearchPhrases(
         collection: collectionName,
         q: '*',
         query_by: 'url',
-        include_fields: 'id,doc_id,url,search_phrase,sort_order,updated_at,checksum',
-        filter_by: `url:=${url} && prompt:=${prompt}`,
-        sort_by: 'sort_order:asc',
+        include_fields: 'id,doc_num,url,search_phrase,sort_order,updated_at,checksum',
+        filter_by: `url:=\`${url}\` && prompt:=\`${prompt}\``,
+        sort_by: 'updated_at:desc',
         per_page: 30,
       },
     ],
   };
 
   const response = await client.multiSearch.perform<SearchPhraseEntry[]>(multiSearchArgs, {});
+  return response;
+}
+
+export async function lookupSearchPhrasesForDocChunks(
+  chunk_ids: string[],
+  collectionName?: string,
+  prompt: string = 'original',
+  maxPhraseCount: number = 30,
+): Promise<MultiSearchResponse<SearchPhraseEntry[]>> {
+  const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
+
+  const multiSearchArgs = {
+    searches: chunk_ids.map(chunk_id => ({
+      collection: collectionName,
+      q: chunk_id,
+      query_by: 'url',
+      // can't use chunk_id yet, because corrupt schema, url has same data.
+      include_fields: 'id,doc_num,url,search_phrase,sort_order,updated_at,checksum',
+      filter_by: `url:=\`${chunk_id}\` && prompt:=\`${prompt}\``,
+      // sort_by: 'updated_at:desc',
+      per_page: maxPhraseCount,
+      highlight: false,
+    })),
+  };
+  const response = await client.multiSearch.perform<SearchPhraseEntry[]>(multiSearchArgs, {});
+
   return response;
 }
 

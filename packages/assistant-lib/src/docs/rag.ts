@@ -95,7 +95,7 @@ export async function ragPipeline(
   var start = total_start;
 
   const extract_search_queries = await queryRelaxation(
-    params.translated_user_query,
+    params.original_user_query,
     params.promptRagQueryRelax,
   );
   durations.generate_searches = round(lapTimer(total_start));
@@ -110,7 +110,7 @@ export async function ragPipeline(
   const search_phrase_hits = await lookupSearchPhrasesSimilar(
     params.phrasesCollectionName,
     extract_search_queries,
-    "original",
+    "keyword-search",
   );
   durations["phrase_similarity_search"] = round(lapTimer(start));
 
@@ -196,7 +196,7 @@ export async function ragPipeline(
   }
 
   const rerankData = {
-    user_input: params.translated_user_query,
+    user_input: params.original_user_query,
     documents: searchHits.map((document: any) =>
       document.content_markdown.substring(0, params.maxSourceLength),
     ),
@@ -299,7 +299,7 @@ export async function ragPipeline(
   const partialPrompt = params.promptRagGenerate;
   const fullPrompt = partialPrompt
     .replace("{context}", contextYaml)
-    .replace("{question}", params.translated_user_query);
+    .replace("{question}", params.original_user_query);
 
   if (envVar("LOG_LEVEL") == "debug") {
     console.log(`rag prompt:\n${partialPrompt}`);
@@ -361,7 +361,7 @@ export async function ragPipeline(
 
   // Translation logic
   start = performance.now();
-  const translation_enabled = true;
+  const translation_enabled = false;
 
   if (
     translation_enabled &&

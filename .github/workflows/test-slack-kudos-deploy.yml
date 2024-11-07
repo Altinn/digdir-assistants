@@ -1,14 +1,14 @@
-name: prod-slack-digdir - Auto deploy
+name: test-slack-kudos - Auto deploy
 
 # When this action will be executed
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches:       
-      [ release ]
+    branches: 
+      [ feature/import-kudos-docs ]
     paths:
     - '**'
-    - '.github/workflows/assistants-slack-digdir-*.yml'
+    - '.github/workflows/test-slack-kudos-*.yml'
 
   # Allow manual trigger 
   workflow_dispatch:
@@ -16,7 +16,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: prod-slack-digdir
+    environment: test-slack-kudos
 
     steps:
       - name: Checkout to the branch
@@ -25,18 +25,18 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.ASSISTANTSSLACKDIGDIR_AZURE_CREDENTIALS }}
+          creds: ${{ secrets.TESTSLACKKUDOS_AZURE_CREDENTIALS }}
 
       - name: Build and push container image to registry
         uses: azure/container-apps-deploy-action@v2
         with:
           appSourcePath: ${{ github.workspace }} 
-          acrName: assistantsprodcr
-          resourceGroup: assistants-prod-norwayeast
-          containerAppName: assistants-slack-digdir
-          containerAppEnvironment: assistants-prod-env
+          acrName: altinnaicontainers
+          resourceGroup: altinn-ai-assistant
+          containerAppName: test-slack-kudos
+          containerAppEnvironment: managedEnvironment-altinnaiassista-a61b
           location: norwayeast
-          imageToBuild: assistantsprodcr.azurecr.io/assistants-slack-release:${{ github.sha }}
+          imageToBuild: altinnaicontainers.azurecr.io/assistants-slack-test:${{ github.sha }}
           buildArguments: |
             "VITE_SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
             "VITE_SLACK_APP_SUPABASE_ANON_KEY=${{secrets.SLACK_APP_SUPABASE_ANON_KEY}}"

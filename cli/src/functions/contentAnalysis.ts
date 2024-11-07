@@ -57,7 +57,12 @@ async function main() {
       `Retrieving content_markdown for all urls from collection '${collectionName}', page ${page} (page_size=${pageSize})`,
     );
 
-    const searchResponse = await typesenseSearch.typesenseRetrieveAllUrls(page, pageSize, '*');
+    const searchResponse = await typesenseSearch.typesenseRetrieveAllUrls(
+      collectionName,
+      page,
+      pageSize,
+      '*',
+    );
     durations.queryDocs += Date.now() - totalStart;
 
     const searchHits: SearchHit[] = searchResponse.results.flatMap((result: any) =>

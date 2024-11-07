@@ -1,6 +1,7 @@
 import Typesense from "typesense";
 import { DocumentSchema } from "typesense/lib/Typesense/Documents";
 import { CollectionCreateSchema } from "typesense/lib/Typesense/Collections";
+export { ImportResponse } from "typesense/lib/Typesense/Documents";
 import { SearchResponseHit } from "typesense/lib/Typesense/Documents";
 import { QueryRelaxation } from "./query-relaxation";
 import { typesenseConfig } from "../config/typesense";
@@ -17,20 +18,24 @@ export interface RankedUrl {
 
 const RagDocSchema = z.object({
   id: z.string().optional(),
-  content_markdown: z.string().optional(),
+  uuid: z.string(),
+  doc_num: z.string(),
+  title: z.string().optional(),
   url: z.string(),
   url_without_anchor: z.string(),
+  source_document_url: z.string(),
   type: z.string().optional(),
   language: z.string().optional(),
   item_priority: z.number(),
   updated_at: z.number(),
+  source_updated_at: z.string().optional(),
   markdown_checksum: z.string().optional(),
-  token_count: z.number().optional(),
 });
 export type RagDoc = z.infer<typeof RagDocSchema>;
 
 export type RagDocQuery = DocumentSchema & {
   id?: string;
+  doc_num?: string;
   content_markdown?: string;
   url?: string;
   url_without_anchor?: string;
@@ -38,8 +43,42 @@ export type RagDocQuery = DocumentSchema & {
   language?: string;
   item_priority?: number;
   updated_at?: number;
+  source_updated_at?: string;
   markdown_checksum?: string;
   token_count?: number;
+};
+
+const RagChunkSchema = z.object({
+  id: z.string().optional(),
+  chunk_id: z.string(),
+  doc_num: z.string(),
+  chunk_index: z.number(),
+  url: z.string(),
+  url_without_anchor: z.string(),
+  content_markdown: z.string().optional(),
+  markdown_checksum: z.string().optional(),
+  type: z.string().optional(),
+  token_count: z.number().optional(),
+  language: z.string().optional(),
+  item_priority: z.number(),
+  updated_at: z.number(),
+});
+export type RagChunk = z.infer<typeof RagChunkSchema>;
+
+export type RagChunkQuery = DocumentSchema & {
+  id?: string;
+  chunk_id?: string;
+  doc_num?: string;
+  chunk_index?: number;
+  url?: string;
+  url_without_anchor?: string;
+  content_markdown?: string;
+  markdown_checksum?: string;
+  token_count?: number;
+  language?: string;
+  type?: string;
+  item_priority?: number;
+  updated_at?: number;
 };
 
 export async function lookupSearchPhrasesSimilar(
@@ -59,7 +98,7 @@ export async function lookupSearchPhrasesSimilar(
       q: query,
       query_by: "search_phrase,phrase_vec",
       include_fields: "search_phrase,url",
-      filter_by: `prompt:=${prompt}`,
+      filter_by: `prompt:=\`${prompt}\``,
       group_by: "url",
       group_limit: 1,
       limit: 20,
@@ -68,6 +107,12 @@ export async function lookupSearchPhrasesSimilar(
       drop_tokens_threshold: 5,
     })),
   };
+
+  if (true || envVar("LOG_LEVEL") === "debug-relaxation") {
+    console.log(
+      `lookupSearchPhraseSimilar query args:\n${JSON.stringify(multiSearchArgs)}`,
+    );
+  }
 
   const response = await client.multiSearch.perform(multiSearchArgs, {});
 
@@ -116,7 +161,7 @@ export async function retrieveAllUrls(
         include_fields: "url_without_anchor,id",
         group_by: "url_without_anchor",
         group_limit: 1,
-        sort_by: "item_priority:asc",
+        // sort_by: "item_priority:asc",
         page: page,
         per_page: pageSize,
       },
@@ -124,6 +169,11 @@ export async function retrieveAllUrls(
   };
 
   const response = await client.multiSearch.perform(multiSearchArgs, {});
+
+  if (envVar("LOG_LEVEL") === "debug") {
+    console.log(`retrieveAllUrls response:\n${JSON.stringify(response)}`);
+  }
+
   const searchPhraseHits = flatMap(response.results, (result: any) =>
     flatMap(result.grouped_hits, (group: any) =>
       flatMap(group.hits, (hit: any) => hit.document.url_without_anchor),
@@ -143,8 +193,8 @@ export async function retrieveAllByUrl(
     collection: docsCollectionName,
     q: rankedUrl["url"],
     query_by: "url_without_anchor",
-    include_fields: "id,url_without_anchor,type,content_markdown",
-    filter_by: `url_without_anchor:=${rankedUrl["url"]}`,
+    include_fields: "id,doc_num,url_without_anchor,type,content_markdown",
+    filter_by: `url_without_anchor:=\`${rankedUrl["url"]}\``,
     group_by: "url_without_anchor",
     group_limit: 1,
     page: 1,
@@ -163,132 +213,399 @@ const docsCollectionSchema = (
   return {
     name: collectionName,
     symbols_to_index: ["_"],
-    default_sorting_field: "item_priority",
+    default_sorting_field: "",
     enable_nested_fields: false,
     fields: [
-      { name: "id", type: "string", facet: true, index: true, optional: true },
       {
-        name: "content_markdown",
-        type: "string",
-        facet: false,
-        optional: true,
-        index: true,
-        sort: false,
-        infix: false,
-        locale: "en",
-      },
-      {
-        name: "url",
-        type: "string",
         facet: true,
-        optional: false,
         index: true,
-        sort: false,
         infix: false,
         locale: "",
+        name: "doc_num",
+        optional: false,
+        sort: true,
+        stem: false,
+        store: true,
+        type: "string",
       },
       {
+        facet: true,
+        index: true,
+        infix: false,
+        locale: "",
         name: "url_without_anchor",
-        type: "string",
-        facet: true,
         optional: false,
-        index: true,
         sort: false,
-        infix: false,
-        locale: "",
-      },
-      {
-        name: "version",
-        type: "string[]",
-        facet: true,
-        optional: true,
-        index: true,
-        sort: false,
-        infix: false,
-        locale: "",
-      },
-      {
-        name: "type",
+        stem: false,
+        store: true,
         type: "string",
-        facet: true,
-        optional: true,
-        index: true,
-        sort: false,
-        infix: false,
-        locale: "en",
       },
       {
-        name: ".*_tag",
-        type: "string",
-        facet: true,
-        optional: true,
-        index: true,
-        sort: false,
-        infix: false,
-        locale: "en",
-      },
-      {
-        name: "language",
-        type: "string",
-        facet: true,
-        optional: true,
-        index: true,
-        sort: false,
-        infix: false,
-        locale: "",
-      },
-      {
-        name: "item_priority",
-        type: "int64",
         facet: false,
-        optional: false,
         index: true,
-        sort: true,
         infix: false,
         locale: "",
-      },
-      {
         name: "updated_at",
-        type: "int64",
-        facet: true,
         optional: false,
-        index: true,
         sort: true,
-        infix: false,
-        locale: "",
-      },
-      {
-        name: "markdown_checksum",
-        type: "string",
-        facet: false,
-        optional: true,
-        index: false,
-        sort: false,
-        infix: false,
-        locale: "",
-      },
-      {
-        name: "token_count",
+        stem: false,
+        store: true,
         type: "int64",
+      },
+      {
         facet: true,
-        optional: true,
         index: true,
-        sort: true,
         infix: false,
         locale: "",
+        name: "uuid",
+        optional: false,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: true,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "type",
+        optional: true,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: true,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "title",
+        optional: true,
+        sort: true,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "subtitle",
+        optional: true,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "isbn",
+        optional: true,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "abstract",
+        optional: true,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: true,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "language",
+        optional: true,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: true,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "source_document_type",
+        optional: true,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "source_document_url",
+        optional: true,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "source_page_url",
+        optional: true,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "source_published_at",
+        optional: true,
+        sort: true,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "source_created_at",
+        optional: true,
+        sort: true,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "source_updated_at",
+        optional: true,
+        sort: true,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "markdown_checksum",
+        optional: true,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
       },
     ],
   };
 };
 
-export async function createDocsCollectionIfNotExists(collectionName: string) {
+const chunksCollectionSchema = (
+  collectionName: string,
+  docsCollectionName: string,
+): CollectionCreateSchema => {
+  return {
+    name: collectionName,
+    symbols_to_index: ["_"],
+    default_sorting_field: "",
+    enable_nested_fields: false,
+    fields: [
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "chunk_id",
+        optional: false,
+        sort: true,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "doc_num",
+        optional: false,
+        reference: docsCollectionName + ".doc_num",
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: true,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "chunk_index",
+        optional: false,
+        sort: true,
+        stem: false,
+        store: true,
+        type: "int32",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "no",
+        name: "content_markdown",
+        optional: false,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: true,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "url",
+        optional: false,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: true,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "url_without_anchor",
+        optional: false,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: true,
+        index: true,
+        infix: false,
+        locale: "en",
+        name: "type",
+        optional: false,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "item_priority",
+        optional: false,
+        sort: true,
+        stem: false,
+        store: true,
+        type: "int64",
+      },
+      {
+        facet: true,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "updated_at",
+        optional: false,
+        sort: true,
+        stem: false,
+        store: true,
+        type: "int64",
+      },
+      {
+        facet: true,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "language",
+        optional: false,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: false,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "markdown_checksum",
+        optional: true,
+        sort: false,
+        stem: false,
+        store: true,
+        type: "string",
+      },
+      {
+        facet: true,
+        index: true,
+        infix: false,
+        locale: "",
+        name: "token_count",
+        optional: true,
+        sort: true,
+        stem: false,
+        store: true,
+        type: "int64",
+      },
+    ],
+  };
+};
+
+export async function ensureDocsAndChunksCollections(
+  docsCollectionName: string,
+) {
+  ensureCollectionExists(
+    docsCollectionName,
+    docsCollectionSchema(docsCollectionName),
+  );
+  ensureCollectionExists(
+    docsCollectionName,
+    chunksCollectionSchema(
+      docsCollectionName.replace("docs", "chunks"),
+      docsCollectionName,
+    ),
+  );
+}
+
+export async function ensureCollectionExists(
+  collectionName: string,
+  schema: CollectionCreateSchema,
+) {
   const localTypesenseConfig = { ...typesenseCfg };
   localTypesenseConfig.apiKey = envVar("TYPESENSE_API_KEY_ADMIN");
-  const client = new Typesense.Client(typesenseCfg);
-
-  // if (envVar("LOG_LEVEL") === "debug") {
-  //   console.log("Typesense config:\n", JSON.stringify(typesenseCfg, null, 2));
-  // }
+  const client = new Typesense.Client(localTypesenseConfig);
 
   const aliases = await client.aliases().retrieve();
   const alias = aliases.aliases.find(
@@ -316,7 +633,7 @@ export async function createDocsCollectionIfNotExists(collectionName: string) {
 
   if (!collectionExists) {
     console.log(`Collection ${collectionName} not found, will create.`);
-    await client.collections().create(docsCollectionSchema(collectionName));
+    await client.collections().create(schema);
     console.log(`Collection ${collectionName} created successfully.`);
   } else {
     console.error(`Collection '${collectionName}' exists.`);
@@ -324,25 +641,34 @@ export async function createDocsCollectionIfNotExists(collectionName: string) {
 }
 
 export async function updateDocs(docs: RagDoc[], collectionName: string) {
+
   const typesenseCfg = typesenseConfig();
-  typesenseCfg.apiKey = envVar("TYPESENSE_API_KEY_ADMIN");
-
-  // console.log("Typesense config:\n", JSON.stringify(typesenseCfg, null, 2));
-
-  const client = new Typesense.Client(typesenseCfg);
+  const localTypesenseConfig = { ...typesenseCfg };
+  localTypesenseConfig.apiKey = envVar("TYPESENSE_API_KEY_ADMIN");
+  const client = new Typesense.Client(localTypesenseConfig);
 
   // Index the document in Typesense
-  const result = await client
+  const results = await client
     .collections<RagDocQuery>(collectionName)
     .documents()
     .import(docs, { action: "upsert" });
 
-  const failedResults = result.filter((result: any) => !result.success);
-  if (failedResults.length > 0) {
-    console.log(
-      `Upsert to typesense failed for the following urls:\n${failedResults}`,
-    );
-  }
+  return results;
+}
+
+export async function updateChunks(chunks: RagChunk[], collectionName: string) {
+  const typesenseCfg = typesenseConfig();
+  const localTypesenseConfig = { ...typesenseCfg };
+  localTypesenseConfig.apiKey = envVar("TYPESENSE_API_KEY_ADMIN");
+  const client = new Typesense.Client(localTypesenseConfig);
+
+  // Index the document in Typesense
+  const results = await client
+    .collections<RagChunkQuery>(collectionName)
+    .documents()
+    .import(chunks, { action: "upsert" });
+
+  return results;
 }
 
 export async function getDocChecksums(
@@ -357,7 +683,22 @@ export async function getDocChecksums(
     .search({
       q: "*",
       filter_by: idList.map((id) => `id:=${id}`).join(" || "),
-      include_fields: "id,doc_id,markdown_checksum,url_without_anchor",
+      include_fields: "id,markdown_checksum,url_without_anchor",
+    });
+
+  return documents.hits?.map((hit: any) => hit.document as RagDocQuery) || [];
+}
+
+export async function getDocsById(collectionName: string, idList: string[]) {
+  const client = new Typesense.Client(typesenseCfg);
+
+  const documents = await client
+    .collections<RagDocQuery>(collectionName)
+    .documents()
+    .search({
+      q: "*",
+      filter_by: idList.map((id) => `id:=${id}`).join(" || "),
+      include_fields: "id,title,url_without_anchor",
     });
 
   return documents.hits?.map((hit: any) => hit.document as RagDocQuery) || [];

@@ -40,11 +40,18 @@ type SearchPhraseList = z.infer<typeof SearchPhraseListSchema>;
 
 type SearchHit = {
   id: string;
+  doc_num: string;
   url: string;
   contentMarkdown: string;
 };
 
 const originalPrompt = `Please analyze the contents of the following documentation article and generate a list of English phrases that you would expect to match the following document. 
+
+Document:
+
+`;
+
+const keywordSearchPromptNew = `Please analyze the contents of the following documentation article and generate a list of keyword search phrases that you would expect to match the following document. 
 
 Document:
 
@@ -61,44 +68,51 @@ async function main() {
     .version('0.1.0');
 
   program
+    .requiredOption('-s, --source <string>', 'collection to extract from')
+    .requiredOption('-t, --target <string>', 'target collection name')
     .option('--prompt <string>, ', 'prompt name', 'original')
-    .option('-c, --collection <string>', 'collection to update (or -n for new)')
-    .option('-n', 'create new collection based on TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION env var');
+    .option('-n', 'create new target collection')
+    .option('--partitions <number>', 'number of partitions to divide the work into')
+    .option('--partition <number>', 'partition number for this process [0 < partition < partitions]')
+    .option('--start <number>', 'page number to start from');
 
   program.parse(process.argv);
   const opts = program.opts();
 
   let promptName = opts.prompt;
-  let collectionNameTmp = opts.collection;
+  let targetCollectionName = opts.collection;
 
-  if (!['original', 'typicalqs'].includes(promptName)) {
-    console.error("Invalid prompt name. Prompt name must be 'original' or 'typicalqs'");
+  const promptNames = ['original', 'typicalqs', 'keyword-search'];
+  if (!promptNames.includes(promptName)) {
+    console.error(`Invalid prompt name. Prompt name must be one of: ${promptNames}`);
     process.exit(1);
   }
 
   const client = new Client(cfg.TYPESENSE_CONFIG);
+  targetCollectionName = opts.target;
+  const collectionFound = await typesenseSearch.lookupCollectionByNameExact(targetCollectionName);
 
   if (opts.n) {
-    collectionNameTmp = `${process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION}_${Date.now()}`;
-
-    await typesenseSearch.setupSearchPhraseSchema(collectionNameTmp);
+    if (collectionFound) {
+      console.error(`Collection '${targetCollectionName}' already exists, aborting.`);
+      return;
+    }
+    await typesenseSearch.setupSearchPhraseSchema(targetCollectionName);
+    console.log(`Collection '${targetCollectionName}' created.`);
   } else {
-    // TODO: verify that collection exists
-    collectionNameTmp = process.env.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION;
-
-    const collectionFound = await typesenseSearch.lookupCollectionByNameExact(collectionNameTmp);
-
     if (!collectionFound) {
-      console.error(`Collection '${collectionNameTmp}' not found. To create, use the '-n' option.`);
+      console.error(
+        `Collection '${targetCollectionName}' not found. To create, use the '-n' option.`,
+      );
       return;
     }
 
-    if (collectionFound.name != collectionNameTmp) {
-      `Resolved alias '${collectionNameTmp}' to collection '${collectionFound.name}'`;
+    if (collectionFound.name != targetCollectionName) {
+      `Resolved alias '${targetCollectionName}' to collection '${collectionFound.name}'`;
     }
-    collectionNameTmp = collectionFound.name;
+    targetCollectionName = collectionFound.name;
 
-    console.log(`Will update existing search phrases in collection: '${collectionNameTmp}'`);
+    console.log(`Will update existing search phrases in collection: '${targetCollectionName}'`);
   }
 
   const durations = {
@@ -109,24 +123,37 @@ async function main() {
     storePhrases: 0,
   };
 
-  let page = 1;
-  const pageSize = 30;
+  // Convert opts.start to an integer
+  const startPage = opts.start ? parseInt(opts.start, 10) : 1;
+  if (isNaN(startPage)) {
+    console.error('Invalid start page number. Please provide a valid integer.');
+    process.exit(1);
+  }
+  let page = startPage;
+  const pageSize = 20;
   const jobPageSize = -1;
+  const partitionCount = opts.partitions || 1;
+  const partitionIndex = Number(opts.partition) || 0;
 
   const totalStart = Date.now();
 
   while (jobPageSize < 0 || page <= jobPageSize) {
     console.log(
-      `Retrieving content_markdown for all urls from collection '${collectionNameTmp}', page ${page} (page_size=${pageSize})`,
+      `Retrieving chunk content '${opts.source}', page ${page} (page_size=${pageSize})`,
     );
 
-    const searchResponse = await typesenseSearch.typesenseRetrieveAllUrls(page, pageSize);
+    const searchResponse = await typesenseSearch.typesenseRetrieveAllUrls(
+      opts.source,
+      page,
+      pageSize,
+    );
     durations.queryDocs += Date.now() - totalStart;
 
     const searchHits: SearchHit[] = searchResponse.results.flatMap((result: any) =>
       result.grouped_hits.flatMap((hit: any) =>
         hit.hits.map((document: any) => ({
           id: document.document.id,
+          doc_num: document.document.doc_num,
           url: document.document.url_without_anchor,
           contentMarkdown: document.document.content_markdown || '',
         })),
@@ -142,116 +169,163 @@ async function main() {
 
     let docIndex = 0;
 
-    while (docIndex < searchHits.length) {
-      const searchHit = searchHits[docIndex];
-      const url = searchHit.url;
+    let uniqueChunkIds = [...new Set(searchHits.map(hit => hit.id))];
+    let uniqueDocNums = new Set(uniqueChunkIds.map(id => id.split('-')[0]));
 
-      // console.log(`searchHit: ${JSON.stringify(searchHit)}`);
+    console.log(`Extracted ${uniqueDocNums.size} unique doc_num values from ${uniqueChunkIds.length} unique chunk IDs, from ${searchHits.length} search hits.`);
 
-      const existingPhrases = await lookupSearchPhrases(url, collectionNameTmp, promptName);
+    // console.log(`Unique doc_nums: `, uniqueDocNums)
+    // console.log('Unique chunk IDs:', uniqueChunkIds);
 
-      // console.log(`existing phrases:\n${JSON.stringify(existingPhrases)}`);
+    if (partitionCount > 1) {
+      uniqueDocNums = new Set(
+        Array.from(uniqueDocNums).filter(docNum => 
+          parseInt(docNum) % partitionCount === partitionIndex)
+      );
+    }
+    uniqueChunkIds = uniqueChunkIds.filter(chunkId => {
+      const docNum = chunkId.split('-')[0];
+      return uniqueDocNums.has(docNum);
+    });
 
-      const contentMd = searchHit.contentMarkdown;
-      const checksumMd = contentMd ? sha1(contentMd) : null;
+    console.log(`After filtering, ${uniqueChunkIds.length} unique chunk IDs remain.`);
+    console.log(`Unique doc_nums: `, uniqueDocNums)
+    console.log('Unique chunk IDs:', uniqueChunkIds);
 
-      const existingPhraseCount = existingPhrases.found || 0;
+    
+    if (uniqueChunkIds.length > 0) {
+      const existingPhrases = await lookupSearchPhrasesForDocChunks(uniqueChunkIds, targetCollectionName, promptName);
 
-      if (existingPhraseCount > 0) {
-        const storedChecksum = existingPhrases.hits?.[0]?.document?.checksum || '';
-        const checksumMatches = storedChecksum === checksumMd;
+      while (docIndex < searchHits.length) {
+        const searchHit = searchHits[docIndex];
+        const url = searchHit.url;
 
-        if (checksumMatches) {
-          console.log(`Found existing phrases and checksum matches, skipping for url: ${url}`);
+        // Check if the current searchHit.id is in the uniqueChunkIds list
+        if (!uniqueChunkIds.includes(searchHit.id)) {
+          console.log(`Skipping url: ${url} as it's not in the filtered chunk IDs`);
           docIndex++;
           continue;
         }
-      }
 
-      console.log(`Generating search phrases for url: ${url}`);
+        const contentMd = searchHit.contentMarkdown;
+        const checksumMd = contentMd ? sha1(contentMd) : null;
 
-      const start = performance.now();
+        const existingPhrasesForChunk = existingPhrases[searchHit.id];
+        let existingPhraseCount = 0;
 
-      const result = await generateSearchPhrases(promptName, searchHit);
+        if (existingPhrasesForChunk && existingPhrasesForChunk.hits) {
+          existingPhraseCount = existingPhrasesForChunk.hits.length;          
+        }
+        if (existingPhraseCount > 0 && existingPhrasesForChunk?.hits) {
+          const storedChecksum = existingPhrasesForChunk?.hits[0].document?.checksum || '';
+          const checksumMatches = storedChecksum === checksumMd;
 
-      durations.generatePhrases += performance.now() - start;
-      durations.total += Math.round(performance.now() - totalStart);
+          // console.log(`Phrase list count: ${existingPhraseCount}, checksum: ${checksumMd} ${ (checksumMatches ? ' === ' : ' != ') } stored checksum: ${storedChecksum}, `)
 
-      let searchPhrases: string[] = [];
-      if (result !== null) {
-        searchPhrases = result.searchPhrases.map((context: any) => context.searchPhrase);
-      } else {
-        searchPhrases = [];
-      }
-      if (searchPhrases.length == 0) {
-        docIndex++;
-        continue;
-      }
+          if (checksumMatches) {
+            console.log(
+              `Found ${existingPhraseCount} existing phrases and checksum matches, skipping for url: ${url}`,
+            );
+            docIndex++;
+            continue;
+          }
+        }
 
-      // delete existing search phrases before uploading new
-      for (const document of existingPhrases.hits || []) {
-        const phraseId = document.document?.id || '';
-        if (phraseId) {
-          try {
-            await client.collections(collectionNameTmp).documents(phraseId).delete();
-            console.log(`Search phrase ID ${phraseId} deleted for url: ${url}`);
-          } catch (error) {
-            if (error instanceof Errors.ObjectNotFound) {
-              console.log(
-                `Search phrase ID ${phraseId} not found in collection "${collectionNameTmp}"`,
-              );
-            } else {
-              console.error(`Error occurred while removing existing search phrases: ${error}`);
+        console.log(`Generating search phrases for chunk: ${url}`);
+
+        const start = performance.now();
+
+        const result = await generateSearchPhrases(promptName, searchHit);
+
+        durations.generatePhrases += performance.now() - start;
+        durations.total += Math.round(performance.now() - totalStart);
+
+        let searchPhrases: string[] = [];
+        if (result !== null) {
+          searchPhrases = result.searchPhrases.map((context: any) => context.searchPhrase);
+        } else {
+          searchPhrases = [];
+        }
+        if (searchPhrases.length == 0) {
+          docIndex++;
+          continue;
+        }
+
+        if (existingPhraseCount > 0 && existingPhrasesForChunk?.hits) {
+          // delete existing search phrases before uploading new
+          for (const document of existingPhrasesForChunk?.hits) {
+            const phraseId = document.document?.id || '';
+            if (phraseId) {
+              try {
+                await client.collections(targetCollectionName).documents(phraseId).delete();
+                console.log(`Search phrase ID ${phraseId} deleted for url: ${url}`);
+              } catch (error) {
+                if (error instanceof Errors.ObjectNotFound) {
+                  console.log(
+                    `Search phrase ID ${phraseId} not found in collection "${targetCollectionName}"`,
+                  );
+                } else {
+                  console.error(`Error occurred while removing existing search phrases: ${error}`);
+                }
+              }
             }
           }
         }
-      }
-      console.log(`Search phrases:`);
+        const uploadBatch: SearchPhraseEntry[] = [];
 
-      const uploadBatch: SearchPhraseEntry[] = [];
-
-      for (const [index, phrase] of searchPhrases.entries()) {
-        console.log(phrase);
-        const entry: SearchPhraseEntry = {
-          doc_id: searchHit.id || '',
-          url: url,
-          search_phrase: phrase,
-          sort_order: index,
-          item_priority: 1,
-          updated_at: Math.floor(new Date().getTime() / 1000),
-          checksum: checksumMd,
-          prompt: promptName,
-        };
-        if (entry.search_phrase) {
-          uploadBatch.push(entry);
-        } else {
-          console.error(`Empty search phrase generated in entry: ${JSON.stringify(entry)}`);
+        let phraseCount = 0;
+        for (const [index, phrase] of searchPhrases.entries()) {
+          const entry: SearchPhraseEntry = {
+            id: '' + searchHit.id + '-' + index,
+            doc_num: '' + searchHit.id,
+            chunk_id: '' + searchHit.id || '',
+            chunk_index: index,
+            url: url,
+            search_phrase: phrase,
+            sort_order: index,
+            item_priority: 1,
+            updated_at: Math.floor(new Date().getTime() / 1000),
+            checksum: checksumMd,
+            prompt: promptName,
+          };
+          if (entry.search_phrase) {
+            uploadBatch.push(entry);
+          } else {
+            console.error(`Empty search phrase generated in entry: ${JSON.stringify(entry)}`);
+          }
         }
-      }
+        console.log(`Generated ${uploadBatch.length} search phrases for chunk ${url}`);
+        // Log each phrase
+        uploadBatch.forEach((entry, index) => {
+          console.log(`${entry.search_phrase}`);
+        });
+        console.log('\n');
 
-      try {
-        const results = await client
-          .collections(collectionNameTmp)
-          .documents()
-          .import(uploadBatch, { action: 'upsert', return_id: true });
-        const failedResults = results.filter((result: any) => !result.success);
-        if (failedResults.length > 0) {
-          console.log(
-            `The following search_phrases for url:\n  "${url}"\n were not successfully upserted to typesense:\n${failedResults}`,
+
+        try {
+          const results = await client
+            .collections(targetCollectionName)
+            .documents()
+            .import(uploadBatch, { action: 'upsert', return_id: true });
+          const failedResults = results.filter((result: any) => !result.success);
+          if (failedResults.length > 0) {
+            console.log(
+              `The following search_phrases for url:\n  "${url}"\n were not successfully upserted to typesense:\n${failedResults}`,
+            );
+          }
+        } catch (error) {
+          console.error(
+            `An error occurred while importing documents to '${targetCollectionName}'\nERROR: ${error}`,
           );
+
+          console.log(`Failed batch content:\n${JSON.stringify(uploadBatch)}`);
+          return;
         }
-      } catch (error) {
-        console.error(
-          `An error occurred while importing documents to '${collectionNameTmp}'\nERROR: ${error}`,
-        );
 
-        console.log(`Failed batch content:\n${JSON.stringify(uploadBatch)}`);
-        return;
+        docIndex += 1;
+        // end while
       }
-
-      docIndex += 1;
-      // end while
-    }
+    } 
     page += 1;
   }
 }
@@ -286,19 +360,61 @@ async function lookupSearchPhrases(
   }
 }
 
+async function lookupSearchPhrasesForDocChunks(
+  chunk_ids: string[],
+  collectionNameTmp: string,
+  prompt: string,
+): Promise<Record<string, SearchResponse<SearchPhraseEntry>>> {
+  let retryCount = 0;
+
+  while (true) {
+    try {
+      const lookupResults: MultiSearchResponse<SearchPhraseEntry[]> =
+        await typesenseSearch.lookupSearchPhrasesForDocChunks(chunk_ids, collectionNameTmp, prompt);
+
+      // Create a dictionary from each list in the lookupResults.results array
+      const existingPhrasesByChunkId = chunk_ids.reduce((acc, chunkId, index) => {
+        acc[chunkId] = lookupResults.results[index];
+        return acc;
+      }, {} as Record<string, SearchResponse<SearchPhraseEntry>>);
+    
+      // // Log the number of search phrases for each chunk_id
+      // for (const chunkId of chunk_ids) {
+      //   const phraseCount = existingPhrasesByChunkId[chunkId]?.hits?.length || 0;
+      //   console.log(`Chunk ID ${chunkId}: ${phraseCount} search phrases`);
+      // }
+      
+      return existingPhrasesByChunkId;
+    } catch (e) {
+      console.error(
+        `Exception occurred while looking up search phrases for chunk_ids: ${chunk_ids}\n Error: ${e}`,
+      );
+      if (retryCount < 10) {
+        retryCount++;
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        continue;
+      } else {
+        throw e;
+      }
+    }
+  }
+}
+
+
 async function generateSearchPhrases(
   prompt: string,
   searchHit: SearchHit,
 ): Promise<SearchPhraseList> {
   let retryCount = 0;
 
-  if (prompt == 'original') {
+  if (prompt == 'original' || prompt == 'keyword-search') {
+    const basePrompt = prompt == 'original' ? originalPrompt : keywordSearchPromptNew;
     while (true) {
       try {
         const content = searchHit.contentMarkdown || '';
 
         let queryResult = await openaiClientInstance.chat.completions.create({
-          model: 'gpt-4o',
+          model: 'gpt-4o-2024-08-06',
           response_model: {
             schema: SearchPhraseListSchema,
             name: 'SearchPhraseListSchema',
@@ -306,7 +422,7 @@ async function generateSearchPhrases(
           temperature: 0.1,
           messages: [
             { role: 'system', content: 'You are a helpful assistant.' },
-            { role: 'user', content: originalPrompt + content },
+            { role: 'user', content: basePrompt + content },
           ],
           max_retries: 0,
         });

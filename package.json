@@ -1,6 +1,6 @@
 {
   "name": "@digdir/assistants",
-  "packageManager": "yarn@4.4.1",
+  "packageManager": "yarn@4.5.1",
   "private": true,
   "workspaces": [
     "packages/assistant-lib",
@@ -16,7 +16,7 @@
     "build:crawler": "cd services/crawler && yarn codestyle:fix && yarn build && cd ../..",
     "build:cli": "cd cli && yarn codestyle:fix && yarn build && cd ..",
     "build:admin": "cd apps/admin && yarn codestyle:fix && yarn build && cd ../..",
-    "build": "yarn clean && yarn build:assistant-lib && yarn build:admin && yarn build:slack-app && yarn build:cli && yarn build:crawler",
+    "build": "yarn clean && yarn build:assistant-lib && yarn build:admin && yarn build:slack-app",
     "run:slack-app": "node ./apps/slack-app/dist/src/app.js"
   },
   "devDependencies": {

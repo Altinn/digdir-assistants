@@ -15,7 +15,12 @@ import {
 } from './utils/slack';
 import { lookupConfig } from './utils/bot-config';
 import { envVar, round, lapTimer, timeoutPromise } from '@digdir/assistant-lib';
-import { userInputAnalysis, UserQueryAnalysis } from '@digdir/assistant-lib';
+import {
+  userInputAnalysis,
+  UserQueryAnalysis,
+  retrieveAllByUrl,
+  getDocsById,
+} from '@digdir/assistant-lib';
 import { ragPipeline, qaTemplate } from '@digdir/assistant-lib';
 import { stripCodeBlockLang, isNullOrEmpty } from '@digdir/assistant-lib';
 import { botLog, BotLogEntry, updateReactions } from './utils/bot-log';
@@ -23,6 +28,7 @@ import OpenAI from 'openai';
 import { isNumber } from 'remeda';
 import { RagPipelineParams, RagPipelineResult } from '@digdir/assistant-lib';
 import { markdownToBlocks } from '@bdb-dd/mack';
+import { flatMap } from 'remeda';
 
 const expressReceiver = new ExpressReceiver({
   signingSecret: envVar('SLACK_BOT_SIGNING_SECRET'),
@@ -91,13 +97,13 @@ app.message(async ({ message, say }) => {
     slackApp,
     srcEvtContext,
     'search.docs.collection',
-    envVar('TYPESENSE_DOCS_COLLECTION'),
+    '',
   );
   const phrasesCollectionName = await lookupConfig(
     slackApp,
     srcEvtContext,
     'search.phrases.collection',
-    envVar('TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION'),
+    '',
   );
 
   const ignoreWhenNotTagged = await lookupConfig(
@@ -485,6 +491,7 @@ async function handleReactionEvents(eventBody: any) {
 
   var itemContext: SlackContext;
   var messageInfo: ReactionsGetResponse;
+  let docsCollectionName = '';
 
   try {
     itemContext = await getReactionItemContext(app.client, eventBody);
@@ -493,6 +500,15 @@ async function handleReactionEvents(eventBody: any) {
       channel: itemContext.channel_id,
       timestamp: itemContext.ts_date + '.' + itemContext.ts_time,
     };
+
+    docsCollectionName = await lookupConfig(slackApp, itemContext, 'search.docs.collection', '');
+
+    if (!docsCollectionName) {
+      console.error(
+        `handleReactionEvents: unable to resolve configuration value for 'search.docs.collection'.`,
+      );
+      return;
+    }
 
     const botInfo = await app.client.auth.test();
     const botId = botInfo.user_id;
@@ -542,7 +558,7 @@ async function handleReactionEvents(eventBody: any) {
         thread_ts: itemContext.ts_date + '.' + itemContext.ts_time,
         user: eventBody?.body?.event?.user,
         text: 'Performance data',
-        blocks: debugMessageBlocks(dbLog!),
+        blocks: await debugMessageBlocks(docsCollectionName, dbLog!),
       });
     }
   } catch (e) {
@@ -589,7 +605,7 @@ function updateSlackMsgCallback(
 
     contentChunks.push(partialResponse);
 
-    const blocks = markdownToBlocks(stripCodeBlockLang(contentChunks.join('')));
+    const blocks = await markdownToBlocks(stripCodeBlockLang(contentChunks.join('')));
 
     if (envVar('LOG_LEVEL') == 'debug') {
       console.log(
@@ -673,22 +689,63 @@ async function finalizeAnswer(
   return responseTs;
 }
 
-function debugMessageBlocks(botLog: BotLogEntry): Array<Block> {
+async function debugMessageBlocks(
+  docsCollectionName: string,
+  botLog: BotLogEntry,
+): Promise<Array<Block>> {
   const content = botLog.content as any;
   // Process and format source documents and not loaded URLs for debug messages
   let sourceList = '*Retrieved articles*\n';
+  const sourceUrls = content.source_urls.map((url: string) => ({ url: url }));
+  const sourceChunks: string[] = [];
   let notLoadedList = '';
-  const knownPathSegment = 'https://docs.altinn.studio';
 
-  content.source_urls.forEach((url: string, i: number) => {
-    const pathSegmentIndex = url.indexOf(knownPathSegment);
-    if (pathSegmentIndex >= 0) {
-      url =
-        'https://docs.altinn.studio' + url.substring(pathSegmentIndex + knownPathSegment.length);
-      url = url.substring(0, url.lastIndexOf('/')) + '/';
-    }
-    sourceList += `#${i + 1}: <${url}|${url.replace('https://docs.altinn.studio/', '')}>\n`;
-  });
+  if (envVar('LOG_LEVEL') === 'debug-reactions') {
+    console.log('source_urls:', JSON.stringify(sourceUrls, null, 2));
+  }
+  const loadedChunksResponse = await retrieveAllByUrl(docsCollectionName, sourceUrls);
+  if (envVar('LOG_LEVEL') === 'debug-reactions') {
+    console.log('source_urls:', JSON.stringify(loadedChunksResponse, null, 2));
+  }
+
+  const docNumsForChunks = flatMap(loadedChunksResponse.results, (result: any) =>
+    flatMap(result.grouped_hits, (grouped_hit: any) =>
+      grouped_hit.hits.map((hit: any) => {
+        return hit.document.doc_num;
+      }),
+    ),
+  );
+
+  const uniqueDocNumsForChunks = [...new Set(docNumsForChunks)];
+
+  console.log(`docIdsForChunks: ${JSON.stringify(uniqueDocNumsForChunks)}`);
+
+  const chunkDocs = await getDocsById(docsCollectionName, uniqueDocNumsForChunks);
+
+  console.log(`Retrieved ${chunkDocs.length} docs.`);
+
+  const loadedChunks = flatMap(loadedChunksResponse.results, (result: any) =>
+    flatMap(result.grouped_hits, (grouped_hit: any) =>
+      grouped_hit.hits.map((hit: any) => {
+        // if (envVar('LOG_LEVEL') === 'debug-reactions') {
+        //   console.log('hits:', JSON.stringify(hit));
+        // }
+        let result = hit.document.content_markdown || '';
+        result = result.replace(/(?<!\n)\n(?!\n)/g, ' '); // .replace('\f', '');
+
+        const chunkDoc = chunkDocs.find((doc) => doc.doc_num == hit.document.doc_num);
+        const header = `Source (${hit.document.url_without_anchor}): [${chunkDoc?.title || ''}](${chunkDoc?.url_without_anchor || ''}) \n\n`;
+        return header + '```\n' + result + '\n```\n';
+        // return result;
+      }),
+    ),
+  );
+  console.log(`Formatted ${loadedChunks.length} chunks to markdown.`);
+
+  const loadedBlocks = flatMap(loadedChunks, (chunk: string) => markdownToBlocks(chunk));
+  if (envVar('LOG_LEVEL') === 'debug-reactions') {
+    console.log(`Loaded blocks:\n${JSON.stringify(loadedBlocks, null, 2)}`);
+  }
 
   content.not_loaded_urls.forEach((url: string, i: number) => {
     notLoadedList += `#${i + 1}: <${url}|${url.replace('https://docs.altinn.studio/', '')}>\n`;
@@ -702,21 +759,18 @@ function debugMessageBlocks(botLog: BotLogEntry): Array<Block> {
         text: `Phrases generated for retrieval:\n> ${content.search_queries.join('\n> ')}`,
       },
     },
-    {
-      type: 'section',
-      text: { type: 'mrkdwn', text: sourceList },
-    },
-    ...(notLoadedList.length > 0
-      ? [
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `*Retrieved, but not used:*\n${notLoadedList}`,
-            },
-          },
-        ]
-      : []),
+    ...loadedBlocks,
+    // ...(notLoadedList.length > 0
+    //   ? [
+    //       {
+    //         type: 'section',
+    //         text: {
+    //           type: 'mrkdwn',
+    //           text: `*Retrieved, but not used:*\n${notLoadedList}`,
+    //         },
+    //       },
+    //     ]
+    //   : []),
     {
       type: 'section',
       text: {

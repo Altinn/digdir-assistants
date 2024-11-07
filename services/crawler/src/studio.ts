@@ -2,7 +2,7 @@
 import { Sitemap } from '@crawlee/utils';
 import { Dataset } from '@crawlee/core';
 import { PlaywrightCrawler } from '@crawlee/playwright';
-import { createDocsCollectionIfNotExists, retrieveAllUrls } from '@digdir/assistant-lib';
+import { ensureDocsAndChunksCollections, retrieveAllUrls } from '@digdir/assistant-lib';
 import { createRouter, failedRequestHandler } from './routes.ts';
 import { Command } from 'commander';
 
@@ -13,16 +13,18 @@ async function main() {
     .description('Crawl the Altinn Studio documentation site')
     .version('0.1.0');
 
-  program.requiredOption('-c, --collection <string>', 'collection to update ');
+  program.requiredOption('-c, --collection <string>', 'docs collection to update.\n   Chunks collections name will be derived by replacing \'docs\' with \'chunks\'.');
 
   program.parse(process.argv);
   const opts = program.opts();
-  let collectionName = opts.collection;
+  let docsCollectionName = opts.collection;
+  const chunksCollectionName = docsCollectionName.replace('docs', 'chunks');
 
   // make sure we have a target collection to update
-  await createDocsCollectionIfNotExists(collectionName);
+  await ensureDocsAndChunksCollections(docsCollectionName);
+  
 
-  const router = createRouter(collectionName, filterUrlsToCrawl);
+  const router = createRouter(docsCollectionName, filterUrlsToCrawl);
   const crawler = new PlaywrightCrawler({
     // proxyConfiguration: new ProxyConfiguration({ proxyUrls: ['...'] }),
     requestHandler: router,
@@ -51,6 +53,7 @@ async function main() {
       'https://docs.altinn.studio/community/changelog/app-nuget',
       'https://docs.altinn.studio/community/about/slide/',
       'https://docs.altinn.studio/nb/',
+      'https://docs.altinn.studio/community/contributing/intro/',
     ];
 
     return urls.filter(
@@ -126,7 +129,7 @@ async function main() {
   let alreadyIndexed = new Set<string>();
   let newUrls: string[] = [];
   do {
-    newUrls = await retrieveAllUrls(collectionName, i, 250);
+    newUrls = await retrieveAllUrls(docsCollectionName, i, 250);
     alreadyIndexed = customUnion(alreadyIndexed, new Set(newUrls));
     i++;
   } while (newUrls.length > 0);
