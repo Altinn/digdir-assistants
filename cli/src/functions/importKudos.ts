@@ -298,6 +298,10 @@ async function main() {
     .version('0.1.0');
 
   program
+    .requiredOption('--dbhost <string>', 'database host', '')
+    .requiredOption('--dbuser <string>', 'database username', '') 
+    .requiredOption('--dbpass <string>', 'database password', '')
+    .requiredOption('--dbname <string>', 'database name', '')
     .requiredOption('-c, --collection <string>', 'typesense collection name for documents', '')
     .option('--chunks <string>', 'typesense collection name for document chunks', '')
     .option('--firstpage <number>', 'page number to start on (1-based)', '1')
@@ -389,10 +393,10 @@ async function main() {
   }
 
   const connection = await mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    database: 'kudos-import',
-    password: 'root',
+    host: opts.dbhost,
+    database: opts.dbname,
+    user: opts.dbuser,
+    password: opts.dbpass,
   });
 
   const chunkImportBatchSize = 40;
