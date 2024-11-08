@@ -726,10 +726,11 @@ async function debugMessageBlocks(
   if (envVar('LOG_LEVEL') === 'debug-reactions') {
     console.log('source_urls:', JSON.stringify(sourceUrls, null, 2));
   }
-  const loadedChunksResponse = await retrieveChunksById(chunksCollectionName, sourceUrls);
-  if (envVar('LOG_LEVEL') === 'debug-reactions') {
-    console.log('source_urls:', JSON.stringify(loadedChunksResponse, null, 2));
-  }
+  const loadedChunksResponse = await retrieveChunksById(
+    docsCollectionName,
+    chunksCollectionName,
+    sourceUrls,
+  );
 
   const docNumsForChunks = flatMap(loadedChunksResponse.results, (result: any) =>
     flatMap(result.grouped_hits, (grouped_hit: any) =>
@@ -747,6 +748,9 @@ async function debugMessageBlocks(
   const chunkDocs = await getDocsById(docsCollectionName, uniqueDocNumsForChunks);
 
   console.log(`Retrieved ${chunkDocs.length} docs.`);
+  if (envVar('LOG_LEVEL') === 'debug-reactions') {
+    console.log('chunkDocs:', JSON.stringify(chunkDocs));
+  }
 
   const loadedChunks = flatMap(loadedChunksResponse.results, (result: any) =>
     flatMap(result.grouped_hits, (grouped_hit: any) =>
@@ -758,7 +762,7 @@ async function debugMessageBlocks(
         result = result.replace(/(?<!\n)\n(?!\n)/g, ' ');
 
         const chunkDoc = chunkDocs.find((doc) => doc.doc_num == hit.document.doc_num);
-        const header = `Source (${chunkDoc?.source_document_url}): [${chunkDoc?.title || ''}](${chunkDoc?.source_document_url || ''}) \n\n`;
+        const header = `Source: [${chunkDoc?.title || ''}](${chunkDoc?.source_document_url || ''})\n\n`;
         return header + '```\n' + result + '\n```\n';
         // return result;
       }),
@@ -780,7 +784,7 @@ async function debugMessageBlocks(
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `Phrases generated for retrieval:\n> ${content.search_queries.join('\n> ')}`,
+        text: `Phrases generated for retrieval:\n> ${content.search_queries.join('\n> ')}\n`,
       },
     },
     ...loadedBlocks,
