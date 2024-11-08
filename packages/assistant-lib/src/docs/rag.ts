@@ -123,6 +123,7 @@ export async function ragPipeline(
   }
   start = performance.now();
   const search_response = await retrieveChunksById(
+    params.docsCollectionName,
     params.chunksCollectionName,
     search_phrase_hits,
   );

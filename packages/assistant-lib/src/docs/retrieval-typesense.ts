@@ -178,6 +178,7 @@ export async function retrieveAllUrls(
 }
 
 export async function retrieveChunksById(
+  docsCollectionName: string,
   chunksCollectionName: string,
   urlList: RankedUrl[],
 ) {
@@ -187,7 +188,10 @@ export async function retrieveChunksById(
     collection: chunksCollectionName,
     q: rankedUrl["url"],
     query_by: "chunk_id",
-    include_fields: "id,doc_num,chunk_id,type,content_markdown",
+    include_fields:
+      "id,doc_num,chunk_id,type,content_markdown,$" +
+      docsCollectionName +
+      "(source_document_url)",
     filter_by: `chunk_id:=\`${rankedUrl["url"]}\``,
     group_by: "chunk_id",
     group_limit: 1,
@@ -646,7 +650,10 @@ export async function getDocChecksums(
   return documents.hits?.map((hit: any) => hit.document as RagDocQuery) || [];
 }
 
-export async function getDocsById(collectionName: string, idList: string[]) {
+export async function getDocsById(
+  collectionName: string,
+  docNumList: string[],
+) {
   const client = new Typesense.Client(typesenseCfg);
 
   const documents = await client
@@ -654,8 +661,10 @@ export async function getDocsById(collectionName: string, idList: string[]) {
     .documents()
     .search({
       q: "*",
-      filter_by: idList.map((id) => `id:=${id}`).join(" || "),
-      include_fields: "id,title,source_document_url",
+      filter_by: docNumList
+        .map((doc_num) => `doc_num:=${doc_num}`)
+        .join(" || "),
+      include_fields: "doc_num,title,source_document_url",
     });
 
   return documents.hits?.map((hit: any) => hit.document as RagDocQuery) || [];
