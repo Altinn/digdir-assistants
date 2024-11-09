@@ -5,7 +5,7 @@ on:
   # Automatically trigger it when detected changes in repo
   push:
     branches: 
-      [ release ]
+      [ main ]
     paths:
     - '**'
     - '.github/workflows/assistants-slack-altinn-AutoDeployTrigger-d1dc56ad-2283-4417-879e-19c246b15681.yml'

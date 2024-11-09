@@ -5,7 +5,7 @@ on:
   # Automatically trigger it when detected changes in repo
   push:
     branches:       
-      [ release ]
+      [ main ]
     paths:
     - '**'
     - '.github/workflows/assistants-slack-digdir-*.yml'
