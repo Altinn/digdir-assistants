@@ -14,22 +14,22 @@
   },
   "dependencies": {
     "@azure/openai": "^1.0.0-beta.12",
-    "@babel/runtime": "^7.25.4",
+    "@babel/runtime": "^7.26.0",
     "@instructor-ai/instructor": "1.5.0",
-    "@supabase/supabase-js": "^2.45.2",
+    "@supabase/supabase-js": "^2.46.1",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^22.5.1",
-    "axios": "^1.7.5",
+    "@types/node": "^22.9.0",
+    "axios": "^1.7.7",
     "dataclass": "^2.1.1",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
-    "openai": "^4.56.1",
+    "openai": "^4.71.1",
     "prettier": "^3.3.3",
-    "remeda": "^2.11.0",
-    "tiktoken": "^1.0.16",
+    "remeda": "^2.17.0",
+    "tiktoken": "^1.0.17",
     "typesense": "^1.8.2",
     "zod": "^3.23.8",
-    "zod-to-json-schema": "^3.23.2"
+    "zod-to-json-schema": "^3.23.5"
   },
   "devDependencies": {
     "typescript": "^5.5.4"
