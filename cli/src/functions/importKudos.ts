@@ -392,7 +392,7 @@ async function main() {
         chunksCollectionName = chunkCollectionFound.name;
       }
 
-      console.log(`Will update existing search phrases in collection: '${docsCollectionName}'`);
+      console.log(`Will update documents in collection: '${docsCollectionName}'`);
     }
   }
 

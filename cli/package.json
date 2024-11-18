@@ -14,6 +14,8 @@
     "codestyle:fix": "prettier src/ --write",
     "run:generateSearchPhrases": "tsx src/functions/generateSearchPhrases.ts",
     "run:importKudos": "tsx src/functions/importKudos.ts",
+    "run:importKudosPublisers": "tsx src/functions/importKudosPublishers.ts",
+    "run:importKudosRecipients": "tsx src/functions/importKudosRecipients.ts",
     "run:contentAnalysis": "tsx src/functions/contentAnalysis.ts",
     "run:listMissingEnDocs": "tsx src/functions/listMissingEnDocs.ts",
     "run:listAllDocs": "tsx src/functions/listAllDocs.ts"
