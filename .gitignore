@@ -16,3 +16,6 @@ temp/
 **/.lsp
 **/.nrepl-port
 **/.shadow-cljs
+clj-cli/chunkr_data
+clj-cli/source_pdfs
+clj-cli/typesense_chunks
