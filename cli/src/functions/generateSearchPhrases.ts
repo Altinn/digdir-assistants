@@ -149,16 +149,25 @@ async function main() {
     );
     durations.queryDocs += Date.now() - totalStart;
 
-    const searchHits: SearchHit[] = searchResponse.results.flatMap((result: any) =>
-      result.grouped_hits.flatMap((hit: any) =>
-        hit.hits.map((document: any) => ({
-          id: document.document.id,
-          doc_num: document.document.doc_num,
-          url: document.document.chunk_id,
-          contentMarkdown: document.document.content_markdown || '',
-        })),
-      ),
-    );
+    if (!searchResponse.results || searchResponse.results.length === 0) {
+      console.log('Empty or null searchResponse.results:', JSON.stringify(searchResponse, null, 2));
+      break;
+    }
+
+    const searchHits: SearchHit[] = searchResponse.results.flatMap((result: any) => {
+      if (!result.grouped_hits || result.grouped_hits.length === 0) {
+        console.log('Empty or null result.grouped_hits:', JSON.stringify(searchResponse, null, 2));        
+      } else {
+        return result.grouped_hits.flatMap((hit: any) =>
+          hit.hits.map((document: any) => ({
+            id: document.document.id,
+            doc_num: document.document.doc_num,
+            url: document.document.chunk_id,
+            contentMarkdown: document.document.content_markdown || '',
+          })),
+        )
+      }
+    });
 
     console.log(`Retrieved ${searchHits.length} urls.`);
 
@@ -179,7 +188,7 @@ async function main() {
 
     if (partitionCount > 1) {
       uniqueDocNums = new Set(
-        Array.from(uniqueDocNums).filter(docNum => 
+        Array.from(uniqueDocNums).filter(docNum =>
           parseInt(docNum) % partitionCount === partitionIndex)
       );
     }
@@ -192,7 +201,7 @@ async function main() {
     console.log(`Unique doc_nums: `, uniqueDocNums)
     console.log('Unique chunk IDs:', uniqueChunkIds);
 
-    
+
     if (uniqueChunkIds.length > 0) {
       const existingPhrases = await lookupSearchPhrasesForDocChunks(uniqueChunkIds, targetCollectionName, promptName);
 
@@ -214,7 +223,7 @@ async function main() {
         let existingPhraseCount = 0;
 
         if (existingPhrasesForChunk && existingPhrasesForChunk.hits) {
-          existingPhraseCount = existingPhrasesForChunk.hits.length;          
+          existingPhraseCount = existingPhrasesForChunk.hits.length;
         }
         if (existingPhraseCount > 0 && existingPhrasesForChunk?.hits) {
           const storedChecksum = existingPhrasesForChunk?.hits[0].document?.checksum || '';
@@ -325,7 +334,7 @@ async function main() {
         docIndex += 1;
         // end while
       }
-    } 
+    }
     page += 1;
   }
 }
@@ -349,13 +358,13 @@ async function lookupSearchPhrasesForDocChunks(
         acc[chunkId] = lookupResults.results[index];
         return acc;
       }, {} as Record<string, SearchResponse<SearchPhraseEntry>>);
-    
+
       // // Log the number of search phrases for each chunk_id
       // for (const chunkId of chunk_ids) {
       //   const phraseCount = existingPhrasesByChunkId[chunkId]?.hits?.length || 0;
       //   console.log(`Chunk ID ${chunkId}: ${phraseCount} search phrases`);
       // }
-      
+
       return existingPhrasesByChunkId;
     } catch (e) {
       console.error(
@@ -402,8 +411,7 @@ async function generateSearchPhrases(
         return queryResult;
       } catch (e) {
         console.error(
-          `Exception occurred while generating search phrases for url: ${
-            searchHit.url || ''
+          `Exception occurred while generating search phrases for url: ${searchHit.url || ''
           }\n Error: ${e}`,
         );
         if (retryCount < 10) {
@@ -456,8 +464,7 @@ async function generateSearchPhrases(
         }
       } catch (e) {
         console.error(
-          `Exception occurred while generating search phrases for url: ${
-            searchHit.url || ''
+          `Exception occurred while generating search phrases for url: ${searchHit.url || ''
           }\n Error: ${e}`,
         );
         if (retryCount < 10) {
