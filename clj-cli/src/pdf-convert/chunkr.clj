@@ -55,7 +55,7 @@
   (let [content (->> chunks
                      (mapcat :segments)
                      (map #(get % :markdown "")) ;; Use empty string as default if :markdown is missing
-                     str/join)]
+                     (str/join "\n"))]
     content))
 
 (defn chunks->typesense-docs
@@ -116,24 +116,30 @@
     (with-open [writer (io/writer filename)]
       (doseq [chunk chunks]
         (.write writer (str (json/generate-string chunk) "\n")))))
-  
+
   (def chunks-to-import-filename "./typesense_chunks/chunks_to_import.jsonl")
 
-  (def doc-num "27262")
+  (defn test-chunks [doc-num] (slurp (str "./chunkr_data/kudos_" doc-num ".json") :encoding "UTF-8"))
 
-  (defn test-chunks [] (slurp (str "./chunkr_data/kudos_" doc-num ".json") :encoding "UTF-8"))
+  (defn chunks-json [doc-num] (json/parse-string (test-chunks doc-num) true))
 
-  (defn chunks-json [] (json/parse-string (test-chunks) true))
 
-  (count (:chunks (chunks-json)))
+  (defn typesense-chunks [doc-num]
+    (chunks->typesense-docs (vec (:chunks (chunks-json doc-num))) doc-num))
 
-  (defn typesense-chunks []
-    (chunks->typesense-docs (vec (:chunks (chunks-json))) doc-num))
 
-  (count (typesense-chunks))
+  (doseq [doc-num ["302"]]
+  ;; ["22302" "22742" "24901" "26024" "26803" "27207" "30832"]]
+    (let [chunks (typesense-chunks doc-num)
+          _ (prn "chunk count: " (count (:chunks (chunks-json doc-num))))]
+    ;; (do)
+      (save-chunks-to-jsonl chunks chunks-to-import-filename)
+      (upsert-collection chunks-collection chunks-to-import-filename 100 10)))
 
-  ;; 1. process chunkr json data
-  (save-chunks-to-jsonl (typesense-chunks) chunks-to-import-filename)
+
+;;   (save-chunks-to-jsonl (typesense-chunks doc-num) chunks-to-import-filename)
+
+  ;; TODO: check if we need to unescape the markdown content before importing
 
   (upsert-collection chunks-collection chunks-to-import-filename 100 10)
 

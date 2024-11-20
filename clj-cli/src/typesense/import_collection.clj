@@ -85,7 +85,7 @@
 (defn upsert-collection [collection-name filename batch-size max-batches]
   (let [url (str (get-in typesense-config [:nodes 0 :protocol]) "://"
                  (get-in typesense-config [:nodes 0 :host]) "/collections/"
-                 collection-name "/documents/import")
+                 collection-name "/documents/import?action=upsert")
         batch-counter (atom 0)
         max-batches (or max-batches Integer/MAX_VALUE)] 
     (with-open [rdr (io/reader filename)]
