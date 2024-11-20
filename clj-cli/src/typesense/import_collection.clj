@@ -82,8 +82,10 @@
                            (map #(json/parse-string % true) batch) wtr)))))))
 
 
-(defn import-collection [collection-name filename batch-size max-batches]
-  (let [url (str "https://" (get-in typesense-config [:nodes 0 :host]) "/collections/" collection-name "/documents/import")
+(defn upsert-collection [collection-name filename batch-size max-batches]
+  (let [url (str (get-in typesense-config [:nodes 0 :protocol]) "://"
+                 (get-in typesense-config [:nodes 0 :host]) "/collections/"
+                 collection-name "/documents/import")
         batch-counter (atom 0)
         max-batches (or max-batches Integer/MAX_VALUE)] 
     (with-open [rdr (io/reader filename)]
@@ -145,7 +147,7 @@
                   _ (reset! next-output-file (str "." "/typesense_import_exists.jsonl"))]
               (prn "Only inserting documents that match in parent collection.")
               (filter-existing-documents collection-name key-field next-input-file @next-output-file 100)))
-          (let [imported-data (import-collection collection-name @next-output-file 100 nil)
+          (let [imported-data (upsert-collection collection-name @next-output-file 100 nil)
                 parsed-data (json/parse-string imported-data true)
                 code-counts (frequencies (map :code parsed-data))]
             (println "Import result:" parsed-data)
@@ -156,7 +158,7 @@
 
 (comment
 
-  (import-collection
+  (upsert-collection
    "DEV_kudos-docs_2024-09-09"
    "STAGING_kudos-docs_2024-09-03_export_20240909_fixed.jsonl"
    100 nil)
@@ -170,7 +172,7 @@
    "./STAGING_kodus-chunks_2024-09-03_filtered.jsonl"
    100)
 
-  (import-collection
+  (upsert-collection
    "DEV_kudos-chunks_2024-09-09"
    "./STAGING_kodus-chunks_2024-09-03_filtered.jsonl"
    100 nil)
@@ -192,7 +194,7 @@
    "./STAGING_kudos-phrases_2024-09-03_ready-to-import.jsonl"
    100)
 
-  (import-collection
+  (upsert-collection
    "DEV_kudos-phrases_2024-09-09"
    "STAGING_kudos-phrases_2024-09-03_ready-to-import.jsonl"
    5000 nil)
