@@ -4384,7 +4384,7 @@ const RAW_RUNTIME_STATE =
           ["@instructor-ai/instructor", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:1.5.0"],\
           ["@types/node", "npm:22.5.1"],\
           ["commander", "npm:12.1.0"],\
-          ["groq-sdk", "npm:0.6.0"],\
+          ["groq-sdk", "npm:0.9.0"],\
           ["mysql2", "npm:3.11.4"],\
           ["openai", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:4.56.1"],\
           ["prettier", "npm:3.3.3"],\
@@ -7132,10 +7132,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["groq-sdk", [\
-      ["npm:0.6.0", {\
-        "packageLocation": "./.yarn/cache/groq-sdk-npm-0.6.0-3cf50e0871-8fc56a7f6a.zip/node_modules/groq-sdk/",\
+      ["npm:0.9.0", {\
+        "packageLocation": "./.yarn/cache/groq-sdk-npm-0.9.0-84e41a0d03-be8f5ed868.zip/node_modules/groq-sdk/",\
         "packageDependencies": [\
-          ["groq-sdk", "npm:0.6.0"],\
+          ["groq-sdk", "npm:0.9.0"],\
           ["@types/node", "npm:18.19.64"],\
           ["@types/node-fetch", "npm:2.6.11"],\
           ["abort-controller", "npm:3.0.0"],\
