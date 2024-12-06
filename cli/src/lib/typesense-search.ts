@@ -111,12 +111,18 @@ export async function retrieveAllChunks(
   return response;
 }
 
-export async function setupSearchPhraseSchema(collectionNameTmp: string): Promise<void> {
+export async function setupSearchPhraseSchema(docsCollectionName: string, collectionNameTmp: string): Promise<void> {
   const client = new typesense.Client(cfg.TYPESENSE_CONFIG);
   const schema: CollectionCreateSchema = {
     name: collectionNameTmp,
     fields: [
-      { name: 'doc_num', type: 'string', optional: false },
+      {
+        name: "doc_num",
+        facet: true,
+        optional: false,
+        reference: `${docsCollectionName}.doc_num`,
+        type: "string"
+      },
       {
         name: 'url',
         type: 'string',

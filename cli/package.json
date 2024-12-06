@@ -12,13 +12,17 @@
     "build": "cd ../ && yarn build:assistant-lib && cd cli/ && tsc -p .",
     "codestyle:check": "prettier src/ --check",
     "codestyle:fix": "prettier src/ --write",
-    "run:generateSearchPhrases": "tsx src/functions/generateSearchPhrases.ts",
-    "run:importKudos": "tsx src/functions/importKudos.ts",
-    "run:importKudosPublisers": "tsx src/functions/importKudosPublishers.ts",
-    "run:importKudosRecipients": "tsx src/functions/importKudosRecipients.ts",
-    "run:contentAnalysis": "tsx src/functions/contentAnalysis.ts",
-    "run:listMissingEnDocs": "tsx src/functions/listMissingEnDocs.ts",
-    "run:listAllDocs": "tsx src/functions/listAllDocs.ts"
+    "generateSearchPhrases": "tsx src/functions/generateSearchPhrases.ts",
+    
+    "kudos:importDocuments": "tsx src/functions/kudos/importKudosDocuments.ts",
+    "kudos:importFiles": "tsx src/functions/kudos/importKudosFiles.ts",
+    "kudos:importOwners": "tsx src/functions/kudos/importKudosOwners.ts",
+    "kudos:importPublishers": "tsx src/functions/kudos/importKudosPublishers.ts",
+    "kudos:importRecipients": "tsx src/functions/kudos/importKudosRecipients.ts",
+
+    "contentAnalysis": "tsx src/functions/contentAnalysis.ts",
+    "listMissingEnDocs": "tsx src/functions/listMissingEnDocs.ts",
+    "listAllDocs": "tsx src/functions/listAllDocs.ts"
   },
   "dependencies": {
     "@babel/runtime": "^7.25.4",

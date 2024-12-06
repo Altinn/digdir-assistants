@@ -10,18 +10,18 @@ Scope: each document in specified Typesense collection
 
 ## How to run
 
-`yarn run:generateSearchPhrases`  
+`yarn generateSearchPhrases`  
 Be sure to set the `TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION` env var with the name of the Typesense collection
 
 
-`yarn run:importKudosPublisers --dbhost localhost --dbname <mariadb-name> --dbuser <username> --dbpass <password> -c <collection-name> --pages -1`
-`yarn run:importKudosRecipients --dbhost localhost --dbname <mariadb-name> --dbuser <username> --dbpass <password> -c <collection-name> --pages -1`
+`yarn kudos:importPublisers --dbhost localhost --dbname <mariadb-name> --dbuser <username> --dbpass <password> -c <collection-name> --pages -1`
+`yarn kudos:importRecipients --dbhost localhost --dbname <mariadb-name> --dbuser <username> --dbpass <password> -c <collection-name> --pages -1`
 Be sure to set the TYPESENSE_API_HOST, TYPESENSE_API_KEY, and TYPESENSE_API_KEY_ADMIN env vars with your Typesense configuration.
 
 If you have not imported the entire KUDOS dataset, you can safely ignore responses error code 404, "Could not find a document with id".
 
 
-`yarn run:contentAnalysis`
+`yarn contentAnalysis`
 Required env vars:
 GROQ_API_KEY
 TYPESENSE_DOCS_COLLECTION
