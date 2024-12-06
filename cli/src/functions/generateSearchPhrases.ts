@@ -97,7 +97,10 @@ async function main() {
       console.error(`Collection '${targetCollectionName}' already exists, aborting.`);
       return;
     }
-    await typesenseSearch.setupSearchPhraseSchema(targetCollectionName);
+    await typesenseSearch.setupSearchPhraseSchema(
+              targetCollectionName.replace('phrases', 'docs'), 
+              targetCollectionName);
+
     console.log(`Collection '${targetCollectionName}' created.`);
   } else {
     if (!collectionFound) {
@@ -286,7 +289,7 @@ async function main() {
         for (const [index, phrase] of searchPhrases.entries()) {
           const entry: SearchPhraseEntry = {
             id: '' + searchHit.id + '-' + index,
-            doc_num: '' + searchHit.id,
+            doc_num: '' + searchHit.doc_num || '',
             chunk_id: '' + searchHit.id || '',
             chunk_index: index,
             url: url,
@@ -326,6 +329,9 @@ async function main() {
           console.error(
             `An error occurred while importing documents to '${targetCollectionName}'\nERROR: ${error}`,
           );
+
+          console.error(`Detailed import results:\n${JSON.stringify((error as any).importResults, null, 2)}`);
+
 
           console.log(`Failed batch content:\n${JSON.stringify(uploadBatch)}`);
           return;
