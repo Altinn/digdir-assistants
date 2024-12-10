@@ -3,7 +3,7 @@
             [clojure.string :as str]
             [clj-http.client :as http]
             [cheshire.core :as json]
-            [typesense.search :as search]
+            [typesense.search :refer [multi-search multi-filter]]
             [typesense.import-collection :refer [upsert-collection]]
             [typesense.files-metadata :refer [upsert-file-chunkr-status get-file-metadata]]
             [taoensso.timbre :as log]))
@@ -136,10 +136,10 @@
       result
       (println :error (str result)))))
 
-(def chunks-to-import-filename "./typesense_chunks/chunks_to_import.jsonl")
-(def docs-collection "KUDOS_docs_2024-09-27_chunkr_test")
-(def chunks-collection "KUDOS_chunks_2024-09-27_chunkr_test")
-(def files-collection-name "KUDOS_files_2024-09-27_chunkr_test")
+;; (def chunks-to-import-filename "./typesense_chunks/chunks_to_import.jsonl")
+;; (def docs-collection "KUDOS_docs_2024-09-27_chunkr_test")
+;; (def chunks-collection "KUDOS_chunks_2024-09-27_chunkr_test")
+;; (def files-collection-name "KUDOS_files_2024-09-27_chunkr_test")
 
 (def max-retries 1)
 
@@ -210,7 +210,7 @@
                                               (upsert-file-chunkr-status (:files-collection-name ctx)
                                                                          (get-in ctx [:file-status :file_id])
                                                                          new-status)
-                                              (Thread/sleep 5000)
+                                              (Thread/sleep 10000)
                                               (recur (inc attempt)))))))
                                     (catch Exception e
                                       (handle-error ctx e))))}
@@ -308,44 +308,152 @@
           (process-pdf-with-chunkr files-collection-name url)))
       (println "Error fetching unstarted documents:" (:error result)))))
 
+(defn get-content-markdown-for-doc [chunks-collection doc-num]
+  (let [query {:collection chunks-collection
+               :q doc-num
+               :query-by "doc_num"
+               :filter-by (str "doc_num:=" doc-num)
+               :sort-by "chunk_index:asc"
+               :include-fields "content_markdown"
+               :per_page 1000}
+        result (search/multi-search query)]
+    (when (:success result)
+      (->> result
+           (:hits)
+           (mapv :content_markdown)))))
+
+(defn save-chunks-to-markdown [doc-num]
+  (let [markdown-chunks (get-content-markdown-for-doc chunks-collection  doc-num)]
+    (spit (str "markdown_" doc-num ".md") (apply str markdown-chunks))))
+
+(defn get-docs-with-chunks []
+  (let [page-size 30]  
+    (loop [current-page 1
+           all-docs []]
+      (let [docs-query {:collection docs-collection
+                        :q "90715"
+                        :query-by "doc_num"
+                        :include-fields "doc_num"
+                        :per_page page-size
+                        :page current-page}
+            docs-result (search/multi-search docs-query)
+            ;; _ (prn :docs-result docs-result)
+            ]
+        (if (and (:success docs-result)
+                 (seq (get-in docs-result [:hits])))
+          (let [doc-nums (mapv #(get-in % [:doc_num]) (get-in docs-result [:hits]))
+                ;; _ (prn :doc-nums doc-nums)
+                chunks-query {:collection chunks-collection
+                              :q doc-nums
+                              :query-by "doc_num"
+                              :filter-by "doc_num"
+                              :include-fields "doc_num"
+                              :page-size 1}
+                chunks-result (search/multi-filter chunks-query)
+                ;; _ (prn :chunks-result chunks-result)
+                ;; Extract doc_nums that have chunks from the chunks-result
+                docs-with-chunks (set (map :doc_num (get-in chunks-result [:hits])))
+                _ (prn :docs-with-chunks docs-with-chunks)
+                ;; Filter current page docs to only those that have chunks
+                current-docs (filter #(contains? docs-with-chunks (:doc_num %)) 
+                                   (get-in docs-result [:hits]))
+                _ (prn :current-docs current-docs)]
+            (if (  ;; or (> current-page 30000) 
+                     (< (count (get-in docs-result [:hits])) page-size)
+                 )
+              ; Last page reached
+              (concat all-docs current-docs)
+              ; More pages to process
+              (recur (inc current-page)
+                     (concat all-docs current-docs))))
+          (do
+            (when-not (:success docs-result)
+              (log/error "Error fetching documents:" (:error docs-result)))
+            all-docs))))))
+
+(defn get-doc-num-list-from-chunks [] 
+  (let [page-size 30]
+    (loop [current-page 1
+           all-doc-nums #{}]
+      (let [chunks-query {:collection chunks-collection
+                          :q "*"
+                          :query-by "doc_num"
+                          :include-fields "doc_num"
+                          :facet-by "doc_num"
+                          :page-size page-size
+                          :page current-page}
+            chunks-result (multi-search chunks-query)
+            _ (prn :chunks-result chunks-result)]
+        (if (:success chunks-result)
+          (let [chunk-doc-num-list (set (map :doc_num (get-in chunks-result [:hits])))
+                _ (prn :chunk-doc-num-list chunk-doc-num-list)]
+            (if (< (count (get-in chunks-result [:hits])) page-size)
+              ;; Last page reached
+              (clojure.set/union all-doc-nums chunk-doc-num-list)
+              ;; More pages to process
+              (recur (inc current-page)
+                     (clojure.set/union all-doc-nums chunk-doc-num-list))))
+          (do
+            (log/error "Error fetching documents:" (:error chunks-result))
+            all-doc-nums))))))
+
+
+
+
 (comment
+  
+  
+  (def current-page 1)
+  (def page-size 300)
 
+  
+  (def chunks-result
+    (multi-search {:collection "KUDOS_chunks_2024-09-27_chunkr_test"
+                   :q "*"
+                   :query-by "doc_num"
+                   :include-fields "doc_num"
+                   :facet-by "doc_num"
+                   :page-size 30 
+                   :page 1}))
+  
 
+     
 
-  ;; (get-unchunked-files files-collection-name)
-  ;; (defn test-chunks [doc-num] (slurp (str "./chunkr_data/kudos_" doc-num ".json") :encoding "UTF-8"))
-  ;; (defn chunks-json [doc-num] (json/parse-string (test-chunks doc-num) true))
-  ;; (defn typesense-chunks [doc-num]
-  ;;   (chunkr-chunks->typesense-chunks (vec (:chunks (chunks-json doc-num))) doc-num))
-
-
+  ;; import documents from KUDOS, converting them to Markdown with Chunkr.ai
   (doseq [doc-num
           [;;
-           "4240"
+          ;;  "4240"
           ;; "17306"
           ;;  "33169" 
           ;; "90715"
-
+           
           ;;  "7024" "8322" "24753" "30776" "32062" "90757"
           ;;  "13769" "5075" "29038" "16940" "28778" "38024"
           ;;  "302" "22302" "22742" "24901" "26024" "26803" "27207" "30832"
-          ;;  "22742" "24901" "26024" "26803" "27207" "30832"
+          ;;  "22742" "24901" "26024" "26803" "27207" "3083
+          ;;  imported with new pipeline:
+          ;; "31119" "30010" "30009" "29980"
+          ;; 
+          ;; DSS:
+          ;; "32613"   "32351" 
+          ;;
+          ;;  "5221" "32643" "32421" "32418" "31994" "30977" "30975" "30963" "30967" "30965" "24488" 
+          ;; "22084" "16133" "2421" "5454" "2329" "2216" "16801" "2649"
+           "32001"
            ;;
            ]]
     (let [_ (println "Processing document:" doc-num)]
       (process-pdf-with-chunkr files-collection-name doc-num)))
 
-  (let [chunks (upload-pdf-to-chunkr "4099.pdf")]
-    (upsert-file-chunkr-status files-collection-name 4099 "uploaded-to-chunkr")
-    (println "chunks: " chunks)
-    )
-  
+
+  (save-chunks-to-markdown "32001")
+
 
 
 
 ;;   (save-chunks-to-jsonl (typesense-chunks doc-num) chunks-to-import-filename)
-
+  
   ;; TODO: check if we need to unescape the markdown content before importing
-
+  
   ;; (upsert-collection chunks-collection chunks-to-import-filename 100 10)
   )

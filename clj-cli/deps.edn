@@ -3,6 +3,7 @@
         clj-http/clj-http {:mvn/version "3.12.3"}
         cheshire/cheshire {:mvn/version "5.11.0"}
         com.taoensso/timbre {:mvn/version "6.6.1"}
+        io.github.runeanielsen/typesense-clj {:mvn/version "0.1.146"}
         org.clojure/tools.cli {:mvn/version "1.0.214"}}
  :aliases
  {:import-collection {:main-opts ["-m" "typesense.import-collection"]}

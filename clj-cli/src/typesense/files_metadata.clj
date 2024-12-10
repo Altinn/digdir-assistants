@@ -2,7 +2,7 @@
   (:require [typesense.api-config :refer [typesense-config]]
             [cheshire.core :as json]
             [clj-http.client :as http]
-            [typesense.search :as search]))
+            [typesense.search :refer [multi-search]]))
 
 (defn upsert-file-chunkr-status [files-collection-name file-id new-status]
   (let [url (str (get-in typesense-config [:nodes 0 :protocol]) "://"
@@ -22,7 +22,7 @@
 
 
 (defn get-file-metadata [files-collection-name doc-num]
-  (let [result (search/multi-search
+  (let [result (multi-search
                 {:collection files-collection-name
                  :q doc-num
                  :query-by "doc_num"
@@ -34,3 +34,9 @@
       (-> result :hits first)
       (println "Failed to retrieve file metadata for doc_num:" doc-num ". Error:" (:message result)))))
 
+
+(comment
+  
+  (get-file-metadata "KUDOS_files_2024-09-27_chunkr_bb" "90487")
+  
+  )

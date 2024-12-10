@@ -63,26 +63,166 @@ CREATE TABLE `documents` (
 
 const kudosDocTypesenseSchema: CollectionCreateSchema = {
   name: 'documents',
+  symbols_to_index: ["_"],
+  token_separators: ['-', '/'],
+  default_sorting_field: "doc_num",
+  enable_nested_fields: false,
   fields: [
-    { name: "doc_num", type: 'string', facet: true, optional: false, sort: true },
-    { name: 'updated_at', type: 'int64', optional: false, sort: true },
-    { name: 'uuid', type: 'string' },
-    { name: 'type', type: 'string', facet: true, optional: true },
-    { name: 'title', type: 'string', optional: true, sort: true },
-    { name: 'subtitle', type: 'string', optional: true },
-    { name: 'isbn', type: 'string', optional: true },
-    { name: 'abstract', type: 'string', optional: true },
-    { name: 'language', type: 'string', optional: true },
-    { name: 'source_document_type', type: 'string', optional: true },
-    { name: 'source_document_url', type: 'string', optional: true },
-    { name: 'source_page_url', type: 'string', optional: true },
-    { name: 'source_published_at', type: 'string', optional: false, sort: true },
-    { name: 'source_created_at', type: 'string', optional: true, sort: true },
-    { name: 'source_updated_at', type: 'string', optional: true, sort: true },
-    { name: 'kudos_published_at', type: 'string', optional: true },
-    { name: 'kudos_unpublishable_at', type: 'string', optional: true },
-    { name: 'kudos_unpublished_at', type: 'string', optional: true },
-  ],
+    {
+      "name": "doc_num",
+      "facet": true,
+      "sort": true,
+      "type": "string"
+    },
+    {
+      "name": "url_without_anchor",
+      "facet": true,
+      "type": "string"
+    },
+    {
+      "name": "updated_at",
+      "sort": true,
+      "type": "int64"
+    },
+    {
+      "name": "uuid",
+      "type": "string"
+    },
+    {
+      "name": "title",
+      "facet": true,
+      "optional": true,
+      "sort": true,
+      "type": "string"
+    },
+    {
+      "name": "subtitle",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "name": "isbn",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "name": "abstract",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "name": "language",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "name": "source_document_type",
+      "facet": true,
+      "optional": true,
+      "sort": true,
+      "type": "string"
+    },
+    {
+      "name": "source_document_url",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "name": "source_page_url",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "name": "source_published_at",
+      "sort": true,
+      "type": "string"
+    },
+    {
+      "name": "source_created_at",
+      "optional": true,
+      "sort": true,
+      "type": "string"
+    },
+    {
+      "name": "source_updated_at",
+      "optional": true,
+      "sort": true,
+      "type": "string"
+    },
+    {
+      "name": "kudos_published_at",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "name": "kudos_unpublishable_at",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "name": "department_short",
+      "optional": true,
+      "type": "string[]"
+    },
+    {
+      "name": "department_long",
+      "optional": true,
+      "type": "string[]"
+    },
+    {
+      "name": "orgs_short",
+      "optional": true,
+      "type": "string[]"
+    },
+    {
+      "name": "orgs_long",
+      "optional": true,
+      "type": "string[]"
+    },
+    {
+      "facet": true,
+      "name": "publisher_short",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "facet": true,
+      "name": "publisher_long",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "facet": true,
+      "name": "recipient_short",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "facet": true,
+      "name": "recipient_long",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "facet": true,
+      "name": "type",
+      "optional": true,
+      "sort": true,
+      "type": "string"
+    },
+    {
+      "facet": true,
+      "name": "owner_short",
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "facet": true,
+      "name": "owner_long",
+      "optional": true,
+      "type": "string"
+    }
+  ]
 };
 
 const KudosDocSchema = z.object({
@@ -293,17 +433,18 @@ async function main() {
   program
     .name('kudosImport')
     .description(
-      'Import KUDOS documents from a local MariaDB instance to two Typesense collections',
+      'Import KUDOS documents and chunks (optional) from a local MariaDB instance to Typesense collection(s)',
     )
-    .version('0.1.0');
+    .version('0.2.0');
 
   program
     .requiredOption('--dbhost <string>', 'database host', '')
-    .requiredOption('--dbuser <string>', 'database username', '') 
+    .requiredOption('--dbuser <string>', 'database username', '')
     .requiredOption('--dbpass <string>', 'database password', '')
     .requiredOption('--dbname <string>', 'database name', '')
     .requiredOption('-c, --collection <string>', 'typesense collection name for documents (not alias name)', '')
     .option('--chunks <string>', 'typesense collection name for document chunks (not alias name)', '')
+    .option('--importchunks', 'import chunks from Kudos DB')
     .option('--firstpage <number>', 'page number to start on (1-based)', '1')
     .option('--pagesize <number>', 'page size', '10')
     .option('--pages <number>', 'number of pages to import', '1')
@@ -374,7 +515,7 @@ async function main() {
         );
         return;
       }
-      if (!chunkCollectionFound) {
+      if (opts.importchunks && !chunkCollectionFound) {
         console.error(`Kudos doc chunk collection '${chunksCollectionName}' not found, aborting.`);
         return;
       }
@@ -385,7 +526,8 @@ async function main() {
         );
         docsCollectionName = docCollectionFound.name;
       }
-      if (chunkCollectionFound.name != chunksCollectionName) {
+      if (opts.importchunks && chunkCollectionFound 
+        && chunkCollectionFound.name != chunksCollectionName) {
         console.log(
           `Resolved alias '${chunksCollectionName}' to collection '${chunkCollectionFound.name}'`,
         );
@@ -421,12 +563,20 @@ async function main() {
   while (true) {
     console.log(`Loading ${opts.pagesize} documents from page ${page}`);
     const [rowResults] = await connection.execute(
-        "SELECT * FROM documents " +
-        "WHERE ((type = 'Tildelingsbrev') OR (type = 'Evaluering') OR  (type = 'Årsrapport')) " +
-        " AND (published_at > '2020-01-01 00:00:00.000') " + 
-        " AND (published_at < '2024-01-01 00:00:00.000') " +
-        //" ORDER BY published_at asc " +
-        " LIMIT ? OFFSET ?",
+      "SELECT * FROM documents " +
+      "WHERE " +
+      " (id IN (30965,2649,33169,16133,22084,8322,17306,29980,26024,30832,26803,32613,90487,302," +
+      "30010,32351,16940,90715,16801,32643,7024,2216,5221,30977,5454,30776,24488,27207,31119,31994," +
+      "32001,4240,30009,30975,14660,24753,32421,30963,22742,30967,32418,22302,24901,2421,2329,32062," +
+      "90757))" +
+      // "(type = 'Tildelingsbrev') OR " +
+      // "(type = 'Evaluering') OR " +
+      // "(type = 'Årsrapport') OR +
+      // "(type = 'Instruks')) " +
+      // " AND (published_at > '2020-01-01 00:00:00.000') " +
+      // " AND (published_at < '2024-01-01 00:00:00.000') " +
+      //" ORDER BY published_at asc " +
+      " LIMIT ? OFFSET ?",
       [opts.pagesize, (page - 1) * opts.pagesize],
     );
     const rows = rowResults as mysql.RowDataPacket[];
@@ -450,13 +600,18 @@ async function main() {
         console.error(`Error decompressing plaintext for doc uuid '${row.uuid}':\n`, error);
         continue;
       }
-      const chunkLengths = await findChunks(
-        plaintextDecompressed,
-        sectionDelim,
-        minChunkLength,
-        maxChunkLength,
-      );
-      sumChunks += chunkLengths.length;
+
+      let chunkLengths: number[] = [];
+
+      if (opts.importchunks) {
+        chunkLengths = await findChunks(
+          plaintextDecompressed,
+          sectionDelim,
+          minChunkLength,
+          maxChunkLength,
+        );
+        sumChunks += chunkLengths.length;
+      }
       sumDocs += 1;
 
       const doc: KudosDoc = {
@@ -486,8 +641,9 @@ async function main() {
           : null,
       };
       console.log(
-        `Doc id: ${row.id} has ${chunkLengths.length} chunks.`,
-        opts.dryrun ? " Dryrun, won't upload to typesense" : ' Uploading...',
+        `Parsed doc_num: ${row.id}.`,
+        opts.dryrun ? " Dryrun, won't upload to typesense" :
+          opts.importchunks ? ` Uploading doc and ${chunkLengths.length} chunks...` : ` Uploading doc only...`,
       );
       if (!opts.dryrun) {
         await typesenseClient
@@ -529,13 +685,13 @@ async function main() {
 
         batch.push(outChunk);
 
-        if (!opts.dryrun) {
+        if (!opts.dryrun && opts.importchunks) {
           if (batch.length == 0) {
             console.log(`No chunks found for doc_num: ${row.id}`);
           } else if (
-            batch.length === chunkImportBatchSize 
+            batch.length === chunkImportBatchSize
             || chunkIndex === chunkLengths.length - 1) {
-            console.log(`Uploading ${batch.length} chunks for doc id ${row.id}`);
+            console.log(`Uploading ${batch.length} chunks for doc_num ${row.id}`);
             await typesenseClient
               .collections(chunksCollectionName)
               .documents()
