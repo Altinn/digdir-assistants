@@ -2,7 +2,7 @@
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         clj-http/clj-http {:mvn/version "3.12.3"}
         cheshire/cheshire {:mvn/version "5.11.0"}
-        org.clojure/tools.cli {:mvn/version "1.0.214"}}
+        org.clojure/tools.cli {:mvn/version "1.1.230"}}
  :aliases
  {:import-collection {:main-opts ["-m" "typesense.import-collection"]}
   :dev   {:extra-deps  {io.github.clojure/tools.build {:mvn/version "0.9.6"}}}
