@@ -125,7 +125,7 @@
       (.write writer (str (json/generate-string chunk) "\n")))))
 
 (defn get-unchunked-files [files-collection-name]
-  (let [result (search/multi-search
+  (let [result (multi-search
                 {:collection files-collection-name
                  :q "*"
                  :query-by "doc_num"
@@ -137,9 +137,9 @@
       (println :error (str result)))))
 
 ;; (def chunks-to-import-filename "./typesense_chunks/chunks_to_import.jsonl")
-;; (def docs-collection "KUDOS_docs_2024-09-27_chunkr_test")
-;; (def chunks-collection "KUDOS_chunks_2024-09-27_chunkr_test")
-;; (def files-collection-name "KUDOS_files_2024-09-27_chunkr_test")
+(def docs-collection "KUDOS_docs_2024-12-10")
+(def chunks-collection "KUDOS_chunks_2024-12-10")
+(def files-collection-name "KUDOS_files_2024-12-10")
 
 (def max-retries 1)
 
@@ -299,7 +299,7 @@
                :filter-by "chunkr_status:=not-started"
                :include-fields "doc_num,kudos_url"
                :per_page 100}
-        result (search/multi-search query)]
+        result (multi-search query)]
     (if (:success result)
       (doseq [doc (get-in result [:results 0 :hits])]
         (let [url (get-in doc [:document :kudos_url])
@@ -316,7 +316,7 @@
                :sort-by "chunk_index:asc"
                :include-fields "content_markdown"
                :per_page 1000}
-        result (search/multi-search query)]
+        result (multi-search query)]
     (when (:success result)
       (->> result
            (:hits)
@@ -336,7 +336,7 @@
                         :include-fields "doc_num"
                         :per_page page-size
                         :page current-page}
-            docs-result (search/multi-search docs-query)
+            docs-result (multi-search docs-query)
             ;; _ (prn :docs-result docs-result)
             ]
         (if (and (:success docs-result)
@@ -349,7 +349,7 @@
                               :filter-by "doc_num"
                               :include-fields "doc_num"
                               :page-size 1}
-                chunks-result (search/multi-filter chunks-query)
+                chunks-result (multi-filter chunks-query)
                 ;; _ (prn :chunks-result chunks-result)
                 ;; Extract doc_nums that have chunks from the chunks-result
                 docs-with-chunks (set (map :doc_num (get-in chunks-result [:hits])))
@@ -439,7 +439,9 @@
           ;;
           ;;  "5221" "32643" "32421" "32418" "31994" "30977" "30975" "30963" "30967" "30965" "24488" 
           ;; "22084" "16133" "2421" "5454" "2329" "2216" "16801" "2649"
-           "32001"
+
+           ;; "32613"
+           "32613"
            ;;
            ]]
     (let [_ (println "Processing document:" doc-num)]

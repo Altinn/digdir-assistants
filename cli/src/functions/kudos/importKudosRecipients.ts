@@ -82,13 +82,13 @@ async function main() {
   while (true) {
     console.log(`Loading ${opts.pagesize} documents from page ${page}`);
     const query = `
-    SELECT dr.document_id, an.actor_id as actor_id, an2.name as abbreviation, an.name as actor_name 
-    FROM document_recipient dr 
-    JOIN actor_names an 
-	    ON dr.actor_id = an.actor_id 
-    JOIN actor_names an2
-      ON dr.actor_id = an2.actor_id 
-    WHERE an.type= 'display' AND an2.type = 'abbreviation'
+    SELECT 
+        dr.document_id,
+        dr.actor_id,
+        (SELECT name FROM actor_names WHERE actor_id = dr.actor_id AND type = 'display' LIMIT 1) as name_long,
+        (SELECT name FROM actor_names WHERE actor_id = dr.actor_id AND type = 'abbreviation' LIMIT 1) as abbreviation,
+        (SELECT name FROM actor_names WHERE actor_id = dr.actor_id AND type = 'official' LIMIT 1) as official
+    FROM document_recipient dr
     LIMIT ${opts.pagesize} OFFSET ${(page - 1) * opts.pagesize}
   `;
     const [rowResults] = await connection.execute(query, [page, opts.pagesize]);
@@ -100,8 +100,8 @@ async function main() {
 
     const updatedDocs = rows.map(row => ({
       id: row.document_id.toString(),
-      recipient_short: row.abbreviation,
-      recipient_long: row.actor_name
+      recipient_short: row.abbreviation ? row.abbreviation : row.name_long,
+      recipient_long: row.official ? row.official : row.name_long,
     }));
     console.log(`Updated docs: ${JSON.stringify(updatedDocs)}`);
 

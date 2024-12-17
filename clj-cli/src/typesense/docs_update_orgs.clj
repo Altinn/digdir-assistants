@@ -6,13 +6,6 @@
             [typesense.search :refer [multi-search]]
             [typesense.admin :refer [update-docs]]))
 
-(defn get-org-set [doc-search-hit]
-  (into #{}
-        -> doc-search-hit
-        (remove nil?
-                [(get doc-search-hit :owner_short)
-                 (get doc-search-hit :publisher_short)
-                 (get doc-search-hit :recipient_short)])))
 
 (defn update-doc-orgs
   "Retrieves all documents from the docs-collection, one page at a time.
