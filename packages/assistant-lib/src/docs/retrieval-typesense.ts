@@ -285,6 +285,13 @@ const docsCollectionSchema = (
         type: "string",
       },
       {
+        facet: true,
+        name: "source_published_year",
+        optional: true,
+        sort: false,
+        type: "string",
+      },
+      {
         name: "source_created_at",
         optional: true,
         sort: true,
