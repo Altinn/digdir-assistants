@@ -13,14 +13,12 @@
     "codestyle:check": "prettier src/ --check",
     "codestyle:fix": "prettier src/ --write",
     "generateSearchPhrases": "tsx src/functions/generateSearchPhrases.ts",
-    
     "kudos:importDocuments": "tsx src/functions/kudos/importKudosDocuments.ts",
     "kudos:importFiles": "tsx src/functions/kudos/importKudosFiles.ts",
     "kudos:importOwners": "tsx src/functions/kudos/importKudosOwners.ts",
     "kudos:importPublishers": "tsx src/functions/kudos/importKudosPublishers.ts",
     "kudos:importRecipients": "tsx src/functions/kudos/importKudosRecipients.ts",
     "kudos:updatePublishedYear": "tsx src/functions/kudos/updatePublishedYear.ts",
-
     "contentAnalysis": "tsx src/functions/contentAnalysis.ts",
     "listMissingEnDocs": "tsx src/functions/listMissingEnDocs.ts",
     "listAllDocs": "tsx src/functions/listAllDocs.ts"

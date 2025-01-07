@@ -138,6 +138,13 @@ const kudosDocTypesenseSchema: CollectionCreateSchema = {
       "type": "string"
     },
     {
+      "name": "source_published_year",
+      "facet": true,
+      "sort": true,
+      "optional": true,
+      "type": "string"
+    },
+    {
       "name": "source_created_at",
       "optional": true,
       "sort": true,
@@ -161,21 +168,25 @@ const kudosDocTypesenseSchema: CollectionCreateSchema = {
     },
     {
       "name": "department_short",
+      "facet": true,
       "optional": true,
       "type": "string[]"
     },
     {
       "name": "department_long",
+      "facet": true,
       "optional": true,
       "type": "string[]"
     },
     {
       "name": "orgs_short",
+      "facet": true,
       "optional": true,
       "type": "string[]"
     },
     {
       "name": "orgs_long",
+      "facet": true,
       "optional": true,
       "type": "string[]"
     },
@@ -271,7 +282,7 @@ const kudosChunkTypesenseSchema = (
   docsCollectionName: string,
 ): CollectionCreateSchema => {
   return {
-    name: 'kudos_chunks',
+    name: docsCollectionName.replace('docs', 'phrases'),
     "fields": [
       {
         "facet": false,
@@ -490,21 +501,23 @@ async function main() {
           }
         }
       }
-      if (chunkCollectionFound) {
-        console.error(`Chunck collection '${chunksCollectionName}' already exists, aborting.`);
-        return;
-      } else {
-        // create new collection
-        try {
-          await typesenseClient.collections(chunksCollectionName).retrieve();
-        } catch (error) {
-          if (error instanceof Errors.ObjectNotFound) {
-            console.log('Creating new collection:', chunksCollectionName);
-            let chunkSchema = kudosChunkTypesenseSchema(docsCollectionName);
-            await typesenseClient.collections().create(chunkSchema);
-            console.log(`Kudos chunk collection ${chunksCollectionName} created successfully.`);
-          } else {
-            throw error;
+      if (opts.importchunks) {
+        if (chunkCollectionFound) {
+          console.error(`Chunck collection '${chunksCollectionName}' already exists, aborting.`);
+          return;
+        } else {
+          // create new collection
+          try {
+            await typesenseClient.collections(chunksCollectionName).retrieve();
+          } catch (error) {
+            if (error instanceof Errors.ObjectNotFound) {
+              console.log('Creating new collection:', chunksCollectionName);
+              let chunkSchema = kudosChunkTypesenseSchema(docsCollectionName);
+              await typesenseClient.collections().create(chunkSchema);
+              console.log(`Kudos chunk collection ${chunksCollectionName} created successfully.`);
+            } else {
+              throw error;
+            }
           }
         }
       }
@@ -569,13 +582,13 @@ async function main() {
       "30010,32351,16940,90715,16801,32643,7024,2216,5221,30977,5454,30776,24488,27207,31119,31994," +
       "32001,4240,30009,30975,14660,24753,32421,30963,22742,30967,32418,22302,24901,2421,2329,32062," +
       "90757))" +
-      // "(type = 'Tildelingsbrev') OR " +
+      // "((type = 'Tildelingsbrev') OR (type = 'Årsrapport'))" +
       // "(type = 'Evaluering') OR " +
       // "(type = 'Årsrapport') OR +
       // "(type = 'Instruks')) " +
-      // " AND (published_at > '2020-01-01 00:00:00.000') " +
-      // " AND (published_at < '2024-01-01 00:00:00.000') " +
-      //" ORDER BY published_at asc " +
+      //  " AND (published_at > '2020-01-01 00:00:00.000') " +
+      //  " AND (published_at < '2025-01-01 00:00:00.000') " +
+      " ORDER BY published_at asc " +
       " LIMIT ? OFFSET ?",
       [opts.pagesize, (page - 1) * opts.pagesize],
     );

@@ -124,6 +124,12 @@ export async function setupSearchPhraseSchema(docsCollectionName: string, collec
         type: "string"
       },
       {
+        name: "chunk_id",
+        facet: true,
+        optional: false,
+        type: "string",
+      },
+      {
         name: 'url',
         type: 'string',
         optional: false,
