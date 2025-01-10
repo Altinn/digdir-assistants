@@ -12,7 +12,8 @@
             [lib.chat-completion :as llm]
             [lib.converters :refer [env-var]]
             [wkok.openai-clojure.api :as openai]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io])
+  (:import [java.util.concurrent Executors TimeUnit]))
 
 ;; Schema definitions
 (def SearchPhrase
@@ -193,37 +194,79 @@
         ;; Clean up temp file
         (io/delete-file temp-file true)))))
 
+(defn process-chunk [target prompt-name chunk]
+  (log/debug "Processing chunk:" chunk)
+  (try
+    (let [existing (get-existing-phrases target (:chunk_id chunk))
+          existing-checksum (some-> existing first :checksum)
+          current-checksum (:markdown_checksum chunk)]
+      (when (or (nil? existing-checksum)
+                (not= existing-checksum current-checksum))
+        (when existing
+          (delete-existing-phrases target (:chunk_id chunk) existing))
+        (let [phrases (generate-search-phrases prompt-name chunk)]
+          (store-search-phrases target chunk phrases prompt-name))))
+    (catch Exception e
+      (log/error "Failed to process chunk:" chunk "error:" (ex-message e)))))
+
+(defn create-thread-pool [thread-count]
+  (let [num-threads (min 10 (max 1 thread-count))]
+    (log/info "Creating thread pool with" num-threads "threads")
+    (Executors/newFixedThreadPool num-threads)))
+
+(defn group-chunks-by-doc [chunks]
+  (group-by :doc_num chunks))
+
+(defn distribute-work [chunks thread-count]
+  (let [doc-groups (vals (group-chunks-by-doc chunks))
+        num-threads (min 10 (max 1 thread-count))
+        chunks-per-thread (Math/ceil (/ (count doc-groups) num-threads))]
+    (partition-all chunks-per-thread doc-groups)))
+
+(defn process-chunk-group [target prompt-name chunk-group]
+  (doseq [chunk chunk-group]
+    (process-chunk target prompt-name chunk)))
+
 (defn -main [& args]
   (let [[source target & opts] args
         opts-map (into {} (for [opt opts
-                                :when (str/starts-with? opt "--")]
-                            [opt (if (= opt "--create-new")
-                                   true
-                                   (get (vec opts) (inc (.indexOf opts opt))))]))
+                               :when (str/starts-with? opt "--")]
+                           [opt (if (= opt "--create-new")
+                                 true
+                                 (get (vec opts) (inc (.indexOf opts opt))))]))
         prompt-name (get opts-map "--prompt" "keyword-search")
-        page-size 4
+        thread-count (if-let [threads (get opts-map "--threads")]
+                      (Integer/parseInt threads)
+                      1)
+        page-size (* 10 thread-count)  ; Increased page size to account for threads
         start-page (if-let [start (get opts-map "--start")]
-                     (Integer/parseInt start)
-                     1)]
-    (log/debug "Starting with options:" {:source source :target target :opts opts-map}) 
-
-    (log/info "Processing collection:" target)
-
-    (loop [page start-page]
-      (log/debug "Processing page:" page)
-      (when-let [chunks (retrieve-all-chunks source page page-size)]
-        (doseq [chunk chunks]
-          (try
-            (let [existing (get-existing-phrases target (:chunk_id chunk))
-                  existing-checksum (some-> existing first :checksum)
-                  current-checksum (:markdown_checksum chunk)]
-              (when (or (nil? existing-checksum)
-                        (not= existing-checksum current-checksum))
-                (when existing
-                  (delete-existing-phrases target (:chunk_id chunk) existing))
-                (let [phrases (generate-search-phrases prompt-name chunk)]
-                  (store-search-phrases target chunk phrases prompt-name))))
-            (catch Exception e
-              (log/error "Failed to process chunk:" chunk "error:" (ex-message e)))))
-        (when (and chunks (seq chunks))
-          (recur (inc page)))))))
+                    (Integer/parseInt start)
+                    1)
+        thread-pool (create-thread-pool thread-count)]
+    (try
+      (log/debug "Starting with options:" 
+                {:source source 
+                 :target target 
+                 :threads thread-count 
+                 :opts opts-map})
+      (log/info "Processing collection:" target)
+      
+      (loop [page start-page]
+        (log/debug "Processing page:" page)
+        (when-let [chunks (retrieve-all-chunks source page page-size)]
+          (let [work-groups (distribute-work chunks thread-count)
+                futures (map #(let [group-chunks (apply concat %)]
+                              (.submit thread-pool
+                                      ^Callable (fn []
+                                                (process-chunk-group target prompt-name group-chunks))))
+                           work-groups)]
+            ; Wait for all futures to complete before moving to next page
+            (doseq [f futures]
+              (.get f)))
+          
+          (when (seq chunks)
+            (recur (inc page)))))
+      
+      (finally
+        (.shutdown thread-pool)
+        (.awaitTermination thread-pool 1 TimeUnit/HOURS)))))
