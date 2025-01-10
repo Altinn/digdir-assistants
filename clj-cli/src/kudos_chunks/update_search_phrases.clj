@@ -4,7 +4,8 @@
             [malli.util :as mu]
             [typesense.search :refer [multi-search]]
             [typesense.import-collection :refer [upsert-collection]]
-            [typesense.api-config :refer [typesense-config]]
+            [typesense.api-config :refer [typesense-config ts-config]]
+            [typesense.client :as ts]
             [taoensso.timbre :as log]
             [cheshire.core :as json]
             [clj-http.client :as http]
@@ -43,7 +44,9 @@
 ;; Constants and configuration
 (def prompts
   {:original "Please analyze the contents of the following documentation article and generate a list of English phrases that you would expect to match the following document.\n\nDocument:\n\n"
-   :keyword-search "Please analyze the contents of the following documentation article and generate a list of keyword search phrases that you would expect to match the following document.\n\nDocument:\n\n"
+   :keyword-search (str "Please analyze the contents of the following documentation article "
+                        "and generate a list of keyword search phrases that you would expect "
+                        "to match the following document. If the text is not comprehensible, just return an empty list.\n\nDocument:\n\n")
    :typicalqs "Generate a list of typical questions that a user might have, that can be answered by the following documentation article. Return only the list of questions as a JSON string array in a code block, do not include answers."})
 
 (defn retrieve-all-chunks [source-collection page page-size]
@@ -82,8 +85,8 @@
             (recur (inc retry-count))))))))
 
 (defn generate-search-phrases [prompt-name chunk]
-  (log/debug "Generating search phrases for doc_num:" (:doc_num chunk) 
-             ", chunk index: " (:chunk_index chunk) "with prompt:" prompt-name)
+  (log/debug "Generating search phrases for chunk-id:" (:chunk_id chunk) 
+             "with prompt:" prompt-name)
   (let [base-prompt (get prompts (keyword prompt-name))
         content (:content_markdown chunk)
         use-azure-openai (= "true" (env-var "USE_AZURE_OPENAI_API"))]
@@ -136,16 +139,34 @@
       (throw (ex-info (str "Unknown prompt name: " prompt-name)
                       {:prompt prompt-name})))))
 
-(defn store-search-phrases [target-collection source-chunk phrases prompt-name]
-  (log/debug "Storing search phrases for doc:" (:doc_num source-chunk))
+(defn get-existing-phrases [target-collection chunk-id]
+  (log/debug "Retrieving existing phrases for chunk-id:" chunk-id)
+  (let [result (multi-search
+                {:collection target-collection
+                 :q chunk-id
+                 :query-by "chunk_id"
+                 :filter-by (str "chunk_id:=" chunk-id)
+                 :include-fields "*"
+                 :page 1
+                 :per_page 100})]
+    (when (:success result)
+      (:hits result))))
+
+(defn delete-existing-phrases [target-collection chunk-id existing-phrase-ids] 
+  (let [ids (mapv :id existing-phrase-ids)]
+    (when (seq ids)
+      (log/debug "Deleting existing phrases for chunk_id:" chunk-id)
+      (ts/delete-documents! ts-config target-collection ids))))
+
+(defn store-search-phrases [target-collection chunk phrases prompt-name]
   (let [timestamp (quot (System/currentTimeMillis) 1000)
         docs (map-indexed 
-              (fn [idx phrase]
-                (let [doc-num (:doc_num source-chunk)
-                      chunk-index (:chunk_index source-chunk)]
-                  {:id (str doc-num "-" idx)
-                   :chunk_id (str doc-num "-" idx)
-                   :doc_num doc-num
+              (fn [phrase-index phrase]
+                (let [chunk-id (:chunk_id chunk)
+                      chunk-index (:chunk_index chunk)]
+                  {:id (str chunk-id "-" phrase-index)
+                   :chunk_id chunk-id
+                   :doc_num (:doc_num chunk)
                    :search_phrase (:search-phrase phrase)
                    :sort_order chunk-index
                    :language "no"
@@ -153,11 +174,10 @@
                    :updated_at timestamp
                    :prompt prompt-name
                    :item_priority 1
-                   :checksum (:markdown_checksum source-chunk)}))
+                   :checksum (:markdown_checksum chunk)}))
               (:search-phrases phrases))
-        temp-file (str "./typesense_batch_" timestamp ".jsonl")]
-    
-    (log/debug "Creating batch of" (count docs) "documents")
+        temp-file (str "./typesense_batch_" timestamp ".jsonl")] 
+    (log/debug "Uploading" (count docs) "search phrases for chunk_id:" (:chunk_id chunk))
     
     ;; Write documents to temp file
     (with-open [w (io/writer temp-file)]
@@ -178,8 +198,7 @@
                             [opt (if (= opt "--create-new")
                                    true
                                    (get (vec opts) (inc (.indexOf opts opt))))]))
-        prompt-name (get opts-map "--prompt" "original")
-        ;; create-new (contains? opts-map "--create-new")
+        prompt-name (get opts-map "--prompt" "keyword-search")
         page-size 4
         start-page (if-let [start (get opts-map "--start")]
                      (Integer/parseInt start)
@@ -193,9 +212,16 @@
       (when-let [chunks (retrieve-all-chunks source page page-size)]
         (doseq [chunk chunks]
           (try
-            (let [phrases (generate-search-phrases prompt-name chunk)]
-              (store-search-phrases target chunk phrases prompt-name))
+            (let [existing (get-existing-phrases target (:chunk_id chunk))
+                  existing-checksum (some-> existing first :checksum)
+                  current-checksum (:markdown_checksum chunk)]
+              (when (or (nil? existing-checksum)
+                        (not= existing-checksum current-checksum))
+                (when existing
+                  (delete-existing-phrases target (:chunk_id chunk) existing))
+                (let [phrases (generate-search-phrases prompt-name chunk)]
+                  (store-search-phrases target chunk phrases prompt-name))))
             (catch Exception e
-              (log/error "Failed to process hit:" chunk "error:" (ex-message e)))))
+              (log/error "Failed to process chunk:" chunk "error:" (ex-message e)))))
         (when (and chunks (seq chunks))
           (recur (inc page)))))))
