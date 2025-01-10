@@ -3,13 +3,24 @@
   (:require [clj-http.client :as http]
             [cheshire.core :as json]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.tools.cli :refer [parse-opts]]
+            [taoensso.timbre :as log]
             [typesense.api-config :refer [typesense-config]]))
 
+;; Configure timbre for UTF-8 output
+(log/merge-config!
+ {:output-fn (fn [data]
+               (let [{:keys [level ?err msg_ ?ns-str ?file timestamp_]} data]
+                 (format "[%s] %s - %s"
+                         (name level)
+                         (force msg_)
+                         (or (some-> ?err .getMessage) ""))))
+  :timestamp-opts {:pattern "yyyy-MM-dd HH:mm:ss" :timezone :jvm-default}})
 
  
 (defn filter-documents [input-file output-file field value take skip]
-  (with-open [rdr (io/reader input-file)
+  (with-open [rdr (io/reader input-file :encoding "UTF-8")
               wtr (io/writer output-file)]
     (->> (line-seq rdr)
          (drop (or skip 0)) ;; Skip the specified number of documents
@@ -75,7 +86,7 @@
       (println "No reference information found for" target-field-name "in" target-collection-name)
       (let [{:keys [collection field-name]} reference-info
             _ (prn " lookup-collection: " collection " lookup-field-name: " field-name)]
-        (with-open [rdr (io/reader input-file)
+        (with-open [rdr (io/reader input-file :encoding "UTF-8")
                     wtr (io/writer output-file)]
           (doseq [batch (partition-all batch-size (line-seq rdr))]
             (process-batch collection target-field-name field-name 
@@ -88,12 +99,14 @@
                  collection-name "/documents/import?action=upsert")
         batch-counter (atom 0)
         max-batches (or max-batches Integer/MAX_VALUE)] 
-    (with-open [rdr (io/reader filename)]
+    (with-open [rdr (io/reader filename :encoding "UTF-8")]
       (doseq [batch (partition-all batch-size (line-seq rdr))]
-        (let [temp-file (str "." "/typesense_import_batch_temp.jsonl")] 
+        (let [timestamp (-> (java.time.LocalDateTime/now)
+                            (.format (java.time.format.DateTimeFormatter/ofPattern "yyyyMMdd_HHmmss")))
+              temp-file (str "." "/typesense_import_batch_" timestamp ".jsonl")] 
           (when (< @batch-counter max-batches)
             (swap! batch-counter inc)
-            (with-open [wtr (io/writer temp-file)] 
+            (with-open [wtr (io/writer temp-file :encoding "UTF-8")] 
               (doseq [line batch]
                 (.write wtr (str line "\n"))))
           ;; Import the batch
@@ -103,10 +116,15 @@
                               {:headers {"X-TYPESENSE-API-KEY" (:api-key typesense-config)
                                          "Content-Type" "application/jsonl"}
                                :body (slurp temp-file)}))]
-              (when (not= "{\"success\":true}" response)
-                (println "Batch import result:" response)))
-          ;; Optionally delete the temp file after each batch
-            (io/delete-file temp-file)))))))
+              ;; Parse and log any errors in the response
+              (let [response-items (str/split-lines response)]
+                (doseq [[idx [item input]] (map-indexed vector (map vector response-items batch))]
+                  (when (not= "{\"success\":true}" item)
+                    (let [error (json/parse-string item true)
+                          input-data (json/parse-string input true)]
+                      (log/error "Import error on item" idx ":" error)
+                      (log/error "Input data was:" input-data)))))
+            (io/delete-file temp-file))))))))
 
 (def cli-options
   [["-f" "--field FIELD" "Field to filter on"]
