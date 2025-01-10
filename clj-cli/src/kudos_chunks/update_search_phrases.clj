@@ -43,10 +43,12 @@
 
 ;; Constants and configuration
 (def prompts
-  {:original "Please analyze the contents of the following documentation article and generate a list of English phrases that you would expect to match the following document.\n\nDocument:\n\n"
-   :keyword-search (str "Please analyze the contents of the following documentation article "
-                        "and generate a list of keyword search phrases that you would expect "
-                        "to match the following document. If the text is not comprehensible, just return an empty list.\n\nDocument:\n\n")
+  {:original 
+   (str "Please analyze the contents of the following documentation article and generate a list of English phrases that you would expect to match the following document.\n\nDocument:\n\n")
+   :keyword-search 
+   (str "Please analyze the contents of the following documentation article "
+        "and generate a list of keyword search phrases that have high information retrieval value. " 
+        "If the text is not comprehensible, just return an empty list.\n\nDocument:\n\n")
    :typicalqs "Generate a list of typical questions that a user might have, that can be answered by the following documentation article. Return only the list of questions as a JSON string array in a code block, do not include answers."})
 
 (defn retrieve-all-chunks [source-collection page page-size]
