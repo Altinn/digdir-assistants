@@ -13,7 +13,8 @@
             [lib.converters :refer [env-var]]
             [wkok.openai-clojure.api :as openai]
             [clojure.java.io :as io])
-  (:import [java.util.concurrent Executors TimeUnit]))
+  (:import [java.util.concurrent Executors TimeUnit]
+           [java.time Instant Duration]))
 
 ;; Schema definitions
 (def SearchPhrase
@@ -53,15 +54,15 @@
    :typicalqs "Generate a list of typical questions that a user might have, that can be answered by the following documentation article. Return only the list of questions as a JSON string array in a code block, do not include answers."})
 
 (defn retrieve-all-chunks [source-collection page page-size]
-  (log/debug "Retrieving chunks from collection:" source-collection "page:" page "size:" page-size)
+  ;; (log/debug "Retrieving chunks from collection:" source-collection "page:" page "size:" page-size)
   (let [search-response (multi-search
                          {:collection source-collection
                           :query-by "chunk_id"
                           :q "*"
-                          :include-fields "chunk_id,doc_num,chunk_index,content_markdown,markdown_checksum"
-                        ;;  :sort-by "doc_num:desc,chunk_index:asc"
+                          :include-fields "chunk_id,doc_num,chunk_index,content_markdown,markdown_checksum" 
+                          ;; :sort-by "chunk_id:asc"
                           :page page
-                          :per-page page-size})]
+                          :page-size page-size})]
     (if (:success search-response)
       (let [;;_ (log/debug "Chunk retrieval response:" search-response)
             results (get-in search-response [:hits])]
@@ -131,9 +132,9 @@
                                    (get-in [:function :arguments])
                                    json/parse-string
                                    (get "searchPhrases")))
-                _ (log/debug "Generated search phrases:")
-                _ (doseq [phrase search-phrases]
-                    (log/debug "  -" phrase))
+                ;; _ (log/debug "Generated search phrases:")
+                ;; _ (doseq [phrase search-phrases]
+                ;;     (log/debug "  -" phrase))
                 phrases {:search-phrases 
                         (mapv (fn [phrase] {:search-phrase phrase})
                               (or search-phrases []))}] 
@@ -143,7 +144,7 @@
                       {:prompt prompt-name})))))
 
 (defn get-existing-phrases [target-collection chunk-id]
-  (log/debug "Retrieving existing phrases for chunk-id:" chunk-id)
+  ;; (log/debug "Retrieving existing phrases for chunk-id:" chunk-id)
   (let [result (multi-search
                 {:collection target-collection
                  :q chunk-id
@@ -163,7 +164,7 @@
 
 (defn store-search-phrases [target-collection chunk phrases prompt-name]
   (let [timestamp (quot (System/currentTimeMillis) 1000)
-        docs (map-indexed 
+        phrases (map-indexed 
               (fn [phrase-index phrase]
                 (let [chunk-id (:chunk_id chunk)
                       chunk-index (:chunk_index chunk)]
@@ -179,13 +180,13 @@
                    :item_priority 1
                    :checksum (:markdown_checksum chunk)}))
               (:search-phrases phrases))
-        temp-file (str "./typesense_batch_" timestamp ".jsonl")] 
-    (log/debug "Uploading" (count docs) "search phrases for chunk_id:" (:chunk_id chunk))
+        temp-file (str "./typesense_batch_" (:chunk_id chunk) "_" timestamp ".jsonl")] 
+    (log/debug "Uploading" (count phrases) "search phrases for chunk_id:" (:chunk_id chunk))
     
     ;; Write documents to temp file
     (with-open [w (io/writer temp-file)]
-      (doseq [doc docs]
-        (.write w (str (json/generate-string doc) "\n"))))
+      (doseq [phrase phrases]
+        (.write w (str (json/generate-string phrase) "\n"))))
     
     ;; Import the batch
     (try
@@ -194,38 +195,65 @@
         ;; Clean up temp file
         (io/delete-file temp-file true)))))
 
-(defn process-chunk [target prompt-name chunk]
-  (log/debug "Processing chunk:" chunk)
-  (try
-    (let [existing (get-existing-phrases target (:chunk_id chunk))
-          existing-checksum (some-> existing first :checksum)
-          current-checksum (:markdown_checksum chunk)]
-      (when (or (nil? existing-checksum)
-                (not= existing-checksum current-checksum))
-        (when existing
-          (delete-existing-phrases target (:chunk_id chunk) existing))
-        (let [phrases (generate-search-phrases prompt-name chunk)]
-          (store-search-phrases target chunk phrases prompt-name))))
-    (catch Exception e
-      (log/error "Failed to process chunk:" chunk "error:" (ex-message e)))))
+(defn process-chunk [target prompt-name chunk stats-atom]
+  ;; (log/debug "Processing chunk:" chunk)
+  (let [start-time (Instant/now)]
+    (try
+      (let [existing (get-existing-phrases target (:chunk_id chunk))
+            existing-checksum (some-> existing first :checksum)
+            current-checksum (:markdown_checksum chunk)]
+        (when (or (nil? existing-checksum)
+                  (not= existing-checksum current-checksum))
+          (when existing
+            (delete-existing-phrases target (:chunk_id chunk) existing))
+          (let [phrases (generate-search-phrases prompt-name chunk)]
+            (if (= 0 (count (:search-phrases phrases)))
+              (swap! stats-atom update :empties inc) 
+              (store-search-phrases target chunk phrases prompt-name))))
+        (swap! stats-atom update :successes inc))
+      (catch Exception e
+        (swap! stats-atom update :failures inc)
+        (log/error "Failed to process chunk:" chunk "error:" (ex-message e)))
+      (finally
+        (let [duration (.toMillis (Duration/between start-time (Instant/now)))]
+          (swap! stats-atom (fn [stats]
+                             (-> stats
+                                 (update :total-time + duration)
+                                 (update :chunks-processed inc)))))))))
+
+(defn process-chunk-group [target prompt-name chunk-group stats-atom]
+  (doseq [chunk chunk-group]
+    (process-chunk target prompt-name chunk stats-atom)))
+
+(defn print-stats [stats page]
+  (let [{:keys [total-time chunks-processed successes failures empties]} stats
+        avg-time (if (pos? chunks-processed)
+                  (double (/ total-time chunks-processed))
+                  0)]
+    (log/info "=== Page" page "Statistics ===")
+    (log/info "Total chunks processed:" chunks-processed)
+    (log/info "Successful updates:" successes)
+    (log/info "Non-comprehensible chunks:" empties)
+    (log/info "Failed updates:" failures)
+    (log/info "Total processing time:" (format "%.2f sec" (/ total-time 1000.0)))
+    (log/info "Average time per chunk:" (format "%.2f ms" avg-time))
+    (log/info "=========================")))
 
 (defn create-thread-pool [thread-count]
   (let [num-threads (min 10 (max 1 thread-count))]
     (log/info "Creating thread pool with" num-threads "threads")
     (Executors/newFixedThreadPool num-threads)))
 
-(defn group-chunks-by-doc [chunks]
-  (group-by :doc_num chunks))
+(defn chunk-index-modulo [chunk thread-count]
+  (mod (:chunk_index chunk) thread-count))
 
 (defn distribute-work [chunks thread-count]
-  (let [doc-groups (vals (group-chunks-by-doc chunks))
-        num-threads (min 10 (max 1 thread-count))
-        chunks-per-thread (Math/ceil (/ (count doc-groups) num-threads))]
-    (partition-all chunks-per-thread doc-groups)))
-
-(defn process-chunk-group [target prompt-name chunk-group]
-  (doseq [chunk chunk-group]
-    (process-chunk target prompt-name chunk)))
+  (let [groups (->> chunks
+                    (group-by #(chunk-index-modulo % thread-count))
+                    vals)]
+    (log/debug "Chunk distribution:"
+              (map #(map :chunk_index %) groups))
+    groups))
 
 (defn -main [& args]
   (let [[source target & opts] args
@@ -248,21 +276,34 @@
                 {:source source 
                  :target target 
                  :threads thread-count 
+                 :page-size page-size
                  :opts opts-map})
       (log/info "Processing collection:" target)
       
       (loop [page start-page]
         (log/debug "Processing page:" page)
         (when-let [chunks (retrieve-all-chunks source page page-size)]
-          (let [work-groups (distribute-work chunks thread-count)
-                futures (map #(let [group-chunks (apply concat %)]
-                              (.submit thread-pool
+          (let [stats-atom (atom {:total-time 0
+                                  :chunks-processed 0
+                                  :successes 0
+                                  :failures 0
+                                  :empties 0})
+                work-groups (distribute-work chunks thread-count)
+                _ (log/debug "Work groups:" (count work-groups))
+
+                page-start-time (Instant/now)
+                futures (doall  ; Force immediate execution
+                         (map #(.submit thread-pool
                                       ^Callable (fn []
-                                                (process-chunk-group target prompt-name group-chunks))))
-                           work-groups)]
+                                                (process-chunk-group target prompt-name % stats-atom)))
+                              work-groups))]
             ; Wait for all futures to complete before moving to next page
             (doseq [f futures]
-              (.get f)))
+              (.get f))
+            
+            (let [page-duration (.toMillis (Duration/between page-start-time (Instant/now)))]
+              (swap! stats-atom assoc :page-time page-duration)
+              (print-stats @stats-atom page)))
           
           (when (seq chunks)
             (recur (inc page)))))
