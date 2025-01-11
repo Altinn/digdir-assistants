@@ -60,7 +60,7 @@
                           :query-by "chunk_id"
                           :q "*"
                           :include-fields "chunk_id,doc_num,chunk_index,content_markdown,markdown_checksum" 
-                          ;; :sort-by "chunk_id:asc"
+                          :sort-by "chunk_index:asc"
                           :page page
                           :page-size page-size})]
     (if (:success search-response)
@@ -100,7 +100,8 @@
           (let [response
                 (if use-azure-openai
                   (openai/create-chat-completion
-                   {:model (env-var "AZURE_OPENAI_DEPLOYMENT_NAME")
+                   {:model "gpt-4o"
+                    :deployment-id (env-var "AZURE_OPENAI_DEPLOYMENT_NAME")
                     :messages [{:role "system" :content "You are a helpful assistant. Reply with supplied JSON format."}
                                {:role "user" :content (str base-prompt content)}]
                     :tools search-results-tools
@@ -247,9 +248,13 @@
 (defn chunk-index-modulo [chunk thread-count]
   (mod (:chunk_index chunk) thread-count))
 
+(defn doc-num-modulo [chunk thread-count]
+  (mod (Integer/parseInt (:doc_num chunk)) thread-count))
+
+
 (defn distribute-work [chunks thread-count]
   (let [groups (->> chunks
-                    (group-by #(chunk-index-modulo % thread-count))
+                    (group-by #(doc-num-modulo % thread-count))
                     vals)]
     (log/debug "Chunk distribution:"
               (map #(map :chunk_index %) groups))
