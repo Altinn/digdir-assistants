@@ -126,7 +126,7 @@
 
 ;; (def chunks-to-import-filename "./typesense_chunks/chunks_to_import.jsonl")
 (def docs-collection "KUDOS_docs_2025-01-08")
-(def chunks-collection "KUDOS_chunks_2025-01-08")
+(def chunks-collection "KUDOS_chunks_2025-01-11")
 (def files-collection-name "KUDOS_files_2025-01-08")
 
 (def max-retries 1)
@@ -185,21 +185,35 @@
                                     (log/info "Got Chunkr task ID:" (:task-id ctx))
                                     (loop [attempt 1]
                                       (let [task  (get-in (make-request :get (str "/task/" (:task-id ctx)) {}) [:body])
+                                            file-id (get-in ctx [:file-status :file_id])
                                             status (get-in task [:status])]
-                                        ;; (log/debug "Polling attempt" attempt "- Status:" status)
-                                        (if (= status "Succeeded")
+                                        (log/debug "Status update " attempt " for doc_num " (:doc-num ctx) "file_id:" file-id "- status:" status)
+                                        (cond
+                                          (= status "Succeeded")
                                           (do
                                             (upsert-file-chunkr-status (:files-collection-name ctx)
                                                                        (get-in ctx [:file-status :file_id])
                                                                        "chunkr-done")
                                             (assoc ctx :status :completed :chunks (get-in task [:output :chunks])))
+                                          
+                                          (= status "Failed")
                                           (do
-                                            (let [new-status (get-in (:chunks ctx) [:task :status])]
+                                            (log/error "Chunkr task failed for file:" (get-in ctx [:file-status :file_id]))
+                                            (upsert-file-chunkr-status (:files-collection-name ctx)
+                                                                       (get-in ctx [:file-status :file_id])
+                                                                       "error-chunkr-failed")
+                                            (throw (ex-info "Chunkr task failed" 
+                                                            {:task-id (:task-id ctx)
+                                                             :file-id (get-in ctx [:file-status :file_id])
+                                                             :status status})))
+                                          
+                                          :else
+                                          (do
                                               (upsert-file-chunkr-status (:files-collection-name ctx)
                                                                          (get-in ctx [:file-status :file_id])
-                                                                         new-status)
+                                                                       "processing")
                                               (Thread/sleep 10000)
-                                              (recur (inc attempt)))))))
+                                            (recur (inc attempt))))))
                                     (catch Exception e
                                       (handle-error ctx e))))}
 

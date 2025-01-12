@@ -6,7 +6,10 @@
             [clojure.string :as str]
             [clojure.tools.cli :refer [parse-opts]]
             [taoensso.timbre :as log]
-            [typesense.api-config :refer [typesense-config]]))
+            [typesense.api-config :refer [typesense-config]])
+  (:import [java.time LocalDateTime]
+           [java.time.format DateTimeFormatter]
+           [java.util UUID]))
 
 ;; Configure timbre for UTF-8 output
 (log/merge-config!
@@ -103,7 +106,8 @@
       (doseq [batch (partition-all batch-size (line-seq rdr))]
         (let [timestamp (-> (java.time.LocalDateTime/now)
                             (.format (java.time.format.DateTimeFormatter/ofPattern "yyyyMMdd_HHmmss")))
-              temp-file (str "." "/typesense_import_batch_" timestamp ".jsonl")] 
+              uuid (str (UUID/randomUUID))
+              temp-file (str "." "/typesense_import_batch_" timestamp "_" uuid ".jsonl")] 
           (when (< @batch-counter max-batches)
             (swap! batch-counter inc)
             (with-open [wtr (io/writer temp-file :encoding "UTF-8")] 

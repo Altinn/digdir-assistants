@@ -15,7 +15,8 @@
                                             "Content-Type" "application/json"}
                                   :body (json/generate-string body)})]
         (if (= 200 (:status response))
-          (println "Successfully updated chunkr_status for file-id:" file-id)
+          ::ok
+          #_(println "Successfully updated chunkr_status for file-id:" file-id)
           (println "Failed to update chunkr_status. Status:" (:status response))))
       (catch Exception e
         (println "Error updating chunkr_status:" (.getMessage e))))))

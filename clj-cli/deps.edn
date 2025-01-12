@@ -4,7 +4,9 @@
         cheshire/cheshire {:mvn/version "5.11.0"}
         com.taoensso/timbre {:mvn/version "6.6.1"}
         io.github.runeanielsen/typesense-clj {:mvn/version "0.1.146"}
-        org.clojure/tools.cli {:mvn/version "1.0.214"}}
+        org.clojure/tools.cli {:mvn/version "1.0.214"}
+        net.clojars.wkok/openai-clojure {:mvn/version "0.22.0"} 
+        metosin/malli {:mvn/version "0.17.0"}}
  :aliases
  {:import-collection {:main-opts ["-m" "typesense.import-collection"]}
   :dev   {:extra-deps  {io.github.clojure/tools.build {:mvn/version "0.9.6"}}}
