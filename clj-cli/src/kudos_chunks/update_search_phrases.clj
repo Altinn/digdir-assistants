@@ -43,6 +43,17 @@
        {:type "array"
         :items {:type "string"}}}}}}])
 
+
+(def env-vars
+  {:use-azure-openai-api (not= "false" (env-var "USE_AZURE_OPENAI_API"))
+   :azure-openai-model-name (env-var "AZURE_OPENAI_MODEL_NAME")
+   :azure-openai-deployment-name (env-var "AZURE_OPENAI_DEPLOYMENT_NAME")
+   :azure-openai-api-key (env-var "AZURE_OPENAI_API_KEY")
+   :azure-openai-api-endpoint (env-var "AZURE_OPENAI_API_ENDPOINT")
+   :azure-openai-api-version (env-var "AZURE_OPENAI_API_VERSION")
+
+   :openai-model-name (env-var "OPENAI_API_MODEL_NAME")})
+
 ;; Constants and configuration
 (def prompts
   {:original 
@@ -53,20 +64,20 @@
         "If the text is not comprehensible, just return an empty list.\n\nDocument:\n\n")
    :typicalqs "Generate a list of typical questions that a user might have, that can be answered by the following documentation article. Return only the list of questions as a JSON string array in a code block, do not include answers."})
 
-(defn retrieve-all-chunks [source-collection page page-size]
+(defn retrieve-all-chunks [source-collection page page-size sort-by]
   ;; (log/debug "Retrieving chunks from collection:" source-collection "page:" page "size:" page-size)
   (let [search-response (multi-search
                          {:collection source-collection
                           :query-by "chunk_id"
                           :q "*"
                           :include-fields "chunk_id,doc_num,chunk_index,content_markdown,markdown_checksum" 
-                          :sort-by "chunk_index:asc"
+                          :sort-by sort-by
                           :page page
                           :page-size page-size})]
     (if (:success search-response)
       (let [;;_ (log/debug "Chunk retrieval response:" search-response)
             results (get-in search-response [:hits])]
-        (log/debug "Retrieved" (count results) "chunks")
+        #_(log/debug "Retrieved" (count results) "chunks")
         results)
       (do
         (log/error "Failed to retrieve chunks:" search-response)
@@ -89,31 +100,38 @@
             (recur (inc retry-count))))))))
 
 (defn generate-search-phrases [prompt-name chunk]
-  (log/debug "Generating search phrases for chunk-id:" (:chunk_id chunk) 
+  #_(log/debug "Generating search phrases for chunk-id:" (:chunk_id chunk) 
              "with prompt:" prompt-name)
   (let [base-prompt (get prompts (keyword prompt-name))
         content (:content_markdown chunk)
-        use-azure-openai (= "true" (env-var "USE_AZURE_OPENAI_API"))]
+        ]
     (if (or (= "original" prompt-name) (= "keyword-search" prompt-name))
       (with-retries
         (fn []
           (let [response
-                (if use-azure-openai
+                (if (:use-azure-openai-api env-vars)
                   (openai/create-chat-completion
-                   {:model "gpt-4o"
-                    :deployment-id (env-var "AZURE_OPENAI_DEPLOYMENT_NAME")
+                   {
+                    :model (:azure-openai-model-name env-vars) 
+                    ;; :deployment-id (:azure-openai-deployment-name env-vars)
+                    ;; :api-version (:azure-openai-api-version env-vars)
                     :messages [{:role "system" :content "You are a helpful assistant. Reply with supplied JSON format."}
                                {:role "user" :content (str base-prompt content)}]
                     :tools search-results-tools
                     :tool_choice {:type "function"
                                   :function {:name "searchPhrases"}}
-                    :temperature 0.1
-                    :max_tokens nil}
-                   {:api-key (env-var "AZURE_OPENAI_API_KEY")
-                    :api-endpoint (env-var "AZURE_OPENAI_ENDPOINT")
-                    :impl :azure})
+                    :temperature 0.1 }
+                   {:api-key (:azure-openai-api-key env-vars)
+                    :api-endpoint (:azure-openai-api-endpoint env-vars) 
+                    ;; :deployment-id (:azure-openai-deployment-name env-vars)
+                    :api-version (:azure-openai-api-version env-vars)
+                    :impl :azure
+                    ;; :trace (fn [request response]
+                    ;;          (println "request:" request)
+                    ;;          (println "response" (:body response)))
+                    })
                   (openai/create-chat-completion
-                   {:model (env-var "OPENAI_API_MODEL_NAME")
+                   {:model (:openai-model-name env-vars)
                     :messages [{:role "system" :content "You are a helpful assistant. Reply with supplied JSON format."}
                                {:role "user" :content (str base-prompt content)}]
                     :tools search-results-tools
@@ -133,7 +151,7 @@
                                    (get-in [:function :arguments])
                                    json/parse-string
                                    (get "searchPhrases")))
-                ;; _ (log/debug "Generated search phrases:")
+                ;;  _ (log/debug "Generated search phrases:")
                 ;; _ (doseq [phrase search-phrases]
                 ;;     (log/debug "  -" phrase))
                 phrases {:search-phrases 
@@ -160,7 +178,7 @@
 (defn delete-existing-phrases [target-collection chunk-id existing-phrase-ids] 
   (let [ids (mapv :id existing-phrase-ids)]
     (when (seq ids)
-      (log/debug "Deleting existing phrases for chunk_id:" chunk-id)
+      #_(log/debug "Deleting existing phrases for chunk_id:" chunk-id)
       (ts/delete-documents! ts-config target-collection ids))))
 
 (defn store-search-phrases [target-collection chunk phrases prompt-name]
@@ -182,7 +200,7 @@
                    :checksum (:markdown_checksum chunk)}))
               (:search-phrases phrases))
         temp-file (str "./typesense_batch_" (:chunk_id chunk) "_" timestamp ".jsonl")] 
-    (log/debug "Uploading" (count phrases) "search phrases for chunk_id:" (:chunk_id chunk))
+    #_(log/debug "Uploading" (count phrases) "search phrases for chunk_id:" (:chunk_id chunk))
     
     ;; Write documents to temp file
     (with-open [w (io/writer temp-file)]
@@ -203,14 +221,16 @@
       (let [existing (get-existing-phrases target (:chunk_id chunk))
             existing-checksum (some-> existing first :checksum)
             current-checksum (:markdown_checksum chunk)]
-        (when (or (nil? existing-checksum)
-                  (not= existing-checksum current-checksum))
-          (when existing
-            (delete-existing-phrases target (:chunk_id chunk) existing))
-          (let [phrases (generate-search-phrases prompt-name chunk)]
-            (if (= 0 (count (:search-phrases phrases)))
-              (swap! stats-atom update :empties inc) 
-              (store-search-phrases target chunk phrases prompt-name))))
+        (if (or (nil? existing-checksum)
+                (not= existing-checksum current-checksum))
+          (do
+            (when existing
+              (delete-existing-phrases target (:chunk_id chunk) existing))
+            (let [phrases (generate-search-phrases prompt-name chunk)]
+              (if (= 0 (count (:search-phrases phrases)))
+                (swap! stats-atom update :empties inc) 
+                (store-search-phrases target chunk phrases prompt-name)))) 
+          (swap! stats-atom update :skipped inc))
         (swap! stats-atom update :successes inc))
       (catch Exception e
         (swap! stats-atom update :failures inc)
@@ -227,18 +247,14 @@
     (process-chunk target prompt-name chunk stats-atom)))
 
 (defn print-stats [stats page]
-  (let [{:keys [total-time chunks-processed successes failures empties]} stats
-        avg-time (if (pos? chunks-processed)
-                  (double (/ total-time chunks-processed))
-                  0)]
-    (log/info "=== Page" page "Statistics ===")
-    (log/info "Total chunks processed:" chunks-processed)
-    (log/info "Successful updates:" successes)
-    (log/info "Non-comprehensible chunks:" empties)
-    (log/info "Failed updates:" failures)
-    (log/info "Total processing time:" (format "%.2f sec" (/ total-time 1000.0)))
-    (log/info "Average time per chunk:" (format "%.2f ms" avg-time))
-    (log/info "=========================")))
+  (let [{:keys [total-time chunks-processed successes failures empties skipped]} stats]
+    (log/info "=== Page" page "/ total chunks:" chunks-processed 
+              "/ updated:" (- successes empties skipped) 
+              "/ skipped:" skipped
+              "/ non-comprehensible:" empties "failed:" failures
+              "/ time:" (format "%.2f sec" (/ total-time 1000.0))
+              "/ chunks/sec:" (format "%.2f" (/ (* chunks-processed 1000.0) total-time)))
+    ))
 
 (defn create-thread-pool [thread-count]
   (let [num-threads (min 10 (max 1 thread-count))]
@@ -254,10 +270,10 @@
 
 (defn distribute-work [chunks thread-count]
   (let [groups (->> chunks
-                    (group-by #(doc-num-modulo % thread-count))
+                    (group-by #(chunk-index-modulo % thread-count))
                     vals)]
-    (log/debug "Chunk distribution:"
-              (map #(map :chunk_index %) groups))
+    #_(log/debug "Chunk distribution:"
+              (map #(map :chunk_id %) groups))
     groups))
 
 (defn -main [& args]
@@ -275,7 +291,9 @@
         start-page (if-let [start (get opts-map "--start")]
                     (Integer/parseInt start)
                     1)
-        thread-pool (create-thread-pool thread-count)]
+        thread-pool (create-thread-pool thread-count)
+        prompt-name (or (get opts-map "--prompt") "default")
+        sort-by (or (get opts-map "--sort-by") "updated_at:desc")]
     (try
       (log/debug "Starting with options:" 
                 {:source source 
@@ -283,18 +301,20 @@
                  :threads thread-count 
                  :page-size page-size
                  :opts opts-map})
+      (log/debug "env-vars:" env-vars)
       (log/info "Processing collection:" target)
       
       (loop [page start-page]
-        (log/debug "Processing page:" page)
-        (when-let [chunks (retrieve-all-chunks source page page-size)]
+        ;; (log/debug "Processing page:" page)
+        (when-let [chunks (retrieve-all-chunks source page page-size sort-by)]
           (let [stats-atom (atom {:total-time 0
                                   :chunks-processed 0
                                   :successes 0
+                                  :skipped 0
                                   :failures 0
                                   :empties 0})
                 work-groups (distribute-work chunks thread-count)
-                _ (log/debug "Work groups:" (count work-groups))
+                ;; _ (log/debug "Work groups:" (count work-groups))
 
                 page-start-time (Instant/now)
                 futures (doall  ; Force immediate execution
