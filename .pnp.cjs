@@ -2071,7 +2071,7 @@ const RAW_RUNTIME_STATE =
           ["@instructor-ai/instructor", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:1.5.0"],\
           ["@types/openai", null],\
           ["@types/zod", null],\
-          ["openai", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:4.56.1"],\
+          ["openai", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:4.77.4"],\
           ["zod", "npm:3.23.8"],\
           ["zod-stream", "virtual:a2a2d3af62523d29a53525902fce1b5f24fa9b87a41a039f50ebe87c54285bdcb5f7991511e9d5eec2c7b6d1bbf3cf9d8b737e2fc24954ff7c4a6cc4329a4252#npm:1.0.3"],\
           ["zod-validation-error", "virtual:64e0da675fcaa641e6770272fdd4312b61bab61554cdbf392aee3654747b3269834e96da02f542a5bd29e5e8afff46fa12379d47190c15eb18f5bd198c780665#npm:2.1.0"]\
@@ -4384,9 +4384,9 @@ const RAW_RUNTIME_STATE =
           ["@instructor-ai/instructor", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:1.5.0"],\
           ["@types/node", "npm:22.5.1"],\
           ["commander", "npm:12.1.0"],\
-          ["groq-sdk", "npm:0.6.0"],\
+          ["groq-sdk", "npm:0.6.1"],\
           ["mysql2", "npm:3.11.4"],\
-          ["openai", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:4.56.1"],\
+          ["openai", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:4.77.4"],\
           ["prettier", "npm:3.3.3"],\
           ["rimraf", "npm:6.0.1"],\
           ["sha1", "npm:1.1.1"],\
@@ -7132,10 +7132,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["groq-sdk", [\
-      ["npm:0.6.0", {\
-        "packageLocation": "./.yarn/cache/groq-sdk-npm-0.6.0-3cf50e0871-8fc56a7f6a.zip/node_modules/groq-sdk/",\
+      ["npm:0.6.1", {\
+        "packageLocation": "./.yarn/cache/groq-sdk-npm-0.6.1-34fd6307bd-625bbd1ee8.zip/node_modules/groq-sdk/",\
         "packageDependencies": [\
-          ["groq-sdk", "npm:0.6.0"],\
+          ["groq-sdk", "npm:0.6.1"],\
           ["@types/node", "npm:18.19.64"],\
           ["@types/node-fetch", "npm:2.6.11"],\
           ["abort-controller", "npm:3.0.0"],\
@@ -9752,17 +9752,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["openai", [\
-      ["npm:4.56.1", {\
-        "packageLocation": "./.yarn/cache/openai-npm-4.56.1-cdffb018ae-862e3dd57c.zip/node_modules/openai/",\
-        "packageDependencies": [\
-          ["openai", "npm:4.56.1"]\
-        ],\
-        "linkType": "SOFT"\
-      }],\
       ["npm:4.71.1", {\
         "packageLocation": "./.yarn/cache/openai-npm-4.71.1-b5940d6401-468721223a.zip/node_modules/openai/",\
         "packageDependencies": [\
           ["openai", "npm:4.71.1"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["npm:4.77.4", {\
+        "packageLocation": "./.yarn/cache/openai-npm-4.77.4-4278da263b-cd63a98ce7.zip/node_modules/openai/",\
+        "packageDependencies": [\
+          ["openai", "npm:4.77.4"]\
         ],\
         "linkType": "SOFT"\
       }],\
@@ -9786,10 +9786,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:4.56.1", {\
-        "packageLocation": "./.yarn/__virtual__/openai-virtual-07cc703735/0/cache/openai-npm-4.56.1-cdffb018ae-862e3dd57c.zip/node_modules/openai/",\
+      ["virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:4.77.4", {\
+        "packageLocation": "./.yarn/__virtual__/openai-virtual-8b5a77b5c5/0/cache/openai-npm-4.77.4-4278da263b-cd63a98ce7.zip/node_modules/openai/",\
         "packageDependencies": [\
-          ["openai", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:4.56.1"],\
+          ["openai", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:4.77.4"],\
           ["@types/node", "npm:18.19.64"],\
           ["@types/node-fetch", "npm:2.6.11"],\
           ["@types/zod", null],\
@@ -13083,7 +13083,7 @@ const RAW_RUNTIME_STATE =
           ["zod-stream", "virtual:a2a2d3af62523d29a53525902fce1b5f24fa9b87a41a039f50ebe87c54285bdcb5f7991511e9d5eec2c7b6d1bbf3cf9d8b737e2fc24954ff7c4a6cc4329a4252#npm:1.0.3"],\
           ["@types/openai", null],\
           ["@types/zod", null],\
-          ["openai", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:4.56.1"],\
+          ["openai", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:4.77.4"],\
           ["schema-stream", "virtual:860df30692e2652168a35d04df8106bec950c4c5d6edd7f0799fdd18e7e3cfc6277a846f46628004652fcc2b59576ed31689b4bdcc365f5c5fc32bd042491fc9#npm:3.2.0"],\
           ["zod", "npm:3.23.8"],\
           ["zod-to-json-schema", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:3.23.5"]\

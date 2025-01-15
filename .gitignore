@@ -19,3 +19,5 @@ temp/
 clj-cli/chunkr_data
 clj-cli/source_pdfs
 clj-cli/typesense_chunks
+cli/data_files_ignored/
+clj-cli/pdf_inbox/

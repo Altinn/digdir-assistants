@@ -3466,7 +3466,7 @@ __metadata:
     commander: "npm:^12.1.0"
     groq-sdk: "npm:^0.6.0"
     mysql2: "npm:^3.10.2"
-    openai: "npm:^4.56.1"
+    openai: "npm:^4.77.4"
     prettier: "npm:^3.3.3"
     rimraf: "npm:^6.0.1"
     sha1: "npm:^1.1.1"
@@ -5940,8 +5940,8 @@ __metadata:
   linkType: hard
 
 "groq-sdk@npm:^0.6.0":
-  version: 0.6.0
-  resolution: "groq-sdk@npm:0.6.0"
+  version: 0.6.1
+  resolution: "groq-sdk@npm:0.6.1"
   dependencies:
     "@types/node": "npm:^18.11.18"
     "@types/node-fetch": "npm:^2.6.4"
@@ -5950,7 +5950,7 @@ __metadata:
     form-data-encoder: "npm:1.7.2"
     formdata-node: "npm:^4.3.2"
     node-fetch: "npm:^2.6.7"
-  checksum: 10c0/8fc56a7f6a567e8e6a5ef34037ef1cf281226f1f08bfc318d6cbc620696714904da36b6ef4b91b11b7cd1aaad04582a1c83fb455d6ad5d4d8e6ca4522dad1205
+  checksum: 10c0/625bbd1ee8bcbfa1f6d5666a5c58f7ebe9afa41ce6995f977b83eb3e0ea5b990834c851967ca401b96c11caae5c2d78bb6acf50dc46fd02d938091f01f434f64
   languageName: node
   linkType: hard
 
@@ -8271,28 +8271,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openai@npm:^4.56.1":
-  version: 4.56.1
-  resolution: "openai@npm:4.56.1"
-  dependencies:
-    "@types/node": "npm:^18.11.18"
-    "@types/node-fetch": "npm:^2.6.4"
-    abort-controller: "npm:^3.0.0"
-    agentkeepalive: "npm:^4.2.1"
-    form-data-encoder: "npm:1.7.2"
-    formdata-node: "npm:^4.3.2"
-    node-fetch: "npm:^2.6.7"
-  peerDependencies:
-    zod: ^3.23.8
-  peerDependenciesMeta:
-    zod:
-      optional: true
-  bin:
-    openai: bin/cli
-  checksum: 10c0/862e3dd57cf83c74ac1b428d5a223b26ef566ac9842ba9a55a39a1baf7cac9144244a606ce9262757d7e62aded7919890369f4d3f44ab26fe4d043dea5cadc82
-  languageName: node
-  linkType: hard
-
 "openai@npm:^4.71.1":
   version: 4.71.1
   resolution: "openai@npm:4.71.1"
@@ -8312,6 +8290,28 @@ __metadata:
   bin:
     openai: bin/cli
   checksum: 10c0/468721223a68ae775dd6d7d2e3f32f7aa1ffb6d3e7fcb91c3851e7aaff75d0bf40b322a418dbc24aef34b86267821891a71f839f4cfce1a3e5bbed2084326314
+  languageName: node
+  linkType: hard
+
+"openai@npm:^4.77.4":
+  version: 4.77.4
+  resolution: "openai@npm:4.77.4"
+  dependencies:
+    "@types/node": "npm:^18.11.18"
+    "@types/node-fetch": "npm:^2.6.4"
+    abort-controller: "npm:^3.0.0"
+    agentkeepalive: "npm:^4.2.1"
+    form-data-encoder: "npm:1.7.2"
+    formdata-node: "npm:^4.3.2"
+    node-fetch: "npm:^2.6.7"
+  peerDependencies:
+    zod: ^3.23.8
+  peerDependenciesMeta:
+    zod:
+      optional: true
+  bin:
+    openai: bin/cli
+  checksum: 10c0/cd63a98ce77fb528d12745962b66b229d0ec5243c19d2796933df540b0732a3c323c205575fcfa096ecfa8e39d84e058f8942c45b5655df571bece1d7ffa7301
   languageName: node
   linkType: hard
 
