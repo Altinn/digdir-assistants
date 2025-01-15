@@ -31,6 +31,15 @@
                                  )]
         (.write writer (str (json/generate-string updated-document) "\n"))))))
 
+(defn fixup-phrases-from-chunkr-test [input-file output-file]
+  (with-open [reader (io/reader input-file)
+              writer (io/writer output-file)]
+    (doseq [line (line-seq reader)]
+      (let [document (json/parse-string line true)
+            updated-document (-> document
+                                 (dissoc :url))]
+        (.write writer (str (json/generate-string updated-document) "\n"))))))
+
 
 (comment 
 
@@ -42,5 +51,10 @@
   (fixup-phrases-from-staging
    "STAGING_kudos-phrases_2024-09-03_export_20240909.jsonl"
    "STAGING_kudos-phrases_2024-09-03_export_20240909_fixed.jsonl")
+
+    (fixup-phrases-from-chunkr-test
+   "KUDOS_phrases_2024-09-27_chunkr_test_export_20250107.jsonl"
+   "KUDOS_phrases_2024-09-27_chunkr_test_export_20250107_fixed.jsonl")
+
 
   )

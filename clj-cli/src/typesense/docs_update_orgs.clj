@@ -50,11 +50,11 @@
 
 (comment
 
-  (def docs-collection "KUDOS_docs_2024-12-10")
+  (def docs-collection "KUDOS_docs_2025-01-08")
 ;; (def chunks-collection "KUDOS_chunks_2024-12-10")
 ;; (def files-collection-name "KUDOS_files_2024-12-10")
   
-  (update-doc-orgs docs-collection 100 10)
+  (update-doc-orgs docs-collection 100 50000)
 
   (def search-args {:collection docs-collection
                     :q "*"

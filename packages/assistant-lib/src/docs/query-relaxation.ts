@@ -1,15 +1,11 @@
 import Instructor from "@instructor-ai/instructor";
 import { z } from "zod";
-import {
-  // azure_client,
-  openaiClient,
-} from "../llm";
+import { openaiClient } from "../llm";
 import { scopedEnvVar } from "../general";
 
 const stage_name = "DOCS_QA_EXTRACT";
 const envVar = scopedEnvVar(stage_name);
 
-// const azureClient = azure_client();
 const openaiClientInstance = Instructor({
   client: openaiClient() as any,
   mode: "FUNCTIONS",

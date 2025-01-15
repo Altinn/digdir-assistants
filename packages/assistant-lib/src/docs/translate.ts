@@ -1,8 +1,7 @@
 import { ChatCompletionMessageParam } from "openai/resources";
 import { envVar } from "../general";
-import { azureOpenAI, openaiClient, chat_stream } from "../llm";
+import { openaiClient, chat_stream } from "../llm";
 
-// const azureLlm = azureOpenAI();
 const openaiLlm = openaiClient();
 
 export async function translate(
