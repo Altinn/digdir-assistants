@@ -1,6 +1,6 @@
 {
   "name": "@digdir/assistant-slack-app",
-  "packageManager": "yarn@4.4.1",
+  "packageManager": "yarn@4.6.0",
   "private": true,
   "version": "1.0.0",
   "description": "Slack app implementation of Altinn Assistant",
