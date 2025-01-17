@@ -22,6 +22,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@apify/consts@npm:^2.36.0":
+  version: 2.36.0
+  resolution: "@apify/consts@npm:2.36.0"
+  checksum: 10c0/49004de665590ca14e0115b38333c7141f43e45e696379535291f3bfecc448a088785810b4e9d037625ecaffe2ecebbcfb7adb3a3bfd2707533042bbb895d3ee
+  languageName: node
+  linkType: hard
+
 "@apify/datastructures@npm:^2.0.0":
   version: 2.0.2
   resolution: "@apify/datastructures@npm:2.0.2"
@@ -29,13 +36,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apify/log@npm:^2.4.0, @apify/log@npm:^2.5.5, @apify/log@npm:^2.5.9":
+"@apify/log@npm:^2.4.0, @apify/log@npm:^2.5.9":
   version: 2.5.9
   resolution: "@apify/log@npm:2.5.9"
   dependencies:
     "@apify/consts": "npm:^2.33.0"
     ansi-colors: "npm:^4.1.1"
   checksum: 10c0/b8bc2687b8de3790e800b9020ea9bd9e4a41f7ace0c621415b3379ed6c9f2b1881742515c13332b2bf4ca15be0ebdbc468ae613bd15d3580f431b1c84d084fb0
+  languageName: node
+  linkType: hard
+
+"@apify/log@npm:^2.5.12":
+  version: 2.5.12
+  resolution: "@apify/log@npm:2.5.12"
+  dependencies:
+    "@apify/consts": "npm:^2.36.0"
+    ansi-colors: "npm:^4.1.1"
+  checksum: 10c0/61a328a4c84062abe0de1ced1e36ca170c8dedd58c60d53f02e98690edc018f6b82edd50869bb73c524db6ed895f634367404928d838f98a60574da8bf53d73d
   languageName: node
   linkType: hard
 
@@ -1620,6 +1637,19 @@ __metadata:
     openai: ">=4.28.0"
     zod: ">=3.22.4"
   checksum: 10c0/287d5d40ef8fb7422fc9d8b38e027045d26213751c20f456beb19887314549d3b3bee28b86150c323eeaba7e1bec6348c5ce5113f9feb90c78af552236c2f390
+  languageName: node
+  linkType: hard
+
+"@instructor-ai/instructor@npm:1.6.0":
+  version: 1.6.0
+  resolution: "@instructor-ai/instructor@npm:1.6.0"
+  dependencies:
+    zod-stream: "npm:2.0.0"
+    zod-validation-error: "npm:^3.4.0"
+  peerDependencies:
+    openai: ">=4.58.0"
+    zod: ">=3.23.8"
+  checksum: 10c0/cc00f6fa23631e46839015328f3cbe7511b2c298d0c3fadcc842dbdd5f339e2c9ea8d5fc92984197178c8543cee16f5488333c4196b2b04236ddfad4a13b9086
   languageName: node
   linkType: hard
 
@@ -3391,8 +3421,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "assistant-crawler@workspace:services/crawler"
   dependencies:
-    "@apify/log": "npm:^2.5.5"
-    "@babel/runtime": "npm:^7.25.4"
+    "@apify/log": "npm:^2.5.12"
+    "@babel/runtime": "npm:^7.26.0"
     "@crawlee/browser": "npm:*"
     "@crawlee/core": "npm:*"
     "@crawlee/playwright": "npm:*"
@@ -3404,7 +3434,8 @@ __metadata:
     "@types/turndown": "npm:^5.0.5"
     commander: "npm:^12.1.0"
     crawlee: "npm:^3.11.2"
-    playwright: "npm:1.46.1"
+    openai: "npm:^4.79.0"
+    playwright: "npm:^1.49.1"
     prettier: "npm:^3.3.3"
     remeda: "npm:^2.2.1"
     rimraf: "npm:^6.0.1"
@@ -3414,6 +3445,7 @@ __metadata:
     turndown: "npm:^7.2.0"
     typescript: "npm:^5.5.4"
     typesense: "npm:^1.8.2"
+    zod: "npm:^3.24.1"
   languageName: unknown
   linkType: soft
 
@@ -3461,7 +3493,7 @@ __metadata:
   dependencies:
     "@babel/runtime": "npm:^7.25.4"
     "@digdir/assistant-lib": "npm:1.0.0"
-    "@instructor-ai/instructor": "npm:1.5.0"
+    "@instructor-ai/instructor": "npm:1.6.0"
     "@types/node": "npm:^22.5.1"
     commander: "npm:^12.1.0"
     groq-sdk: "npm:^0.6.0"
@@ -8315,6 +8347,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"openai@npm:^4.79.0":
+  version: 4.79.0
+  resolution: "openai@npm:4.79.0"
+  dependencies:
+    "@types/node": "npm:^18.11.18"
+    "@types/node-fetch": "npm:^2.6.4"
+    abort-controller: "npm:^3.0.0"
+    agentkeepalive: "npm:^4.2.1"
+    form-data-encoder: "npm:1.7.2"
+    formdata-node: "npm:^4.3.2"
+    node-fetch: "npm:^2.6.7"
+  peerDependencies:
+    ws: ^8.18.0
+    zod: ^3.23.8
+  peerDependenciesMeta:
+    ws:
+      optional: true
+    zod:
+      optional: true
+  bin:
+    openai: bin/cli
+  checksum: 10c0/6323607d3b906f843373ad099b3407f31f34d034a031db5917fdbe742dc1a893fcac81eece4f87bfe0564fe798400e7844fa9a2ca5578e5f1c7932394f30ddff
+  languageName: node
+  linkType: hard
+
 "optionator@npm:^0.9.3":
   version: 0.9.4
   resolution: "optionator@npm:0.9.4"
@@ -8689,6 +8746,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"playwright-core@npm:1.49.1":
+  version: 1.49.1
+  resolution: "playwright-core@npm:1.49.1"
+  bin:
+    playwright-core: cli.js
+  checksum: 10c0/990b619c75715cd98b2c10c1180a126e3a454b247063b8352bc67792fe01183ec07f31d30c8714c3768cefed12886d1d64ac06da701f2baafc2cad9b439e3919
+  languageName: node
+  linkType: hard
+
 "playwright@npm:1.46.1":
   version: 1.46.1
   resolution: "playwright@npm:1.46.1"
@@ -8701,6 +8767,21 @@ __metadata:
   bin:
     playwright: cli.js
   checksum: 10c0/2a328a2073313136192d74b48b981d9aeb1d4cc54926ed235f638c875f9de59c41370bb20bb2d8cf30126c52c6e25cc02db21ffafeb487c92c84c52c84846912
+  languageName: node
+  linkType: hard
+
+"playwright@npm:^1.49.1":
+  version: 1.49.1
+  resolution: "playwright@npm:1.49.1"
+  dependencies:
+    fsevents: "npm:2.3.2"
+    playwright-core: "npm:1.49.1"
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  bin:
+    playwright: cli.js
+  checksum: 10c0/2368762c898920d4a0a5788b153dead45f9c36c3f5cf4d2af5228d0b8ea65823e3bbe998877950a2b9bb23a211e4633996f854c6188769dc81a25543ac818ab5
   languageName: node
   linkType: hard
 
@@ -9562,6 +9643,17 @@ __metadata:
   peerDependencies:
     zod: ^3.23.3
   checksum: 10c0/4f0ee9ec67fe1b4f7f1536511bcd8c52d6a3e9a85130c50a99d9a66eae79b0a766b0307af6fdf4f5594d4707f8cc41a56bc2610dad38f8f82883138016cb6f4d
+  languageName: node
+  linkType: hard
+
+"schema-stream@npm:^3.2.0":
+  version: 3.2.2
+  resolution: "schema-stream@npm:3.2.2"
+  dependencies:
+    ramda: "npm:^0.29.0"
+  peerDependencies:
+    zod: ^3.23.3
+  checksum: 10c0/173835d1abada82a2830adef2cc5e6d81eed4b1544c407b38fb9e750ccd2468a7db63fc57e606d51e81f0b4e69a2e708582da26a1790979d6e23a0a792baac2b
   languageName: node
   linkType: hard
 
@@ -11169,12 +11261,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"zod-stream@npm:2.0.0":
+  version: 2.0.0
+  resolution: "zod-stream@npm:2.0.0"
+  dependencies:
+    schema-stream: "npm:^3.2.0"
+    zod-to-json-schema: "npm:^3.23.1"
+  peerDependencies:
+    openai: ">=4.24.1"
+    zod: ^3.23.3
+  checksum: 10c0/0fac824e9ff2ef1877deffc81c7f434989b294b329846d5a966e5daf0606f62d1553afd7ecf002520d0e15a201947b74273b79b7696934aebec8048d82f511ec
+  languageName: node
+  linkType: hard
+
 "zod-to-json-schema@npm:^3.22.3, zod-to-json-schema@npm:^3.23.5":
   version: 3.23.5
   resolution: "zod-to-json-schema@npm:3.23.5"
   peerDependencies:
     zod: ^3.23.3
   checksum: 10c0/bf50455f446c96b9a161476347ebab6e3bcae7fdf1376ce0b74248e79db733590164476dac2fc481a921868f705fefdcafd223a98203a700b3f01ba1cda6aa90
+  languageName: node
+  linkType: hard
+
+"zod-to-json-schema@npm:^3.23.1":
+  version: 3.24.1
+  resolution: "zod-to-json-schema@npm:3.24.1"
+  peerDependencies:
+    zod: ^3.24.1
+  checksum: 10c0/dd4e72085003e41a3f532bd00061f27041418a4eb176aa6ce33042db08d141bd37707017ee9117d97738ae3f22fc3e1404ea44e6354634ac5da79d7d3173b4ee
   languageName: node
   linkType: hard
 
@@ -11187,10 +11301,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"zod-validation-error@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "zod-validation-error@npm:3.4.0"
+  peerDependencies:
+    zod: ^3.18.0
+  checksum: 10c0/aaadb0e65c834aacb12fa088663d52d9f4224b5fe6958f09b039f4ab74145fda381c8a7d470bfddf7ddd9bbb5fdfbb52739cd66958ce6d388c256a44094d1fba
+  languageName: node
+  linkType: hard
+
 "zod@npm:^3.23.8":
   version: 3.23.8
   resolution: "zod@npm:3.23.8"
   checksum: 10c0/8f14c87d6b1b53c944c25ce7a28616896319d95bc46a9660fe441adc0ed0a81253b02b5abdaeffedbeb23bdd25a0bf1c29d2c12dd919aef6447652dd295e3e69
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.24.1":
+  version: 3.24.1
+  resolution: "zod@npm:3.24.1"
+  checksum: 10c0/0223d21dbaa15d8928fe0da3b54696391d8e3e1e2d0283a1a070b5980a1dbba945ce631c2d1eccc088fdbad0f2dfa40155590bf83732d3ac4fcca2cc9237591b
   languageName: node
   linkType: hard
 

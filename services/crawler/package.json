@@ -6,8 +6,8 @@
   "type": "module",
   "description": "Altinn Assistant crawler",
   "dependencies": {
-    "@apify/log": "^2.5.5",
-    "@babel/runtime": "^7.25.4",
+    "@apify/log": "^2.5.12",
+    "@babel/runtime": "^7.26.0",
     "@crawlee/browser": "*",
     "@crawlee/core": "*",
     "@crawlee/playwright": "*",
@@ -15,13 +15,15 @@
     "@digdir/assistant-lib": "1.0.0",
     "commander": "^12.1.0",
     "crawlee": "^3.11.2",
-    "playwright": "1.46.1",
+    "openai": "^4.79.0",
+    "playwright": "^1.49.1",
     "prettier": "^3.3.3",
     "remeda": "^2.2.1",
     "sha1": "^1.1.1",
     "tiktoken": "^1.0.16",
     "turndown": "^7.2.0",
-    "typesense": "^1.8.2"
+    "typesense": "^1.8.2",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@playwright/test": "1.46.1",

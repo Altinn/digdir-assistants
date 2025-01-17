@@ -21,7 +21,7 @@
   "dependencies": {
     "@babel/runtime": "^7.25.4",
     "@digdir/assistant-lib": "1.0.0",
-    "@instructor-ai/instructor": "1.5.0",
+    "@instructor-ai/instructor": "1.6.0",
     "@types/node": "^22.5.1",
     "commander": "^12.1.0",
     "groq-sdk": "^0.6.0",
