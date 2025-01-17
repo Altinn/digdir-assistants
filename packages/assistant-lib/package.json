@@ -23,12 +23,12 @@
     "dataclass": "^2.1.1",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
-    "openai": "^4.71.1",
+    "openai": "^4.79.0",
     "prettier": "^3.3.3",
     "remeda": "^2.17.0",
     "tiktoken": "^1.0.17",
     "typesense": "^1.8.2",
-    "zod": "^3.23.8",
+    "zod": "^3.24.1",
     "zod-to-json-schema": "^3.23.5"
   },
   "devDependencies": {
