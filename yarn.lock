@@ -1003,7 +1003,7 @@ __metadata:
   dependencies:
     "@azure/openai": "npm:^1.0.0-beta.12"
     "@babel/runtime": "npm:^7.26.0"
-    "@instructor-ai/instructor": "npm:1.5.0"
+    "@instructor-ai/instructor": "npm:1.6.0"
     "@supabase/supabase-js": "npm:^2.46.1"
     "@types/js-yaml": "npm:^4.0.9"
     "@types/node": "npm:^22.9.0"
@@ -1030,7 +1030,7 @@ __metadata:
     "@babel/runtime": "npm:^7.26.0"
     "@bdb-dd/mack": "https://github.com/bdb-dd/mack.git#14338e54e63d85151e9065d28b25caa778b9a73a"
     "@digdir/assistant-lib": "npm:1.0.0"
-    "@instructor-ai/instructor": "npm:1.5.0"
+    "@instructor-ai/instructor": "npm:1.6.0"
     "@slack/bolt": "npm:^3.21.1"
     "@slack/web-api": "npm:^6.12.1"
     "@supabase/supabase-js": "npm:^2.46.1"
@@ -1712,19 +1712,6 @@ __metadata:
   version: 1.0.7
   resolution: "@inquirer/figures@npm:1.0.7"
   checksum: 10c0/d7b4cfcd38dd43d1ac79da52c4478aa89145207004a471aa2083856f1d9b99adef45563f09d66c09d6457b09200fcf784527804b70ad3bd517cbc5e11142c2df
-  languageName: node
-  linkType: hard
-
-"@instructor-ai/instructor@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@instructor-ai/instructor@npm:1.5.0"
-  dependencies:
-    zod-stream: "npm:1.0.3"
-    zod-validation-error: "npm:^2.1.0"
-  peerDependencies:
-    openai: ">=4.28.0"
-    zod: ">=3.22.4"
-  checksum: 10c0/287d5d40ef8fb7422fc9d8b38e027045d26213751c20f456beb19887314549d3b3bee28b86150c323eeaba7e1bec6348c5ce5113f9feb90c78af552236c2f390
   languageName: node
   linkType: hard
 
@@ -9655,17 +9642,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"schema-stream@npm:^3.1.0":
-  version: 3.2.0
-  resolution: "schema-stream@npm:3.2.0"
-  dependencies:
-    ramda: "npm:^0.29.0"
-  peerDependencies:
-    zod: ^3.23.3
-  checksum: 10c0/4f0ee9ec67fe1b4f7f1536511bcd8c52d6a3e9a85130c50a99d9a66eae79b0a766b0307af6fdf4f5594d4707f8cc41a56bc2610dad38f8f82883138016cb6f4d
-  languageName: node
-  linkType: hard
-
 "schema-stream@npm:^3.2.0":
   version: 3.2.2
   resolution: "schema-stream@npm:3.2.2"
@@ -11268,19 +11244,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod-stream@npm:1.0.3":
-  version: 1.0.3
-  resolution: "zod-stream@npm:1.0.3"
-  dependencies:
-    schema-stream: "npm:^3.1.0"
-    zod-to-json-schema: "npm:^3.22.3"
-  peerDependencies:
-    openai: ">=4.24.1"
-    zod: ">=3.22.4"
-  checksum: 10c0/d888f25537343da1783d7ecdfb328298201a12ad42c8b27adfe7d6cd83cb32fcb570abe684c879b705d4cc3e4ba131955a4fc4c863090ffa9261e99f72ecddcd
-  languageName: node
-  linkType: hard
-
 "zod-stream@npm:2.0.0":
   version: 2.0.0
   resolution: "zod-stream@npm:2.0.0"
@@ -11294,15 +11257,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod-to-json-schema@npm:^3.22.3, zod-to-json-schema@npm:^3.23.5":
-  version: 3.23.5
-  resolution: "zod-to-json-schema@npm:3.23.5"
-  peerDependencies:
-    zod: ^3.23.3
-  checksum: 10c0/bf50455f446c96b9a161476347ebab6e3bcae7fdf1376ce0b74248e79db733590164476dac2fc481a921868f705fefdcafd223a98203a700b3f01ba1cda6aa90
-  languageName: node
-  linkType: hard
-
 "zod-to-json-schema@npm:^3.23.1":
   version: 3.24.1
   resolution: "zod-to-json-schema@npm:3.24.1"
@@ -11312,12 +11266,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod-validation-error@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "zod-validation-error@npm:2.1.0"
+"zod-to-json-schema@npm:^3.23.5":
+  version: 3.23.5
+  resolution: "zod-to-json-schema@npm:3.23.5"
   peerDependencies:
-    zod: ^3.18.0
-  checksum: 10c0/e8e8a0af64092dfb3388d759bf10fb7cf5358bc1bdb365771b8ac1944b1fb014ccbc8e60fbd69627961ea5873c5694e5c3fe730341c9842312fbb91661a1f451
+    zod: ^3.23.3
+  checksum: 10c0/bf50455f446c96b9a161476347ebab6e3bcae7fdf1376ce0b74248e79db733590164476dac2fc481a921868f705fefdcafd223a98203a700b3f01ba1cda6aa90
   languageName: node
   linkType: hard
 

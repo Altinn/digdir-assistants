@@ -1248,7 +1248,7 @@ const RAW_RUNTIME_STATE =
           ["@digdir/assistant-lib", "workspace:packages/assistant-lib"],\
           ["@azure/openai", "npm:1.0.0-beta.13"],\
           ["@babel/runtime", "npm:7.26.0"],\
-          ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.5.0"],\
+          ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.6.0"],\
           ["@supabase/supabase-js", "npm:2.46.1"],\
           ["@types/js-yaml", "npm:4.0.9"],\
           ["@types/node", "npm:22.9.0"],\
@@ -1277,7 +1277,7 @@ const RAW_RUNTIME_STATE =
           ["@babel/runtime", "npm:7.26.0"],\
           ["@bdb-dd/mack", "https://github.com/bdb-dd/mack.git#commit=14338e54e63d85151e9065d28b25caa778b9a73a"],\
           ["@digdir/assistant-lib", "workspace:packages/assistant-lib"],\
-          ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.5.0"],\
+          ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.6.0"],\
           ["@slack/bolt", "npm:3.21.1"],\
           ["@slack/web-api", "npm:6.12.1"],\
           ["@supabase/supabase-js", "npm:2.46.1"],\
@@ -2139,13 +2139,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@instructor-ai/instructor", [\
-      ["npm:1.5.0", {\
-        "packageLocation": "./.yarn/cache/@instructor-ai-instructor-npm-1.5.0-3fccfeb5ad-287d5d40ef.zip/node_modules/@instructor-ai/instructor/",\
-        "packageDependencies": [\
-          ["@instructor-ai/instructor", "npm:1.5.0"]\
-        ],\
-        "linkType": "SOFT"\
-      }],\
       ["npm:1.6.0", {\
         "packageLocation": "./.yarn/cache/@instructor-ai-instructor-npm-1.6.0-6ad75d4fc5-cc00f6fa23.zip/node_modules/@instructor-ai/instructor/",\
         "packageDependencies": [\
@@ -2153,35 +2146,16 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.5.0", {\
-        "packageLocation": "./.yarn/__virtual__/@instructor-ai-instructor-virtual-64e0da675f/0/cache/@instructor-ai-instructor-npm-1.5.0-3fccfeb5ad-287d5d40ef.zip/node_modules/@instructor-ai/instructor/",\
+      ["virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.6.0", {\
+        "packageLocation": "./.yarn/__virtual__/@instructor-ai-instructor-virtual-31c3085ff5/0/cache/@instructor-ai-instructor-npm-1.6.0-6ad75d4fc5-cc00f6fa23.zip/node_modules/@instructor-ai/instructor/",\
         "packageDependencies": [\
-          ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.5.0"],\
+          ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.6.0"],\
           ["@types/openai", null],\
           ["@types/zod", null],\
           ["openai", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:4.79.0"],\
           ["zod", "npm:3.24.1"],\
-          ["zod-stream", "virtual:64e0da675fcaa641e6770272fdd4312b61bab61554cdbf392aee3654747b3269834e96da02f542a5bd29e5e8afff46fa12379d47190c15eb18f5bd198c780665#npm:1.0.3"],\
-          ["zod-validation-error", "virtual:64e0da675fcaa641e6770272fdd4312b61bab61554cdbf392aee3654747b3269834e96da02f542a5bd29e5e8afff46fa12379d47190c15eb18f5bd198c780665#npm:2.1.0"]\
-        ],\
-        "packagePeers": [\
-          "@types/openai",\
-          "@types/zod",\
-          "openai",\
-          "zod"\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:1.6.0", {\
-        "packageLocation": "./.yarn/__virtual__/@instructor-ai-instructor-virtual-4fd0ad6a00/0/cache/@instructor-ai-instructor-npm-1.6.0-6ad75d4fc5-cc00f6fa23.zip/node_modules/@instructor-ai/instructor/",\
-        "packageDependencies": [\
-          ["@instructor-ai/instructor", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:1.6.0"],\
-          ["@types/openai", null],\
-          ["@types/zod", null],\
-          ["openai", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:4.79.0"],\
-          ["zod", "npm:3.24.1"],\
-          ["zod-stream", "virtual:4fd0ad6a006f4ed974080ad654d9efb41aefef4772c609e9ccb593518a5d563f9e92ef3347b9b092a6530101cf5aac4c657f407714fe86e7cc71961b76877385#npm:2.0.0"],\
-          ["zod-validation-error", "virtual:4fd0ad6a006f4ed974080ad654d9efb41aefef4772c609e9ccb593518a5d563f9e92ef3347b9b092a6530101cf5aac4c657f407714fe86e7cc71961b76877385#npm:3.4.0"]\
+          ["zod-stream", "virtual:31c3085ff520c88730021cff16b550ca3bde2295b11e090da1c63566d388295ad5e3889613c1db7c330a111947c2de3f0d7df6dbffd2a11beaef3f71b897e09d#npm:2.0.0"],\
+          ["zod-validation-error", "virtual:31c3085ff520c88730021cff16b550ca3bde2295b11e090da1c63566d388295ad5e3889613c1db7c330a111947c2de3f0d7df6dbffd2a11beaef3f71b897e09d#npm:3.4.0"]\
         ],\
         "packagePeers": [\
           "@types/openai",\
@@ -4490,7 +4464,7 @@ const RAW_RUNTIME_STATE =
           ["assistants-cli", "workspace:cli"],\
           ["@babel/runtime", "npm:7.26.0"],\
           ["@digdir/assistant-lib", "workspace:packages/assistant-lib"],\
-          ["@instructor-ai/instructor", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:1.6.0"],\
+          ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.6.0"],\
           ["@types/node", "npm:22.5.1"],\
           ["commander", "npm:12.1.0"],\
           ["groq-sdk", "npm:0.6.0"],\
@@ -11276,13 +11250,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["schema-stream", [\
-      ["npm:3.2.0", {\
-        "packageLocation": "./.yarn/cache/schema-stream-npm-3.2.0-9efccfddf4-4f0ee9ec67.zip/node_modules/schema-stream/",\
-        "packageDependencies": [\
-          ["schema-stream", "npm:3.2.0"]\
-        ],\
-        "linkType": "SOFT"\
-      }],\
       ["npm:3.2.2", {\
         "packageLocation": "./.yarn/cache/schema-stream-npm-3.2.2-8953700636-173835d1ab.zip/node_modules/schema-stream/",\
         "packageDependencies": [\
@@ -11290,24 +11257,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:860df30692e2652168a35d04df8106bec950c4c5d6edd7f0799fdd18e7e3cfc6277a846f46628004652fcc2b59576ed31689b4bdcc365f5c5fc32bd042491fc9#npm:3.2.0", {\
-        "packageLocation": "./.yarn/__virtual__/schema-stream-virtual-1a1e6aac94/0/cache/schema-stream-npm-3.2.0-9efccfddf4-4f0ee9ec67.zip/node_modules/schema-stream/",\
+      ["virtual:62b90b9519b65693dea3c2b01253c5698c792e22cf712f6af8a10bc51f88f7fed7228398cbd9a464d835cbef836bbad4812dd4b2d2145e22cecee0f451b85d9f#npm:3.2.2", {\
+        "packageLocation": "./.yarn/__virtual__/schema-stream-virtual-7f2c3b69de/0/cache/schema-stream-npm-3.2.2-8953700636-173835d1ab.zip/node_modules/schema-stream/",\
         "packageDependencies": [\
-          ["schema-stream", "virtual:860df30692e2652168a35d04df8106bec950c4c5d6edd7f0799fdd18e7e3cfc6277a846f46628004652fcc2b59576ed31689b4bdcc365f5c5fc32bd042491fc9#npm:3.2.0"],\
-          ["@types/zod", null],\
-          ["ramda", "npm:0.29.1"],\
-          ["zod", "npm:3.24.1"]\
-        ],\
-        "packagePeers": [\
-          "@types/zod",\
-          "zod"\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["virtual:d5a153089bda762f617dc4e2482d7ecb775d69120e32f4daa9a9a87f25993cca20e0de7184a962a761caea5a4aef1445b348595f7e29e201b7771ad5b2aa0b3f#npm:3.2.2", {\
-        "packageLocation": "./.yarn/__virtual__/schema-stream-virtual-a5199a017c/0/cache/schema-stream-npm-3.2.2-8953700636-173835d1ab.zip/node_modules/schema-stream/",\
-        "packageDependencies": [\
-          ["schema-stream", "virtual:d5a153089bda762f617dc4e2482d7ecb775d69120e32f4daa9a9a87f25993cca20e0de7184a962a761caea5a4aef1445b348595f7e29e201b7771ad5b2aa0b3f#npm:3.2.2"],\
+          ["schema-stream", "virtual:62b90b9519b65693dea3c2b01253c5698c792e22cf712f6af8a10bc51f88f7fed7228398cbd9a464d835cbef836bbad4812dd4b2d2145e22cecee0f451b85d9f#npm:3.2.2"],\
           ["@types/zod", null],\
           ["ramda", "npm:0.29.1"],\
           ["zod", "npm:3.24.1"]\
@@ -13143,13 +13096,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["zod-stream", [\
-      ["npm:1.0.3", {\
-        "packageLocation": "./.yarn/cache/zod-stream-npm-1.0.3-37f896bd5c-d888f25537.zip/node_modules/zod-stream/",\
-        "packageDependencies": [\
-          ["zod-stream", "npm:1.0.3"]\
-        ],\
-        "linkType": "SOFT"\
-      }],\
       ["npm:2.0.0", {\
         "packageLocation": "./.yarn/cache/zod-stream-npm-2.0.0-8148798d00-0fac824e9f.zip/node_modules/zod-stream/",\
         "packageDependencies": [\
@@ -13157,35 +13103,16 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:4fd0ad6a006f4ed974080ad654d9efb41aefef4772c609e9ccb593518a5d563f9e92ef3347b9b092a6530101cf5aac4c657f407714fe86e7cc71961b76877385#npm:2.0.0", {\
-        "packageLocation": "./.yarn/__virtual__/zod-stream-virtual-d5a153089b/0/cache/zod-stream-npm-2.0.0-8148798d00-0fac824e9f.zip/node_modules/zod-stream/",\
+      ["virtual:31c3085ff520c88730021cff16b550ca3bde2295b11e090da1c63566d388295ad5e3889613c1db7c330a111947c2de3f0d7df6dbffd2a11beaef3f71b897e09d#npm:2.0.0", {\
+        "packageLocation": "./.yarn/__virtual__/zod-stream-virtual-62b90b9519/0/cache/zod-stream-npm-2.0.0-8148798d00-0fac824e9f.zip/node_modules/zod-stream/",\
         "packageDependencies": [\
-          ["zod-stream", "virtual:4fd0ad6a006f4ed974080ad654d9efb41aefef4772c609e9ccb593518a5d563f9e92ef3347b9b092a6530101cf5aac4c657f407714fe86e7cc71961b76877385#npm:2.0.0"],\
+          ["zod-stream", "virtual:31c3085ff520c88730021cff16b550ca3bde2295b11e090da1c63566d388295ad5e3889613c1db7c330a111947c2de3f0d7df6dbffd2a11beaef3f71b897e09d#npm:2.0.0"],\
           ["@types/openai", null],\
           ["@types/zod", null],\
           ["openai", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:4.79.0"],\
-          ["schema-stream", "virtual:d5a153089bda762f617dc4e2482d7ecb775d69120e32f4daa9a9a87f25993cca20e0de7184a962a761caea5a4aef1445b348595f7e29e201b7771ad5b2aa0b3f#npm:3.2.2"],\
+          ["schema-stream", "virtual:62b90b9519b65693dea3c2b01253c5698c792e22cf712f6af8a10bc51f88f7fed7228398cbd9a464d835cbef836bbad4812dd4b2d2145e22cecee0f451b85d9f#npm:3.2.2"],\
           ["zod", "npm:3.24.1"],\
-          ["zod-to-json-schema", "virtual:d5a153089bda762f617dc4e2482d7ecb775d69120e32f4daa9a9a87f25993cca20e0de7184a962a761caea5a4aef1445b348595f7e29e201b7771ad5b2aa0b3f#npm:3.24.1"]\
-        ],\
-        "packagePeers": [\
-          "@types/openai",\
-          "@types/zod",\
-          "openai",\
-          "zod"\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["virtual:64e0da675fcaa641e6770272fdd4312b61bab61554cdbf392aee3654747b3269834e96da02f542a5bd29e5e8afff46fa12379d47190c15eb18f5bd198c780665#npm:1.0.3", {\
-        "packageLocation": "./.yarn/__virtual__/zod-stream-virtual-860df30692/0/cache/zod-stream-npm-1.0.3-37f896bd5c-d888f25537.zip/node_modules/zod-stream/",\
-        "packageDependencies": [\
-          ["zod-stream", "virtual:64e0da675fcaa641e6770272fdd4312b61bab61554cdbf392aee3654747b3269834e96da02f542a5bd29e5e8afff46fa12379d47190c15eb18f5bd198c780665#npm:1.0.3"],\
-          ["@types/openai", null],\
-          ["@types/zod", null],\
-          ["openai", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:4.79.0"],\
-          ["schema-stream", "virtual:860df30692e2652168a35d04df8106bec950c4c5d6edd7f0799fdd18e7e3cfc6277a846f46628004652fcc2b59576ed31689b4bdcc365f5c5fc32bd042491fc9#npm:3.2.0"],\
-          ["zod", "npm:3.24.1"],\
-          ["zod-to-json-schema", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:3.23.5"]\
+          ["zod-to-json-schema", "virtual:62b90b9519b65693dea3c2b01253c5698c792e22cf712f6af8a10bc51f88f7fed7228398cbd9a464d835cbef836bbad4812dd4b2d2145e22cecee0f451b85d9f#npm:3.24.1"]\
         ],\
         "packagePeers": [\
           "@types/openai",\
@@ -13211,6 +13138,19 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
+      ["virtual:62b90b9519b65693dea3c2b01253c5698c792e22cf712f6af8a10bc51f88f7fed7228398cbd9a464d835cbef836bbad4812dd4b2d2145e22cecee0f451b85d9f#npm:3.24.1", {\
+        "packageLocation": "./.yarn/__virtual__/zod-to-json-schema-virtual-ac9e812d25/0/cache/zod-to-json-schema-npm-3.24.1-5292a81488-dd4e720850.zip/node_modules/zod-to-json-schema/",\
+        "packageDependencies": [\
+          ["zod-to-json-schema", "virtual:62b90b9519b65693dea3c2b01253c5698c792e22cf712f6af8a10bc51f88f7fed7228398cbd9a464d835cbef836bbad4812dd4b2d2145e22cecee0f451b85d9f#npm:3.24.1"],\
+          ["@types/zod", null],\
+          ["zod", "npm:3.24.1"]\
+        ],\
+        "packagePeers": [\
+          "@types/zod",\
+          "zod"\
+        ],\
+        "linkType": "HARD"\
+      }],\
       ["virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:3.23.5", {\
         "packageLocation": "./.yarn/__virtual__/zod-to-json-schema-virtual-9d3cc677ed/0/cache/zod-to-json-schema-npm-3.23.5-40129d6cc7-bf50455f44.zip/node_modules/zod-to-json-schema/",\
         "packageDependencies": [\
@@ -13223,29 +13163,9 @@ const RAW_RUNTIME_STATE =
           "zod"\
         ],\
         "linkType": "HARD"\
-      }],\
-      ["virtual:d5a153089bda762f617dc4e2482d7ecb775d69120e32f4daa9a9a87f25993cca20e0de7184a962a761caea5a4aef1445b348595f7e29e201b7771ad5b2aa0b3f#npm:3.24.1", {\
-        "packageLocation": "./.yarn/__virtual__/zod-to-json-schema-virtual-121b4435f2/0/cache/zod-to-json-schema-npm-3.24.1-5292a81488-dd4e720850.zip/node_modules/zod-to-json-schema/",\
-        "packageDependencies": [\
-          ["zod-to-json-schema", "virtual:d5a153089bda762f617dc4e2482d7ecb775d69120e32f4daa9a9a87f25993cca20e0de7184a962a761caea5a4aef1445b348595f7e29e201b7771ad5b2aa0b3f#npm:3.24.1"],\
-          ["@types/zod", null],\
-          ["zod", "npm:3.24.1"]\
-        ],\
-        "packagePeers": [\
-          "@types/zod",\
-          "zod"\
-        ],\
-        "linkType": "HARD"\
       }]\
     ]],\
     ["zod-validation-error", [\
-      ["npm:2.1.0", {\
-        "packageLocation": "./.yarn/cache/zod-validation-error-npm-2.1.0-220f5f6e0b-e8e8a0af64.zip/node_modules/zod-validation-error/",\
-        "packageDependencies": [\
-          ["zod-validation-error", "npm:2.1.0"]\
-        ],\
-        "linkType": "SOFT"\
-      }],\
       ["npm:3.4.0", {\
         "packageLocation": "./.yarn/cache/zod-validation-error-npm-3.4.0-1c97ee8445-aaadb0e65c.zip/node_modules/zod-validation-error/",\
         "packageDependencies": [\
@@ -13253,23 +13173,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:4fd0ad6a006f4ed974080ad654d9efb41aefef4772c609e9ccb593518a5d563f9e92ef3347b9b092a6530101cf5aac4c657f407714fe86e7cc71961b76877385#npm:3.4.0", {\
-        "packageLocation": "./.yarn/__virtual__/zod-validation-error-virtual-fd0156b1aa/0/cache/zod-validation-error-npm-3.4.0-1c97ee8445-aaadb0e65c.zip/node_modules/zod-validation-error/",\
+      ["virtual:31c3085ff520c88730021cff16b550ca3bde2295b11e090da1c63566d388295ad5e3889613c1db7c330a111947c2de3f0d7df6dbffd2a11beaef3f71b897e09d#npm:3.4.0", {\
+        "packageLocation": "./.yarn/__virtual__/zod-validation-error-virtual-de5d8fe45f/0/cache/zod-validation-error-npm-3.4.0-1c97ee8445-aaadb0e65c.zip/node_modules/zod-validation-error/",\
         "packageDependencies": [\
-          ["zod-validation-error", "virtual:4fd0ad6a006f4ed974080ad654d9efb41aefef4772c609e9ccb593518a5d563f9e92ef3347b9b092a6530101cf5aac4c657f407714fe86e7cc71961b76877385#npm:3.4.0"],\
-          ["@types/zod", null],\
-          ["zod", "npm:3.24.1"]\
-        ],\
-        "packagePeers": [\
-          "@types/zod",\
-          "zod"\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["virtual:64e0da675fcaa641e6770272fdd4312b61bab61554cdbf392aee3654747b3269834e96da02f542a5bd29e5e8afff46fa12379d47190c15eb18f5bd198c780665#npm:2.1.0", {\
-        "packageLocation": "./.yarn/__virtual__/zod-validation-error-virtual-64cf526b17/0/cache/zod-validation-error-npm-2.1.0-220f5f6e0b-e8e8a0af64.zip/node_modules/zod-validation-error/",\
-        "packageDependencies": [\
-          ["zod-validation-error", "virtual:64e0da675fcaa641e6770272fdd4312b61bab61554cdbf392aee3654747b3269834e96da02f542a5bd29e5e8afff46fa12379d47190c15eb18f5bd198c780665#npm:2.1.0"],\
+          ["zod-validation-error", "virtual:31c3085ff520c88730021cff16b550ca3bde2295b11e090da1c63566d388295ad5e3889613c1db7c330a111947c2de3f0d7df6dbffd2a11beaef3f71b897e09d#npm:3.4.0"],\
           ["@types/zod", null],\
           ["zod", "npm:3.24.1"]\
         ],\

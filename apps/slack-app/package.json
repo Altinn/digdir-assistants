@@ -20,7 +20,7 @@
     "@babel/runtime": "^7.26.0",
     "@bdb-dd/mack": "https://github.com/bdb-dd/mack.git#14338e54e63d85151e9065d28b25caa778b9a73a",
     "@digdir/assistant-lib": "1.0.0",
-    "@instructor-ai/instructor": "1.5.0",
+    "@instructor-ai/instructor": "1.6.0",
     "@slack/bolt": "^3.21.1",
     "@slack/web-api": "^6.12.1",
     "@supabase/supabase-js": "^2.46.1",
