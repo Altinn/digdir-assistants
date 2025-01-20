@@ -1299,6 +1299,7 @@ const RAW_RUNTIME_STATE =
           ["lodash", "npm:4.17.21"],\
           ["nodemon", "npm:3.1.7"],\
           ["openai", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:4.79.0"],\
+          ["path-to-regexp", "npm:0.1.12"],\
           ["prettier", "npm:3.3.3"],\
           ["ramda", "npm:0.30.1"],\
           ["remeda", "npm:2.17.0"],\
