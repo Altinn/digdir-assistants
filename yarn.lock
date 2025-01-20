@@ -3604,7 +3604,7 @@ __metadata:
     "@instructor-ai/instructor": "npm:1.6.0"
     "@types/node": "npm:^22.5.1"
     commander: "npm:^12.1.0"
-    groq-sdk: "npm:^0.6.0"
+    groq-sdk: "npm:^0.12.0"
     mysql2: "npm:^3.10.2"
     openai: "npm:^4.79.0"
     prettier: "npm:^3.3.3"
@@ -6022,9 +6022,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"groq-sdk@npm:^0.6.0":
-  version: 0.6.0
-  resolution: "groq-sdk@npm:0.6.0"
+"groq-sdk@npm:^0.12.0":
+  version: 0.12.0
+  resolution: "groq-sdk@npm:0.12.0"
   dependencies:
     "@types/node": "npm:^18.11.18"
     "@types/node-fetch": "npm:^2.6.4"
@@ -6033,7 +6033,7 @@ __metadata:
     form-data-encoder: "npm:1.7.2"
     formdata-node: "npm:^4.3.2"
     node-fetch: "npm:^2.6.7"
-  checksum: 10c0/8fc56a7f6a567e8e6a5ef34037ef1cf281226f1f08bfc318d6cbc620696714904da36b6ef4b91b11b7cd1aaad04582a1c83fb455d6ad5d4d8e6ca4522dad1205
+  checksum: 10c0/6943e43490cfdfa5849a583c60900c4cc5b7eda6d8af50c5d0bbf8afca9048a09650e31e6f2091e1107ec1afd650ffcdeb55d320691803a08190ab303c41188d
   languageName: node
   linkType: hard
 
