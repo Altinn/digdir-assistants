@@ -1299,7 +1299,7 @@ const RAW_RUNTIME_STATE =
           ["lodash", "npm:4.17.21"],\
           ["nodemon", "npm:3.1.7"],\
           ["openai", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:4.79.0"],\
-          ["path-to-regexp", "npm:0.1.12"],\
+          ["path-to-regexp", "npm:6.3.0"],\
           ["prettier", "npm:3.3.3"],\
           ["ramda", "npm:0.30.1"],\
           ["remeda", "npm:2.17.0"],\
@@ -10084,6 +10084,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/path-to-regexp-npm-6.2.2-0bf7f6805c-4b60852d35.zip/node_modules/path-to-regexp/",\
         "packageDependencies": [\
           ["path-to-regexp", "npm:6.2.2"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:6.3.0", {\
+        "packageLocation": "./.yarn/cache/path-to-regexp-npm-6.3.0-ee2cdde576-73b67f4638.zip/node_modules/path-to-regexp/",\
+        "packageDependencies": [\
+          ["path-to-regexp", "npm:6.3.0"]\
         ],\
         "linkType": "HARD"\
       }]\
