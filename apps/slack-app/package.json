@@ -26,9 +26,10 @@
     "@supabase/supabase-js": "^2.46.1",
     "@types/ramda": "^0.30.2",
     "axios": "^1.7.7",
+    "body-parser": "^1.20.3",
     "dataclass": "^2.1.1",
     "es-abstract": "^1.23.3",
-    "express": "^5.0.0",
+    "express": "^4.21.2",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "openai": "^4.79.0",
@@ -40,6 +41,7 @@
     "zod-to-json-schema": "^3.23.5"
   },
   "devDependencies": {
+    "@types/body-parser": "^1",
     "@types/express": "^5.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.9.0",
