@@ -16,6 +16,5 @@ Be sure to set the `TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION` env var with the na
 
 `yarn run:contentAnalysis`
 Required env vars:
-GROQ_API_KEY
 TYPESENSE_DOCS_COLLECTION
 
