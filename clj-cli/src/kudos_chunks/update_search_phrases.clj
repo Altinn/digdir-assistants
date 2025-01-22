@@ -4,7 +4,7 @@
             [malli.util :as mu]
             [typesense.search :refer [multi-search]]
             [typesense.import-collection :refer [upsert-collection]]
-            [typesense.api-config :refer [typesense-config ts-config]]
+            [typesense.api-config :refer [ts-config]]
             [typesense.client :as ts]
             [taoensso.timbre :as log]
             [cheshire.core :as json]
