@@ -1,6 +1,6 @@
 {
   "name": "assistants-cli",
-  "packageManager": "yarn@4.4.1",
+  "packageManager": "yarn@4.6.0",
   "version": "1.0.0",
   "description": "CLI interface to run tasks and configure Altinn Assistant",
   "main": "main.ts",
@@ -12,7 +12,6 @@
     "build": "cd ../ && yarn build:assistant-lib && cd cli/ && tsc -p .",
     "codestyle:check": "prettier src/ --check",
     "codestyle:fix": "prettier src/ --write",
-    "generateSearchPhrases": "tsx src/functions/generateSearchPhrases.ts",
     "kudos:importDocuments": "tsx src/functions/kudos/importKudosDocuments.ts",
     "kudos:importFiles": "tsx src/functions/kudos/importKudosFiles.ts",
     "kudos:importOwners": "tsx src/functions/kudos/importKudosOwners.ts",
@@ -24,14 +23,13 @@
     "listAllDocs": "tsx src/functions/listAllDocs.ts"
   },
   "dependencies": {
-    "@babel/runtime": "^7.25.4",
+    "@babel/runtime": "^7.26.0",
     "@digdir/assistant-lib": "1.0.0",
-    "@instructor-ai/instructor": "1.5.0",
+    "@instructor-ai/instructor": "1.6.0",
     "@types/node": "^22.5.1",
     "commander": "^12.1.0",
-    "groq-sdk": "^0.6.0",
     "mysql2": "^3.10.2",
-    "openai": "^4.77.4",
+    "openai": "^4.79.0",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
     "sha1": "^1.1.1",
@@ -39,7 +37,7 @@
     "tsx": "^4.15.7",
     "typescript": "^5.5.4",
     "typesense": "^1.8.2",
-    "zod": "^3.23.8"
+    "zod": "^3.24.1"
   },
   "prettier": {
     "endOfLine": "auto",

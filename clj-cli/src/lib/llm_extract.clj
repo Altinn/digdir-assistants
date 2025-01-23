@@ -25,15 +25,27 @@
   Provide only the YEAR, or \"Unknown\" if this part of the document does not clearly indicate the YEAR.
    "))
 
+(defn- attempt-extract [messages attempts]
+  (if (> attempts 5)
+    "" ;; return nil instead of throwing
+    #_(throw (ex-info "Failed to extract year after 5 attempts"
+                    {:attempts attempts}))
+    (try
+      (let [response (local-chat-completion messages)]
+        (-> response
+            :choices
+            first
+            :message
+            :content))
+      (catch Exception e
+        (println "Attempt" attempts "failed:" (.getMessage e))
+        (Thread/sleep (* attempts 1000))
+        (attempt-extract messages (inc attempts))))))
+
 (defn extract-relevant-year [text]
   (let [messages [{:role "system" :content extract-year-sys-prompt}
-                  {:role "user" :content text}]
-        response (local-chat-completion messages)]
-    (-> response
-        :choices
-        first
-        :message
-        :content)))
+                  {:role "user" :content text}]]
+    (attempt-extract messages 1)))
 
 (defn get-doc-by-num [docs-collection doc-num]
   (let [result (ts/search ts-config docs-collection
@@ -105,30 +117,21 @@
          errors 0]
     (if-let [docs (seq (get-doc-titles docs-collection batch-size page-num))]
       (let [results (for [doc docs
-                         :let [doc-num (:doc_num doc)
-                               year-from-chunks (get-year-from-chunks chunks-collection doc-num)
-                               year-from-doc (get-year-from-doc docs-collection doc-num)]]
-                     (try
-                       (if (= (:year year-from-chunks) (:year year-from-doc))
-                         (do
-                           (println "Doc:" doc-num "Year:" (:year year-from-doc))
-                           (when-let [response (ts/update-documents! ts-config docs-collection
-                                                                 [{:id doc-num
-                                                                   :source_published_year (:year year-from-doc)}])]
-                             (if (:success (first response))
-                               {:status :updated}
-                               {:status :error
-                                :error (get-in response [0 :error])}))
-                           {:status :updated})
-                         (do
-                           (println "Doc:" doc-num 
-                                  "Year from title:" (:year year-from-doc)
-                                  "Year from chunks:" (:year year-from-chunks)
-                                  "- title and chunks do not match")
-                           {:status :mismatch}))
-                       (catch Exception e
-                         {:status :error
-                          :error (.getMessage e)})))
+                          :let [doc-num (:doc_num doc)
+                                {:keys [year title]} (get-year-from-doc docs-collection doc-num)]]
+                      (try
+                        (println "doc-num:" doc-num " / year:" year "/ title: " title)
+                        (when-let [response (ts/update-documents! ts-config docs-collection
+                                                                  [{:id doc-num
+                                                                    :source_published_year year}])]
+                          (if (:success (first response))
+                            {:status :updated}
+                            {:status :error
+                             :error (get-in response [0 :error])}))
+                        {:status :updated}
+                        (catch Exception e
+                          {:status :error
+                           :error (.getMessage e)})))
              new-errors (count (filter #(= :error (:status %)) results))
              new-updated (count (filter #(= :updated (:status %)) results))
              new-mismatches (count (filter #(= :mismatch (:status %)) results))]
@@ -167,7 +170,7 @@
   
   ;; Process all documents and compare years from titles and chunks
   (compare-years-from-titles-and-chunks
-   docs-collection chunks-collection :start-page 3 :stop-on-error true)
+   docs-collection chunks-collection :start-page 1)
 
   (get-doc-titles docs-collection 10 2)
 

@@ -1,17 +1,16 @@
-import Groq from 'groq-sdk';
 import { Client, Errors } from 'typesense';
 
 const { config } = require('../lib/config');
 import * as typesenseSearch from '../lib/typesense-search';
+import { openaiClient } from '@digdir/assistant-lib';
 import { z } from 'zod';
 import sha1 from 'sha1';
 import { get_encoding } from 'tiktoken';
 
 const cfg = config();
 
-const groqClient = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+const openAI = openaiClient();
+
 
 const encoding = get_encoding('cl100k_base');
 
@@ -149,8 +148,8 @@ async function analyzeContent(searchHit: SearchHit): Promise<SearchHit> {
 
       const content = searchHit.content_markdown.slice(0, 2000) || '';
 
-      //  1. call Groq API to categorize content language
-      let queryResult = await groqClient.chat.completions.create({
+      //  1. call OpenAI API to categorize content language
+      let queryResult = await openAI.chat.completions.create({
         model: 'gemma-7b-it',
         response_format: { type: 'json_object' },
         temperature: 0.1,

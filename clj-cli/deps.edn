@@ -1,14 +1,14 @@
 {:paths ["src"]
- :deps {org.clojure/clojure {:mvn/version "1.11.1"}
-        clj-http/clj-http {:mvn/version "3.12.3"}
-        cheshire/cheshire {:mvn/version "5.11.0"}
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        clj-http/clj-http {:mvn/version "3.13.0"}
+        cheshire/cheshire {:mvn/version "5.13.0"}
+        org.clojure/tools.cli {:mvn/version "1.1.230"}
         com.taoensso/timbre {:mvn/version "6.6.1"}
         io.github.runeanielsen/typesense-clj {:mvn/version "0.1.146"}
-        org.clojure/tools.cli {:mvn/version "1.0.214"}
         net.clojars.wkok/openai-clojure {:mvn/version "0.22.0"} 
         metosin/malli {:mvn/version "0.17.0"}}
  :aliases
  {:import-collection {:main-opts ["-m" "typesense.import-collection"]}
-  :dev   {:extra-deps  {io.github.clojure/tools.build {:mvn/version "0.9.6"}}}
-  :build {:deps {io.github.clojure/tools.build {:mvn/version "v0.9.6"}}
+  :dev   {:extra-deps  {io.github.clojure/tools.build {:mvn/version "0.10.6"}}}
+  :build {:deps {io.github.clojure/tools.build {:mvn/version "v0.10.6"}}
           :ns-default build}}}

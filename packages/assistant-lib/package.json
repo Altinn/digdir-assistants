@@ -1,6 +1,6 @@
 {
   "name": "@digdir/assistant-lib",
-  "packageManager": "yarn@4.4.1",
+  "packageManager": "yarn@4.6.0",
   "private": true,
   "version": "1.0.0",
   "description": "Core assistant library",
@@ -15,7 +15,7 @@
   "dependencies": {
     "@azure/openai": "^1.0.0-beta.12",
     "@babel/runtime": "^7.26.0",
-    "@instructor-ai/instructor": "1.5.0",
+    "@instructor-ai/instructor": "1.6.0",
     "@supabase/supabase-js": "^2.46.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.9.0",
@@ -23,12 +23,12 @@
     "dataclass": "^2.1.1",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
-    "openai": "^4.71.1",
+    "openai": "^4.79.0",
     "prettier": "^3.3.3",
     "remeda": "^2.17.0",
     "tiktoken": "^1.0.17",
     "typesense": "^1.8.2",
-    "zod": "^3.23.8",
+    "zod": "^3.24.1",
     "zod-to-json-schema": "^3.23.5"
   },
   "devDependencies": {

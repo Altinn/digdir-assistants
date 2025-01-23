@@ -23,6 +23,5 @@ If you have not imported the entire KUDOS dataset, you can safely ignore respons
 
 `yarn contentAnalysis`
 Required env vars:
-GROQ_API_KEY
 TYPESENSE_DOCS_COLLECTION
 

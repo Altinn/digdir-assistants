@@ -1,5 +1,3 @@
-import Groq from 'groq-sdk';
-
 import { SearchPhraseEntry } from '../lib/typesense-search';
 import { SearchResponse } from 'typesense/lib/Typesense/Documents';
 import { MultiSearchResponse } from 'typesense/lib/Typesense/MultiSearch';
@@ -17,10 +15,6 @@ import sha1 from 'sha1';
 const cfg = config();
 
 const openAI = openaiClient();
-
-const groqClient = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
 
 const openaiClientInstance = Instructor({
   client: openAI as any,
@@ -57,7 +51,6 @@ Document:
 
 `;
 
-// for use as system prompt in JSON mode with llama3-8b on Groq
 const typicalQsSysPrompt = `Generate a list of typical questions that a user might have, that can be answered by the following documentation article. Return only the list of questions as a JSON string array in a code block, do not include answers.`;
 
 async function main() {
@@ -429,58 +422,6 @@ async function generateSearchPhrases(
         }
       }
     }
-  } else if (prompt == 'typicalqs') {
-    while (true) {
-      try {
-        let queryResult = await groqClient.chat.completions.create({
-          model: 'llama3-8b-8192',
-          //response_format: { type: "json_object" },
-          temperature: 0.6,
-          messages: [
-            { role: 'system', content: typicalQsSysPrompt },
-            { role: 'user', content: searchHit.contentMarkdown.slice(0, 7000) },
-          ],
-        });
-        if (queryResult && queryResult.choices && queryResult.choices.length > 0) {
-          // use
-
-          const response = queryResult?.choices[0]?.message?.content || '';
-          console.log(`Groq response:\n${response}`);
-
-          const jsonExtracted = extractCodeBlockContents(response);
-          console.log(`JSON extracted:\n${jsonExtracted}`);
-
-          const typicalQsList = JSON.parse(jsonExtracted);
-
-          const extractedValues = typicalQsList.flatMap((item) => {
-            if (typeof item === 'object') {
-              return Object.values(item);
-            }
-            return item;
-          });
-          console.log(`parsed json:\n${JSON.stringify(extractedValues)}`);
-
-          const mapped = extractedValues
-            .filter((item) => typeof item === 'string')
-            .map((item) => ({ searchPhrase: item }));
-
-          return { searchPhrases: mapped };
-        } else {
-          throw new Error('invalid response from groq');
-        }
-      } catch (e) {
-        console.error(
-          `Exception occurred while generating search phrases for url: ${searchHit.url || ''
-          }\n Error: ${e}`,
-        );
-        if (retryCount < 10) {
-          retryCount++;
-          await new Promise((resolve) => setTimeout(resolve, 5000));
-          continue;
-        } else {
-          return { searchPhrases: [] };
-        }
-      }
-    }
-  } else throw new Error(`unknown prompt name \'${prompt}\'`);
+  } 
+  else throw new Error(`unknown prompt name \'${prompt}\'`);
 }
