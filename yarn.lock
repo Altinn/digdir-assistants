@@ -1883,19 +1883,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/icons-material@npm:^5.15.21":
-  version: 5.16.7
-  resolution: "@mui/icons-material@npm:5.16.7"
+"@mui/icons-material@npm:^6.0.0":
+  version: 6.4.1
+  resolution: "@mui/icons-material@npm:6.4.1"
   dependencies:
-    "@babel/runtime": "npm:^7.23.9"
+    "@babel/runtime": "npm:^7.26.0"
   peerDependencies:
-    "@mui/material": ^5.0.0
-    "@types/react": ^17.0.0 || ^18.0.0
-    react: ^17.0.0 || ^18.0.0
+    "@mui/material": ^6.4.1
+    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/49bab1754334798acaf93187d27200cf90d7c50b6a019531594aeac9e5ced9168281fec70bb040792dc86c8bc0d3bf9a876f22cfbf86ad07941ca6bc6c564921
+  checksum: 10c0/f551aea11f0c3a6ff0336333e1cf28b69d7965e5984643067e5f8563eabf1434dee910c9b4beb530f785f191b0ec14520d9c41fd8ee6649f4f8d26f831f02ba8
   languageName: node
   linkType: hard
 
@@ -3567,7 +3567,7 @@ __metadata:
     "@fortawesome/fontawesome-svg-core": "npm:^6.6.0"
     "@fortawesome/free-solid-svg-icons": "npm:^6.6.0"
     "@fortawesome/react-fontawesome": "npm:^0.2.2"
-    "@mui/icons-material": "npm:^5.15.21"
+    "@mui/icons-material": "npm:^6.0.0"
     "@mui/lab": "npm:^5.0.0-alpha.170"
     "@mui/material": "npm:^5.15.21"
     "@mui/system": "npm:^5.15.20"

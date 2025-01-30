@@ -2361,18 +2361,18 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@mui/icons-material", [\
-      ["npm:5.16.7", {\
-        "packageLocation": "./.yarn/cache/@mui-icons-material-npm-5.16.7-3ba3ef0f30-49bab17543.zip/node_modules/@mui/icons-material/",\
+      ["npm:6.4.1", {\
+        "packageLocation": "./.yarn/cache/@mui-icons-material-npm-6.4.1-cc8353d439-f551aea11f.zip/node_modules/@mui/icons-material/",\
         "packageDependencies": [\
-          ["@mui/icons-material", "npm:5.16.7"]\
+          ["@mui/icons-material", "npm:6.4.1"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.16.7", {\
-        "packageLocation": "./.yarn/__virtual__/@mui-icons-material-virtual-b2deca21aa/0/cache/@mui-icons-material-npm-5.16.7-3ba3ef0f30-49bab17543.zip/node_modules/@mui/icons-material/",\
+      ["virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:6.4.1", {\
+        "packageLocation": "./.yarn/__virtual__/@mui-icons-material-virtual-a9bbb8f55d/0/cache/@mui-icons-material-npm-6.4.1-cc8353d439-f551aea11f.zip/node_modules/@mui/icons-material/",\
         "packageDependencies": [\
-          ["@mui/icons-material", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.16.7"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@mui/icons-material", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:6.4.1"],\
+          ["@babel/runtime", "npm:7.26.0"],\
           ["@mui/material", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.16.7"],\
           ["@types/mui__material", null],\
           ["@types/react", "npm:18.3.12"],\
@@ -4473,7 +4473,7 @@ const RAW_RUNTIME_STATE =
           ["@fortawesome/fontawesome-svg-core", "npm:6.6.0"],\
           ["@fortawesome/free-solid-svg-icons", "npm:6.6.0"],\
           ["@fortawesome/react-fontawesome", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:0.2.2"],\
-          ["@mui/icons-material", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.16.7"],\
+          ["@mui/icons-material", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:6.4.1"],\
           ["@mui/lab", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.0.0-alpha.173"],\
           ["@mui/material", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.16.7"],\
           ["@mui/system", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.16.7"],\
