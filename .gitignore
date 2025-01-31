@@ -21,3 +21,4 @@ clj-cli/source_pdfs/
 clj-cli/typesense_chunks/
 clj-cli/chunkr_data/
 clj-cli/pdf_inbox/
+clj-cli/typesense_import_*.jsonl
