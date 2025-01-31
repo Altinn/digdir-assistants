@@ -162,19 +162,14 @@
           (println "Skipping first" skip "documents"))
         (when (not-empty key-field)
           (println "Using key field:" key-field))
-        (let [next-output-file (atom (str "." "/typesense_import_filtered_temp.jsonl"))] 
+        (let [next-output-file (atom "./typesense_import_filtered_temp.jsonl")]
           (filter-documents input-file @next-output-file field value take skip)
           (when (not-empty key-field)
             (let [next-input-file @next-output-file
-                  _ (reset! next-output-file (str "." "/typesense_import_exists.jsonl"))]
+                  _ (reset! next-output-file "./typesense_import_exists.jsonl")]
               (prn "Only inserting documents that match in parent collection.")
               (filter-existing-documents collection-name key-field next-input-file @next-output-file 100)))
-          (let [imported-data (upsert-collection collection-name @next-output-file 100 nil)
-                parsed-data (json/parse-string imported-data true)
-                code-counts (frequencies (map :code parsed-data))]
-            (println "Import result:" parsed-data)
-            (println "Summary of :code counts:" code-counts)
-            #_(io/delete-file temp-file))
+          (upsert-collection collection-name @next-output-file 100 nil)
           ;;
           )))))
 
@@ -220,6 +215,11 @@
    "DEV_kudos-phrases_2024-09-09"
    "STAGING_kudos-phrases_2024-09-03_ready-to-import.jsonl"
    5000 nil)
+  
+  (upsert-collection
+   "KUDOS_phrases_2025-01-10_test4"
+   "/Volumes/models/kudos_backup/snapshot_2025-01-10/KUDOS_phrases_2025-01-10_test4_export_20250116.jsonl"
+   5000 2)
 
 
 

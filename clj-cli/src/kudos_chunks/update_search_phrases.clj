@@ -292,7 +292,6 @@
                     (Integer/parseInt start)
                     1)
         thread-pool (create-thread-pool thread-count)
-        prompt-name (or (get opts-map "--prompt") "default")
         sort-by (or (get opts-map "--sort-by") "updated_at:desc")]
     (try
       (log/debug "Starting with options:" 
