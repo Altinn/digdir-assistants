@@ -113,13 +113,23 @@
             (with-open [wtr (io/writer temp-file :encoding "UTF-8")] 
               (doseq [line batch]
                 (.write wtr (str line "\n"))))
-          ;; Import the batch
-            (let [response
+            (let [batch-size (count batch)
+                  start-time (System/currentTimeMillis)
+                  file-size (/ (.length (io/file temp-file)) 1024.0) ;; Size in KB
+                  response
                   (:body
                    (http/post url
                               {:headers {"X-TYPESENSE-API-KEY" (:api-key typesense-config)
                                          "Content-Type" "application/jsonl"}
-                               :body (slurp temp-file)}))]
+                               :body (slurp temp-file)}))
+                  end-time (System/currentTimeMillis)
+                  time-taken (/ (- end-time start-time) 1000.0)] ;; Time in seconds
+              (log/info (format "Batch %d: Uploaded %d documents (%.2f KB) in %.2f seconds (%.2f docs/sec)"
+                              @batch-counter
+                              batch-size
+                              file-size
+                              time-taken
+                              (/ batch-size time-taken)))
               ;; Parse and log any errors in the response
               (let [response-items (str/split-lines response)]
                 (doseq [[idx [item input]] (map-indexed vector (map vector response-items batch))]
@@ -153,6 +163,7 @@
       :else
       (let [[collection-name input-file] arguments
             {:keys [field value take skip key-field]} options] ;; Added key-field to options
+        (println "Server host node:" (get-in typesense-config [:nodes 0 :host]))
         (println "Importing documents into collection:" collection-name)
         (when (and field value)
           (println "Applying filter:" field "=" value))
@@ -162,16 +173,19 @@
           (println "Skipping first" skip "documents"))
         (when (not-empty key-field)
           (println "Using key field:" key-field))
-        (let [next-output-file (atom "./typesense_import_filtered_temp.jsonl")]
-          (filter-documents input-file @next-output-file field value take skip)
-          (when (not-empty key-field)
-            (let [next-input-file @next-output-file
-                  _ (reset! next-output-file "./typesense_import_exists.jsonl")]
-              (prn "Only inserting documents that match in parent collection.")
-              (filter-existing-documents collection-name key-field next-input-file @next-output-file 100)))
-          (upsert-collection collection-name @next-output-file 100 nil)
-          ;;
-          )))))
+        (let [needs-filtering (or (and field value) (not-empty key-field))]
+          (if needs-filtering
+            ;; Apply filtering if needed
+            (let [next-output-file (atom "./typesense_import_filtered_temp.jsonl")]
+              (filter-documents input-file @next-output-file field value take skip)
+              (when (not-empty key-field)
+                (let [next-input-file @next-output-file
+                      _ (reset! next-output-file "./typesense_import_exists.jsonl")]
+                  (prn "Only inserting documents that match in parent collection.")
+                  (filter-existing-documents collection-name key-field next-input-file @next-output-file 100)))
+              (upsert-collection collection-name @next-output-file 10 nil))
+            ;; No filtering needed, use input file directly
+            (upsert-collection collection-name input-file 5000 nil)))))))
 
 (comment
 
