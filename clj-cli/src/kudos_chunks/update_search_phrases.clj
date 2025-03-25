@@ -288,8 +288,8 @@
                       (Integer/parseInt threads)
                       1)
         page-size (* 10 thread-count)  ; Increased page size to account for threads
-        start-page (if-let [start (get opts-map "--start")]
-                    (Integer/parseInt start)
+        start-page (if-let [page (get opts-map "--page")]
+                    (Integer/parseInt page)
                     1)
         thread-pool (create-thread-pool thread-count)
         sort-by (or (get opts-map "--sort-by") "updated_at:desc")]

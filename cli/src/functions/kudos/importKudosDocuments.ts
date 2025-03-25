@@ -138,13 +138,6 @@ const kudosDocTypesenseSchema: CollectionCreateSchema = {
       "type": "string"
     },
     {
-      "name": "source_published_year",
-      "facet": true,
-      "sort": true,
-      "optional": true,
-      "type": "string"
-    },
-    {
       "name": "source_created_at",
       "optional": true,
       "sort": true,
@@ -232,6 +225,26 @@ const kudosDocTypesenseSchema: CollectionCreateSchema = {
       "name": "owner_long",
       "optional": true,
       "type": "string"
+    },
+    {
+      "name": "source_published_year",
+      "facet": true,
+      "sort": true,
+      "optional": true,
+      "type": "string"
+    },
+    {
+      "facet": true,
+      "index": true,
+      "infix": false,
+      "locale": "",
+      "name": "concerns_years",
+      "optional": true,
+      "sort": false,
+      "stem": false,
+      "stem_dictionary": "",
+      "store": true,
+      "type": "string[]"
     }
   ]
 };
@@ -282,10 +295,10 @@ const kudosChunkTypesenseSchema = (
   docsCollectionName: string,
 ): CollectionCreateSchema => {
   return {
-    name: docsCollectionName.replace('docs', 'phrases'),
+    name: docsCollectionName.replace('docs', 'chunks'),
     "fields": [
       {
-        "facet": false,
+        "facet": true,
         "index": true,
         "infix": false,
         "locale": "",
@@ -297,13 +310,14 @@ const kudosChunkTypesenseSchema = (
         "type": "string"
       },
       {
-        "facet": false,
+        "facet": true,
         "index": true,
         "infix": false,
         "locale": "",
         "name": "doc_num",
         "optional": false,
         "reference": docsCollectionName + ".doc_num",
+        "async_reference": true,
         "sort": false,
         "stem": false,
         "store": true,
@@ -434,6 +448,96 @@ const kudosChunkTypesenseSchema = (
   }
 };
 
+
+const KudosFileSchema = z.object({
+  file_id: z.string(),
+  doc_num: z.string(),
+  kudos_url: z.string(),
+  size: z.number(),
+  chunkr_status: z.string().optional()
+});
+type KudosFile = z.infer<typeof KudosFileSchema>;
+
+
+const kudosFileTypesenseSchema = (
+  docsCollectionName: string,
+): CollectionCreateSchema => {
+  return {
+    name: docsCollectionName.replace('docs', 'files'),
+    "default_sorting_field": "doc_num",
+    "enable_nested_fields": false,
+    "symbols_to_index": [],
+    "token_separators": [],
+    "fields": [
+      {
+        "facet": true,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "file_id",
+        "optional": false,
+        "sort": false,
+        "stem": false,
+        "stem_dictionary": "",
+        "store": true,
+        "type": "string"
+      },
+      {
+        "facet": true,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "doc_num",
+        "optional": false,
+        "sort": true,
+        "stem": false,
+        "stem_dictionary": "",
+        "store": true,
+        "type": "string"
+      },
+      {
+        "facet": false,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "kudos_url",
+        "optional": false,
+        "sort": false,
+        "stem": false,
+        "stem_dictionary": "",
+        "store": true,
+        "type": "string"
+      },
+      {
+        "facet": false,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "size",
+        "optional": false,
+        "sort": true,
+        "stem": false,
+        "stem_dictionary": "",
+        "store": true,
+        "type": "int64"
+      },
+      {
+        "facet": true,
+        "index": true,
+        "infix": false,
+        "locale": "",
+        "name": "chunkr_status",
+        "optional": true,
+        "sort": true,
+        "stem": false,
+        "stem_dictionary": "",
+        "store": true,
+        "type": "string"
+      }
+    ],
+  };
+}
+
 const cfg = config();
 const encoding = get_encoding('cl100k_base');
 
@@ -455,7 +559,9 @@ async function main() {
     .requiredOption('--dbname <string>', 'database name', '')
     .requiredOption('-c, --collection <string>', 'typesense collection name for documents (not alias name)', '')
     .option('--chunks <string>', 'typesense collection name for document chunks (not alias name)', '')
+    .option('--files <string>', 'typesense collection name for document files (not alias name)', '')
     .option('--importchunks', 'import chunks from Kudos DB')
+    .option('--importfiles', 'import files from Kudos DB')
     .option('--firstpage <number>', 'page number to start on (1-based)', '1')
     .option('--pagesize <number>', 'page size', '10')
     .option('--pages <number>', 'number of pages to import', '1')
@@ -466,6 +572,7 @@ async function main() {
   const opts = program.opts();
   let docsCollectionName = opts.collection;
   let chunksCollectionName = opts.chunks;
+  let filesCollectionName = opts.files;
   let docCollectionVerified = false;
 
   const typesenseClient = new Client(cfg.TYPESENSE_CONFIG);
@@ -476,6 +583,12 @@ async function main() {
   }
   const chunkCollectionFound =
     await typesenseSearch.lookupCollectionByNameExact(chunksCollectionName);
+    
+  if (!filesCollectionName) {
+    filesCollectionName = docsCollectionName.replace('docs', 'files');
+  }
+  const fileCollectionFound =
+    await typesenseSearch.lookupCollectionByNameExact(filesCollectionName);
 
   if (!opts.dryrun) {
     if (opts.n) {
@@ -501,26 +614,45 @@ async function main() {
           }
         }
       }
-      if (opts.importchunks) {
-        if (chunkCollectionFound) {
-          console.error(`Chunck collection '${chunksCollectionName}' already exists, aborting.`);
-          return;
-        } else {
-          // create new collection
-          try {
-            await typesenseClient.collections(chunksCollectionName).retrieve();
-          } catch (error) {
-            if (error instanceof Errors.ObjectNotFound) {
-              console.log('Creating new collection:', chunksCollectionName);
-              let chunkSchema = kudosChunkTypesenseSchema(docsCollectionName);
-              await typesenseClient.collections().create(chunkSchema);
-              console.log(`Kudos chunk collection ${chunksCollectionName} created successfully.`);
-            } else {
-              throw error;
-            }
+
+      if (chunkCollectionFound) {
+        console.error(`Chunk collection '${chunksCollectionName}' already exists, aborting.`);
+        return;
+      } else {
+        // create new collection
+        try {
+          await typesenseClient.collections(chunksCollectionName).retrieve();
+        } catch (error) {
+          if (error instanceof Errors.ObjectNotFound) {
+            console.log('Creating new collection:', chunksCollectionName);
+            let chunkSchema = kudosChunkTypesenseSchema(docsCollectionName);
+            await typesenseClient.collections().create(chunkSchema);
+            console.log(`Kudos chunk collection ${chunksCollectionName} created successfully.`);
+          } else {
+            throw error;
           }
         }
       }
+
+      if (fileCollectionFound) {
+        console.error(`File collection '${filesCollectionName}' already exists, aborting.`);
+        return;
+      } else {
+        // create new collection
+        try {
+          await typesenseClient.collections(filesCollectionName).retrieve();
+        } catch (error) {
+          if (error instanceof Errors.ObjectNotFound) {
+            console.log('Creating new collection:', filesCollectionName);
+            let fileSchema = kudosFileTypesenseSchema(docsCollectionName);
+            await typesenseClient.collections().create(fileSchema);
+            console.log(`Kudos file collection ${filesCollectionName} created successfully.`);
+          } else {
+            throw error;
+          }
+        }
+      }
+
     } else {
       if (!docCollectionFound) {
         console.error(
@@ -532,6 +664,10 @@ async function main() {
         console.error(`Kudos doc chunk collection '${chunksCollectionName}' not found, aborting.`);
         return;
       }
+      if (opts.importfiles && !fileCollectionFound) {
+        console.error(`Kudos doc file collection '${filesCollectionName}' not found, aborting.`);
+        return;
+      }
 
       if (docCollectionFound.name != docsCollectionName) {
         console.log(
@@ -539,7 +675,7 @@ async function main() {
         );
         docsCollectionName = docCollectionFound.name;
       }
-      if (opts.importchunks && chunkCollectionFound 
+      if (opts.importchunks && chunkCollectionFound
         && chunkCollectionFound.name != chunksCollectionName) {
         console.log(
           `Resolved alias '${chunksCollectionName}' to collection '${chunkCollectionFound.name}'`,
@@ -586,11 +722,12 @@ async function main() {
       // "((type = 'Tildelingsbrev') OR (type = 'Årsrapport'))" +
       // "(type = 'Tildelingsbrev')" +
       // "(type = 'Årsrapport') " +
-      "(type = 'Evaluering')  " +
+      // "(type = 'Evaluering')  " +
+      "(type = 'Statusrapport')  " +
       // "(type = 'Årsrapport') OR +
       // "(type = 'Instruks')) " +
-       " AND (published_at > '2021-01-01 00:00:00.000') " +
-       " AND (published_at < '2025-01-01 00:00:00.000') " +
+      " AND (published_at > '2020-01-01 00:00:00.000') " +
+      " AND (published_at < '2026-01-01 00:00:00.000') " +
       " ORDER BY published_at asc " +
       " LIMIT ? OFFSET ?",
       [opts.pagesize, (page - 1) * opts.pagesize],
@@ -600,26 +737,31 @@ async function main() {
     if (!Array.isArray(rows) || rows.length === 0) break;
     if (opts.pages >= 0 && page - opts.firstpage >= opts.pages) break;
 
+    let chunkLengths: number[] = [];
+
     for (let i = 0; i < rows.length; i++) {
+
       const row = rows[i];
-      const plaintextCompressed = row.plaintext ? row.plaintext.toString('utf8') : null;
-
-      if (!plaintextCompressed) {
-        console.warn(`Skipping doc id: ${row.id}, plaintext column was empty.`);
-        continue;
-      }
-
-      let plaintextDecompressed;
-      try {
-        plaintextDecompressed = zlib.inflateSync(row.plaintext).toString('utf8');
-      } catch (error) {
-        console.error(`Error decompressing plaintext for doc uuid '${row.uuid}':\n`, error);
-        continue;
-      }
-
-      let chunkLengths: number[] = [];
 
       if (opts.importchunks) {
+
+        const plaintextCompressed = row.plaintext ? row.plaintext.toString('utf8') : null;
+
+        if (!plaintextCompressed) {
+          console.warn(`Skipping doc id: ${row.id}, plaintext column was empty.`);
+          continue;
+        }
+
+        let plaintextDecompressed;
+        try {
+          plaintextDecompressed = zlib.inflateSync(row.plaintext).toString('utf8');
+        } catch (error) {
+          console.error(`Error decompressing plaintext for doc uuid '${row.uuid}':\n`, error);
+          continue;
+        }
+
+        let chunkLengths: number[] = [];
+
         chunkLengths = await findChunks(
           plaintextDecompressed,
           sectionDelim,
@@ -659,7 +801,9 @@ async function main() {
       console.log(
         `Parsed doc_num: ${row.id}.`,
         opts.dryrun ? " Dryrun, won't upload to typesense" :
-          opts.importchunks ? ` Uploading doc and ${chunkLengths.length} chunks...` : ` Uploading doc only...`,
+          opts.importchunks
+            ? ` Uploading doc and ${chunkLengths.length} chunks...`
+            : ` Uploading doc only...`,
       );
       if (!opts.dryrun) {
         await typesenseClient
@@ -724,4 +868,3 @@ async function main() {
 
   await connection.end();
 }
-
