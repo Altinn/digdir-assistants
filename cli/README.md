@@ -10,8 +10,8 @@ Scope: each document in specified Typesense collection
 
 ## How to run
 
-`yarn generateSearchPhrases`  
-Be sure to set the `TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION` env var with the name of the Typesense collection
+`yarn kudos:generateSearchPhrases -s <source collection> -t <target collection>`
+Optionally, create a new collection with `-n` 
 
 
 `yarn kudos:importPublisers --dbhost localhost --dbname <mariadb-name> --dbuser <username> --dbpass <password> -c <collection-name> --pages -1`
