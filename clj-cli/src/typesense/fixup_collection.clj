@@ -61,6 +61,9 @@
 
 
 
+;; TODO: use /collections/<collection-name>/documents?action=update to update a single document
+;; rather than uploading JSONL documents, which seems to break JOIN indexes
+;; maybe async references fixes this 
 (defn fixup-doc-year [input-file output-file]
   (with-open [reader (io/reader input-file)
               writer (io/writer output-file)]
