@@ -59,8 +59,8 @@
   {:original 
    (str "Please analyze the contents of the following documentation article and generate a list of English phrases that you would expect to match the following document.\n\nDocument:\n\n")
    :keyword-search 
-   (str "Please analyze the contents of the following documentation article "
-        "and generate a list of keyword search phrases that have high information retrieval value. " 
+   (str "Analyze the following chunk and generate a list of keyword search phrases "
+        "that have high BM25 information retrieval precision, using the same language as the document. " 
         "If the text is not comprehensible, just return an empty list.\n\nDocument:\n\n")
    :typicalqs "Generate a list of typical questions that a user might have, that can be answered by the following documentation article. Return only the list of questions as a JSON string array in a code block, do not include answers."})
 
@@ -251,7 +251,8 @@
     (log/info "=== Page" page "/ total chunks:" chunks-processed 
               "/ updated:" (- successes empties skipped) 
               "/ skipped:" skipped
-              "/ non-comprehensible:" empties "failed:" failures
+              "/ non-comprehensible:" empties 
+              "/ failed:" failures
               "/ time:" (format "%.2f sec" (/ total-time 1000.0))
               "/ chunks/sec:" (format "%.2f" (/ (* chunks-processed 1000.0) total-time)))
     ))

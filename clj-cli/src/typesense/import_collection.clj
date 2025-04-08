@@ -124,7 +124,7 @@
                                :body (slurp temp-file)}))
                   end-time (System/currentTimeMillis)
                   time-taken (/ (- end-time start-time) 1000.0)] ;; Time in seconds
-              (log/info (format "Batch %d: Uploaded %d documents (%.2f KB) in %.2f seconds (%.2f docs/sec)"
+              #_(log/info (format "Batch %d: Uploaded %d documents (%.2f KB) in %.2f seconds (%.2f docs/sec)"
                               @batch-counter
                               batch-size
                               file-size
