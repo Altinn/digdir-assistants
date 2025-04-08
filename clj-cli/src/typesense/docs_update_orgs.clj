@@ -1,9 +1,5 @@
 (ns typesense.org-names
-  (:require [typesense.api-config :refer [typesense-config typesense-api-url]]
-            [cheshire.core :as json]
-            [clojure.java.io :as io]
-            [clj-http.client :as http]
-            [typesense.search :refer [multi-search]]
+  (:require [typesense.search :refer [multi-search]]
             [typesense.admin :refer [update-docs]]))
 
 
@@ -50,7 +46,7 @@
 
 (comment
 
-  (def docs-collection "KUDOS_docs_2025-01-08")
+  (def docs-collection "kudos_docs_2025-03-24")
 ;; (def chunks-collection "KUDOS_chunks_2024-12-10")
 ;; (def files-collection-name "KUDOS_files_2024-12-10")
   
