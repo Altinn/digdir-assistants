@@ -1,17 +1,20 @@
 ## Digdir Assistants CLI
 
-Commands available:
+Use the cli and clj-cli to import and export Typesense collections.
 
-Scope: each document in specified Typesense collection
+- import and export of small collections will work fine with the bb-scripts version
+- importing large JSONL files should be done with the clj-cli
 
-`contentAnalysis` - use an LLM to extract the relevant language code
-`generateSearchPhrases` - use an LLM to generate a set of search phrases related to the contents
+Generate search phrases:
 
+Use the following clj-cli command:
+
+```
+clj -M -m kudos-chunks.update-search-phrases <chunks collection name> <phrases collection name> --prompt keyword-search --threads 8
+
+```
 
 ## How to run
-
-`yarn kudos:generateSearchPhrases -s <source collection> -t <target collection>`
-Optionally, create a new collection with `-n` 
 
 
 `yarn kudos:importPublisers --dbhost localhost --dbname <mariadb-name> --dbuser <username> --dbpass <password> -c <collection-name> --pages -1`

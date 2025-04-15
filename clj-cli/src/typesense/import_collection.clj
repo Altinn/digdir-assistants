@@ -189,54 +189,56 @@
 
 (comment
 
+  ;; Example usage: Upsert documents into a collection
   (upsert-collection
-   "DEV_kudos-docs_2024-09-09"
-   "STAGING_kudos-docs_2024-09-03_export_20240909_fixed.jsonl"
-   100 nil)
+   "<collection-name>"                 ;; Target Typesense collection name
+   "<input-file-path>"                 ;; Path to the JSONL file containing documents
+   100                                 ;; Batch size for upserting
+   nil)                                ;; Optional function to transform each document before upserting
 
-  ;;DEV_kudos-chunks_2024-09-09  --key-field doc_num
-
+  ;; Example usage: Filter a JSONL file to keep only documents NOT present in a Typesense collection
   (filter-existing-documents
-   "DEV_kudos-chunks_2024-09-09"
-   "doc_num"
-   "./STAGING_kudos-chunks_2024-09-03_export_20240909_fixed.jsonl"
-   "./STAGING_kodus-chunks_2024-09-03_filtered.jsonl"
-   100)
+   "<collection-name>"                 ;; Typesense collection name to check against
+   "<key-field>"                       ;; Field name in JSONL documents to use as the unique identifier (e.g., "id", "doc_num")
+   "<input-file-path>"                 ;; Path to the input JSONL file
+   "<output-file-path>"                ;; Path to the output JSONL file (will contain documents not found in the collection)
+   100)                                ;; Batch size for checking existence
 
+  ;; Example usage: Upsert chunks into a collection
   (upsert-collection
-   "DEV_kudos-chunks_2024-09-09"
-   "./STAGING_kodus-chunks_2024-09-03_filtered.jsonl"
-   100 nil)
+   "<collection-name>"                 ;; Target Typesense collection name for chunks
+   "<input-file-path>"                 ;; Path to the JSONL file containing chunks
+   100                                 ;; Batch size for upserting
+   nil)                                ;; Optional transformation function
 
 
+  ;; Example usage: Filter documents based on a field value (or take/skip)
   (filter-documents
-   "./STAGING_kudos-phrases_2024-09-03_export_20240909_fixed.jsonl" ;; input-file
-   "./STAGING_kodus-phrases_2024-09-03_filtered.jsonl" ;; output-file
-   nil ;; field to filter on
-   nil ;; value to filter on
-   nil ;; take all
-   0  ;; skip none)
-   )
+   "<input-file-path>"                 ;; Path to the input JSONL file
+   "<output-file-path>"                ;; Path to the output JSONL file
+   nil                                 ;; Field name to filter on (optional)
+   nil                                 ;; Value to filter for (optional)
+   nil                                 ;; Number of documents to take (optional)
+   0)                                  ;; Number of documents to skip (optional)
 
+  ;; Example usage: Filter phrases file to remove phrases whose corresponding chunks already exist in a collection
   (filter-existing-documents
-   "DEV_kudos-phrases_2024-09-09"
-   "chunk_id" ;; key-field
-   "./STAGING_kodus-phrases_2024-09-03_filtered.jsonl"
-   "./STAGING_kudos-phrases_2024-09-03_ready-to-import.jsonl"
-   100)
+   "<chunk-collection-name>"           ;; Typesense collection name containing chunks
+   "<chunk-key-field>"                 ;; Field name in phrase documents linking to the chunk (e.g., "chunk_id")
+   "<input-phrases-file-path>"         ;; Path to the input phrases JSONL file
+   "<output-phrases-file-path>"        ;; Path to the output phrases JSONL file (ready for import)
+   100)                                ;; Batch size for checking existence
 
+  ;; Example usage: Upsert phrases into a collection
   (upsert-collection
-   "DEV_kudos-phrases_2024-09-09"
-   "STAGING_kudos-phrases_2024-09-03_ready-to-import.jsonl"
-   5000 nil)
+   "<phrases-collection-name>"         ;; Target Typesense collection name for phrases
+   "<input-phrases-file-path>"         ;; Path to the JSONL file containing phrases to import
+   5000                                ;; Batch size
+   nil)                                ;; Optional transformation function
   
+  ;; Example usage: Upsert phrases from a different source/backup
   (upsert-collection
-   "KUDOS_phrases_2025-01-10_test4"
-   "/Volumes/models/kudos_backup/snapshot_2025-01-10/KUDOS_phrases_2025-01-10_test4_export_20250116.jsonl"
-   5000 2)
-
-
-
-  (+ 1 1)
-  ;;
-  )
+   "<phrases-collection-name>"         ;; Target Typesense collection name for phrases
+   "<alternative-phrases-file-path>"   ;; Path to an alternative JSONL file containing phrases
+   5000                                ;; Batch size
+   nil)                                ;; Optional transformation function
