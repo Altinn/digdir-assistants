@@ -5,6 +5,6 @@
         org.clojure/tools.cli {:mvn/version "1.1.230"}}
  :aliases
  {:import-collection {:main-opts ["-m" "typesense.import-collection"]}
-  :dev   {:extra-deps  {io.github.clojure/tools.build {:mvn/version "0.10.6"}}}
+  :dev   {:extra-deps  {io.github.clojure/tools.build {:mvn/version "0.10.10"}}}
   :build {:deps {io.github.clojure/tools.build {:mvn/version "v0.10.6"}}
           :ns-default build}}}
