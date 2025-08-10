@@ -93,17 +93,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure-rest/core-client@npm:^1.1.7":
-  version: 1.4.0
-  resolution: "@azure-rest/core-client@npm:1.4.0"
+"@azure-rest/core-client@npm:^2.2.0":
+  version: 2.5.0
+  resolution: "@azure-rest/core-client@npm:2.5.0"
   dependencies:
     "@azure/abort-controller": "npm:^2.0.0"
-    "@azure/core-auth": "npm:^1.3.0"
+    "@azure/core-auth": "npm:^1.9.0"
     "@azure/core-rest-pipeline": "npm:^1.5.0"
     "@azure/core-tracing": "npm:^1.0.1"
-    "@azure/core-util": "npm:^1.0.0"
+    "@typespec/ts-http-runtime": "npm:^0.3.0"
     tslib: "npm:^2.6.2"
-  checksum: 10c0/be389a5ba39f97d09f9a927c07caac2a6dc8e607bcdcf1b81f25c43ea78192b3d6414af79962531948c14314edc1363aead27fbe96a8a93b41cfc9b297c2e2e9
+  checksum: 10c0/02da837ae71b6c0adb17945ba1979760bb3605e14463ecc35eaafc41e8bfd7d2d53cd0ce681042590abb9987ae32335eba34ef49460374bdf4fe65a2e874848e
   languageName: node
   linkType: hard
 
@@ -116,7 +116,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-auth@npm:^1.3.0, @azure/core-auth@npm:^1.4.0, @azure/core-auth@npm:^1.8.0":
+"@azure/core-auth@npm:^1.8.0":
   version: 1.9.0
   resolution: "@azure/core-auth@npm:1.9.0"
   dependencies:
@@ -127,7 +127,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-rest-pipeline@npm:^1.13.0, @azure/core-rest-pipeline@npm:^1.5.0":
+"@azure/core-auth@npm:^1.9.0":
+  version: 1.10.0
+  resolution: "@azure/core-auth@npm:1.10.0"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.0.0"
+    "@azure/core-util": "npm:^1.11.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/a1319b8eda53e8a2dcd57bf7cd0245dfa8c0c00a8e1a9e86344a50dde7a3f036361f2ba323bcf7d41e5671f245785739f244a2ed6ac414f9f12dd4d1bea0722d
+  languageName: node
+  linkType: hard
+
+"@azure/core-rest-pipeline@npm:^1.5.0":
   version: 1.17.0
   resolution: "@azure/core-rest-pipeline@npm:1.17.0"
   dependencies:
@@ -143,15 +154,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-sse@npm:^2.0.0":
-  version: 2.1.3
-  resolution: "@azure/core-sse@npm:2.1.3"
-  dependencies:
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/364df0e6ffe5069951eaf8f9f21ab8606b8e861fa96a66ae4a623015947ca4208e018c11a271b64931ad3955d912bfd72ad9ebd5908eac835eac5ded035b370a
-  languageName: node
-  linkType: hard
-
 "@azure/core-tracing@npm:^1.0.1":
   version: 1.2.0
   resolution: "@azure/core-tracing@npm:1.2.0"
@@ -161,7 +163,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-util@npm:^1.0.0, @azure/core-util@npm:^1.11.0, @azure/core-util@npm:^1.4.0, @azure/core-util@npm:^1.9.0":
+"@azure/core-util@npm:^1.11.0, @azure/core-util@npm:^1.9.0":
   version: 1.11.0
   resolution: "@azure/core-util@npm:1.11.0"
   dependencies:
@@ -171,7 +173,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/logger@npm:^1.0.0, @azure/logger@npm:^1.0.3":
+"@azure/logger@npm:^1.0.0":
   version: 1.1.4
   resolution: "@azure/logger@npm:1.1.4"
   dependencies:
@@ -180,18 +182,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/openai@npm:^1.0.0-beta.12":
-  version: 1.0.0-beta.13
-  resolution: "@azure/openai@npm:1.0.0-beta.13"
+"@azure/openai@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@azure/openai@npm:2.0.0"
   dependencies:
-    "@azure-rest/core-client": "npm:^1.1.7"
-    "@azure/core-auth": "npm:^1.4.0"
-    "@azure/core-rest-pipeline": "npm:^1.13.0"
-    "@azure/core-sse": "npm:^2.0.0"
-    "@azure/core-util": "npm:^1.4.0"
-    "@azure/logger": "npm:^1.0.3"
-    tslib: "npm:^2.4.0"
-  checksum: 10c0/3235651696ed5717dd86fc9852d31148d3b43bac14ec57f5a25cbf3ebccdc653c1841c19f3d02e875d858e277bb54492a8b9b2205a0912a53d58083e90744e94
+    "@azure-rest/core-client": "npm:^2.2.0"
+    tslib: "npm:^2.6.3"
+  checksum: 10c0/b4b5cdb07f03abba86f8cc0ad6d616ee599218a6b28ca54e36adeda318e8f6473c9cc8c0f32c2ee9eb4f744af6741b9949e67d02be0c41dcc0a033ee45079376
   languageName: node
   linkType: hard
 
@@ -1001,7 +998,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@digdir/assistant-lib@workspace:packages/assistant-lib"
   dependencies:
-    "@azure/openai": "npm:^1.0.0-beta.12"
+    "@azure/openai": "npm:^2.0.0"
     "@babel/runtime": "npm:^7.26.0"
     "@instructor-ai/instructor": "npm:1.6.0"
     "@supabase/supabase-js": "npm:^2.46.1"
@@ -1026,7 +1023,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@digdir/assistant-slack-app@workspace:apps/slack-app"
   dependencies:
-    "@azure/openai": "npm:^1.0.0-beta.12"
+    "@azure/openai": "npm:^2.0.0"
     "@babel/runtime": "npm:^7.26.0"
     "@bdb-dd/mack": "https://github.com/bdb-dd/mack.git#14338e54e63d85151e9065d28b25caa778b9a73a"
     "@digdir/assistant-lib": "npm:1.0.0"
@@ -3189,6 +3186,17 @@ __metadata:
     "@typescript-eslint/types": "npm:8.13.0"
     eslint-visitor-keys: "npm:^3.4.3"
   checksum: 10c0/50b35f3cf673aaed940613f0007f7c4558a89ebef15c49824e65b6f084b700fbf01b01a4e701e24bbe651297a39678645e739acd255255f1603867a84bef0383
+  languageName: node
+  linkType: hard
+
+"@typespec/ts-http-runtime@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@typespec/ts-http-runtime@npm:0.3.0"
+  dependencies:
+    http-proxy-agent: "npm:^7.0.0"
+    https-proxy-agent: "npm:^7.0.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/fe6121ce9015d32a38755244ecabd7f44ff7e40cc07a5656e84d19a0ea8a644a67b49804c5e851ad768d774194221accf8388ac834e1f9f1e148a03c054355dd
   languageName: node
   linkType: hard
 
@@ -10261,7 +10269,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.1.0, tslib@npm:^2.3.1, tslib@npm:^2.4.0, tslib@npm:^2.6.2":
+"tslib@npm:^2.1.0, tslib@npm:^2.3.1, tslib@npm:^2.4.0, tslib@npm:^2.6.2, tslib@npm:^2.6.3":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62
