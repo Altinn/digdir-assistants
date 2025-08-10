@@ -16,7 +16,7 @@
     "go": "yarn run build && yarn start"
   },
   "dependencies": {
-    "@azure/openai": "^1.0.0-beta.12",
+    "@azure/openai": "^2.0.0",
     "@babel/runtime": "^7.26.0",
     "@bdb-dd/mack": "https://github.com/bdb-dd/mack.git#14338e54e63d85151e9065d28b25caa778b9a73a",
     "@digdir/assistant-lib": "1.0.0",
