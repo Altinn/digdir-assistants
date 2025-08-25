@@ -8,17 +8,14 @@ on:
       [ main ]
     paths:
     - '**'
-    - '.github/workflows/assistants-slack-digdir-AutoDeployTrigger-445b47b2-2c6f-4391-9e55-003c65f71932.yml'
+    - '.github/workflows/assistants-slack-digdir-AutoDeployTrigger-be585c37-cd22-4fb5-984e-eb2851f9f0a4.yml'
 
   # Allow manual trigger 
-  workflow_dispatch:      
-
+  workflow_dispatch:
+      
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions: 
-      id-token: write #This is required for requesting the OIDC JWT Token
-      contents: read #Required when GH token is used to authenticate with private repo
 
     steps:
       - name: Checkout to the branch
@@ -27,9 +24,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
         with:
-          client-id: ${{ secrets.ASSISTANTSSLACKDIGDIR_AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.ASSISTANTSSLACKDIGDIR_AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.ASSISTANTSSLACKDIGDIR_AZURE_SUBSCRIPTION_ID }}
+          creds: ${{ secrets.ASSISTANTSSLACKDIGDIR_AZURE_CREDENTIALS }}
 
       - name: Build and push container image to registry
         uses: azure/container-apps-deploy-action@8dff69dac3367c32ceb2690d8f13adbeab462703 # v2
@@ -42,7 +37,7 @@ jobs:
           registryPassword: ${{ secrets.ASSISTANTSSLACKDIGDIR_REGISTRY_PASSWORD }}
           containerAppName: assistants-slack-digdir
           resourceGroup: assistants-prod-norwayeast
-          imageToBuild: assistantsprodcr.azurecr.io/assistants-slack-digdir:${{ github.sha }}
+          imageToBuild: assistantsprodcr.azurecr.io/assistants-slack-release:${{ github.sha }}
           buildArguments: |
             "VITE_SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
             "VITE_SLACK_APP_SUPABASE_ANON_KEY=${{ secrets.SLACK_APP_SUPABASE_ANON_KEY }}"
@@ -73,4 +68,5 @@ jobs:
             "DEBUG_INSTRUCTOR=${{ vars.DEBUG_INSTRUCTOR }}"
             "LOG_LEVEL=${{ vars.LOG_LEVEL }}"
 
+     
 
