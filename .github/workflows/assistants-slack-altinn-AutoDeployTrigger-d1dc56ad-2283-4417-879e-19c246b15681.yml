@@ -39,7 +39,7 @@ jobs:
           imageToBuild: altinnaicontainers.azurecr.io/assistants-slack-altinn:${{ github.sha }}
           buildArguments: |
             "VITE_SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
-            "VITE_SLACK_APP_SUPABASE_ANON_KEY=${{secrets.SLACK_APP_SUPABASE_ANON_KEY}}"
+            "VITE_SLACK_APP_SUPABASE_ANON_KEY=${{ secrets.SLACK_APP_SUPABASE_ANON_KEY }}"
           environmentVariables: >
             "OPENAI_API_KEY=secretref:openai-api-key" 
             "AZURE_OPENAI_API_KEY=secretref:azure-openai-api-key" 
@@ -56,6 +56,7 @@ jobs:
             "AZURE_OPENAI_DEPLOYMENT=${{ vars.AZURE_OPENAI_DEPLOYMENT }}"
             "AZURE_OPENAI_VERSION=${{ vars.AZURE_OPENAI_VERSION }}"
             "COLBERT_API_URL=${{ vars.COLBERT_API_URL }}"
+            "COLBERT_API_KEY=${{ secrets.COLBERT_API_KEY }}"
             "TYPESENSE_API_HOST=${{ vars.TYPESENSE_API_HOST }}"
             "TYPESENSE_DOCS_COLLECTION=${{ vars.TYPESENSE_DOCS_COLLECTION }}"
             "TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION=${{ vars.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION }}"
