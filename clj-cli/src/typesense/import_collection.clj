@@ -235,10 +235,11 @@
    "<input-phrases-file-path>"         ;; Path to the JSONL file containing phrases to import
    5000                                ;; Batch size
    nil)                                ;; Optional transformation function
-  
+
   ;; Example usage: Upsert phrases from a different source/backup
   (upsert-collection
    "<phrases-collection-name>"         ;; Target Typesense collection name for phrases
    "<alternative-phrases-file-path>"   ;; Path to an alternative JSONL file containing phrases
    5000                                ;; Batch size
    nil)                                ;; Optional transformation function
+  )
