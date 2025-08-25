@@ -1,0 +1,55 @@
+[tools]
+# gives us yarn out of the box
+yarn = "4.9.3"
+
+[env]
+
+# ensures correct package manager activated
+FNM_COREPACK_ENABLED=1
+
+# Assistent entity config file path. 
+# Example: config/ka_dev.edn
+ENTITY_CONFIG_FILE=""
+
+# Postgres secrets
+ADH_POSTGRES_URL="" 
+ADH_POSTGRES_HOST="" 
+ADH_POSTGRES_TABLE=""
+ADH_POSTGRES_USER="" 
+ADH_POSTGRES_PWD=""
+
+# Typesense secrets
+TYPESENSE_API_HOST=""
+TYPESENSE_API_KEY=""
+TYPESENSE_API_KEY_ADMIN=""
+
+# Azure OpenAI settings
+USE_AZURE_OPENAI_API=true
+AZURE_OPENAI_API_VERSION="2024-08-01-preview"
+AZURE_OPENAI_DEPLOYMENT_NAME="gpt-4o-2024-11-20"
+AZURE_OPENAI_MODEL_NAME="gpt-4o-2024-11-20"
+
+# Azure OpenAI secrets
+AZURE_OPENAI_API_ENDPOINT=""
+AZURE_OPENAI_API_KEY=""
+
+# OpenAI secrets
+OPENAI_API_URL=""
+OPENAI_API_MODEL_NAME=""
+OPENAI_API_API_KEY=""
+
+# Context window settings
+MAX_CONTEXT_DOC_COUNT=10
+MAX_CONTEXT_LENGTH=90000
+MAX_SOURCE_LENGTH=40000
+
+# ColBERT reranker
+COLBERT_API_URL=""
+COLBERT_API_KEY=""
+
+# Postmark email service
+POSTMARK_API_KEY=""
+
+# Auth secrets
+ADMIN_USER_EMAILS=""
+ALLOWED_DOMAINS=""

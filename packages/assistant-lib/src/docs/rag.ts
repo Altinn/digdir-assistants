@@ -211,8 +211,8 @@ export async function ragPipeline(
   }
   const rerankResponse = await axios.post(rerankUrl, rerankData, {
     headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': envVar('COLBERT_API_KEY'),
+      "Content-Type": "application/json",
+      "X-API-Key": envVar("COLBERT_API_KEY"),
     },
   });
   reranked = rerankResponse.data;
