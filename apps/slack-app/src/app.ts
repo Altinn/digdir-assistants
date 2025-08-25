@@ -218,7 +218,19 @@ app.message(async ({ message, say }) => {
 
   srcEvtContext = await getEventContext(app.client, genericMsg);
 
-  if (analysisError != null) {
+  if (analysisError != null || queryAnalysisResult == null) {
+    // Comprehensive error logging
+    const errorDetails = {
+      analysisError,
+      queryAnalysisResultType: typeof queryAnalysisResult,
+      queryAnalysisResultValue: queryAnalysisResult,
+      stage1Duration,
+      userInput: userInput.substring(0, 100), // First 100 chars for context
+      timestamp: new Date().toISOString(),
+    };
+
+    console.error('stage1_analyze FAILURE:', JSON.stringify(errorDetails, null, 2));
+
     const error_logEntry: BotLogEntry = {
       slack_context: srcEvtContext,
       slack_app: slackApp,
@@ -227,7 +239,10 @@ app.message(async ({ message, say }) => {
       content: {
         bot_name: 'docs',
         original_user_query: userInput,
-        error: analysisError,
+        error:
+          analysisError ||
+          `queryAnalysisResult is ${typeof queryAnalysisResult}: ${JSON.stringify(queryAnalysisResult)}`,
+        error_details: errorDetails,
       },
     };
     try {

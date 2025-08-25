@@ -209,7 +209,12 @@ export async function ragPipeline(
       `Calling ${rerankUrl}, sending:\n${JSON.stringify(rerankData)}`,
     );
   }
-  const rerankResponse = await axios.post(rerankUrl, rerankData);
+  const rerankResponse = await axios.post(rerankUrl, rerankData, {
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-Key": envVar("COLBERT_API_KEY"),
+    },
+  });
   reranked = rerankResponse.data;
 
   if (envVar("LOG_LEVEL") === "debug-rerank") {
@@ -218,7 +223,9 @@ export async function ragPipeline(
   }
 
   // Re-order search-hits based on new ranking
-  const searchHitsReranked = reranked.map((r) => searchHits[r.result_index]);
+  const searchHitsReranked = reranked
+    .sort((a, b) => a.rank - b.rank)
+    .map((r) => searchHits[r.index]);
 
   durations.colbert_rerank = round(lapTimer(start));
 

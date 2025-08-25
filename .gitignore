@@ -19,3 +19,6 @@ temp/
 cli/data_files_ignored/
 clj-cli/source_pdfs/
 clj-cli/typesense_chunks/
+
+# local configuration files
+mise*.local.toml
