@@ -6,19 +6,25 @@ ARG VITE_SLACK_APP_SUPABASE_API_URL=default \
 
 
 USER root
-ENV YARN_VERSION 4.3.1
 ENV YARN_CACHE_FOLDER .yarn/cache
-RUN corepack enable yarn
-RUN yarn policies set-version $YARN_VERSION \
-    && yarn -v 
+RUN corepack enable yarn 
 
 # Create app directory
 WORKDIR /usr/src/app
 
-# Install app dependencies
-COPY . .
+# Copy package manager files first for better layer caching
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn ./.yarn
+
+# Copy package.json files from workspaces
+COPY apps/admin/package.json ./apps/admin/
+COPY apps/slack-app/package.json ./apps/slack-app/
+COPY packages/assistant-lib/package.json ./packages/assistant-lib/
+
+# Install dependencies (this layer will be cached if package.json files haven't changed)
+RUN yarn install
+
+# Copy source code after dependencies are installed
 COPY apps/ ./apps/
 COPY packages/ ./packages/
 
@@ -26,7 +32,6 @@ COPY packages/ ./packages/
 ENV VITE_SLACK_APP_SUPABASE_API_URL=$VITE_SLACK_APP_SUPABASE_API_URL
 ENV VITE_SLACK_APP_SUPABASE_ANON_KEY=$VITE_SLACK_APP_SUPABASE_ANON_KEY
 
-RUN yarn install
 RUN yarn build
 
 
@@ -36,11 +41,20 @@ FROM node:slim as runner
 ENV YARN_CACHE_FOLDER .yarn/cache
 ENV NODE_ENV production
 
+# Enable corepack for yarn in production
+RUN corepack enable yarn
+
 # Create app directory
 WORKDIR /usr/src/app
 
-# Install app dependencies
-COPY --from=builder /usr/src/app/ .
+# Copy only necessary files for production
+COPY --from=builder /usr/src/app/package.json ./
+COPY --from=builder /usr/src/app/yarn.lock ./
+COPY --from=builder /usr/src/app/.yarnrc.yml ./
+COPY --from=builder /usr/src/app/.yarn ./.yarn
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/apps/slack-app/dist ./apps/slack-app/dist
+COPY --from=builder /usr/src/app/packages/assistant-lib/dist ./packages/assistant-lib/dist
 
 # switch back to non-root user    
 USER node
