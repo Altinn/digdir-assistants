@@ -57,8 +57,8 @@ COPY --from=builder /usr/src/app/.yarn ./.yarn
 COPY --from=builder /usr/src/app/apps/slack-app/package.json ./apps/slack-app/
 COPY --from=builder /usr/src/app/packages/assistant-lib/package.json ./packages/assistant-lib/
 
-# Install production dependencies
-RUN yarn workspaces focus --production
+# Install production dependencies for the slack-app workspace
+RUN yarn workspaces focus @digdir/assistant-slack-app --production
 
 # Copy built artifacts
 COPY --from=builder /usr/src/app/apps/slack-app/dist ./apps/slack-app/dist
