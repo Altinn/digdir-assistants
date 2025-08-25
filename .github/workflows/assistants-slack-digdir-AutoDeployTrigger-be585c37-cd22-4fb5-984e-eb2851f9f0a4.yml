@@ -1,4 +1,4 @@
-name: Trigger auto deployment for assistants-slack-digdir
+name: prod-slack-altinn - Auto deploy
 
 # When this action will be executed
 on:
@@ -19,15 +19,15 @@ jobs:
 
     steps:
       - name: Checkout to the branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
 
       - name: Azure Login
-        uses: azure/login@v2
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
         with:
           creds: ${{ secrets.ASSISTANTSSLACKDIGDIR_AZURE_CREDENTIALS }}
 
       - name: Build and push container image to registry
-        uses: azure/container-apps-deploy-action@v2
+        uses: azure/container-apps-deploy-action@8dff69dac3367c32ceb2690d8f13adbeab462703 # v2
         with:
           appSourcePath: ${{ github.workspace }}
           _dockerfilePathKey_: _dockerfilePath_
@@ -38,8 +38,35 @@ jobs:
           containerAppName: assistants-slack-digdir
           resourceGroup: assistants-prod-norwayeast
           imageToBuild: assistantsprodcr.azurecr.io/assistants-slack-release:${{ github.sha }}
-          
-            
+          buildArguments: |
+            "VITE_SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}"
+            "VITE_SLACK_APP_SUPABASE_ANON_KEY=${{ secrets.SLACK_APP_SUPABASE_ANON_KEY }}"
+          environmentVariables: >
+            "OPENAI_API_KEY=secretref:openai-api-key" 
+            "AZURE_OPENAI_API_KEY=secretref:azure-openai-api-key" 
+            "SLACK_APP_TOKEN=secretref:slack-app-token" 
+            "SLACK_BOT_TOKEN=secretref:slack-bot-token" 
+            "SLACK_BOT_SIGNING_SECRET=secretref:slack-bot-signing-secret" 
+            "TYPESENSE_API_KEY=secretref:typesense-api-key" 
+            "SLACK_APP_SUPABASE_API_URL=${{ vars.SLACK_APP_SUPABASE_API_URL }}" 
+            "SLACK_APP_SUPABASE_ANON_KEY=${{ secrets.SLACK_APP_SUPABASE_ANON_KEY }}"
+            "USE_AZURE_OPENAI_API=${{ vars.USE_AZURE_OPENAI_API}}"
+            "OPENAI_API_URL=${{ vars.OPENAI_API_URL }}"
+            "OPENAI_API_MODEL_NAME=${{ vars.OPENAI_API_MODEL_NAME }}"
+            "AZURE_OPENAI_API_URL=${{ vars.AZURE_OPENAI_API_URL }}"
+            "AZURE_OPENAI_DEPLOYMENT=${{ vars.AZURE_OPENAI_DEPLOYMENT }}"
+            "AZURE_OPENAI_VERSION=${{ vars.AZURE_OPENAI_VERSION }}"
+            "COLBERT_API_URL=${{ vars.COLBERT_API_URL }}"
+            "COLBERT_API_KEY=${{ secrets.COLBERT_API_KEY }}"
+            "TYPESENSE_API_HOST=${{ vars.TYPESENSE_API_HOST }}"
+            "TYPESENSE_DOCS_COLLECTION=${{ vars.TYPESENSE_DOCS_COLLECTION }}"
+            "TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION=${{ vars.TYPESENSE_DOCS_SEARCH_PHRASE_COLLECTION }}"
+            "MAX_CONTEXT_DOC_COUNT=${{ vars.MAX_CONTEXT_DOC_COUNT }}"
+            "MAX_CONTEXT_LENGTH=${{ vars.MAX_CONTEXT_LENGTH }}"
+            "MAX_SOURCE_LENGTH=${{ vars.MAX_SOURCE_LENGTH }}"
+            "DEBUG_SLACK=${{ vars.DEBUG_SLACK }}"
+            "DEBUG_INSTRUCTOR=${{ vars.DEBUG_INSTRUCTOR }}"
+            "LOG_LEVEL=${{ vars.LOG_LEVEL }}"
 
      
 
