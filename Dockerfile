@@ -1,6 +1,6 @@
 # build image - START
 # args without default values
-FROM node as builder
+FROM node@sha256:d2b6b5aedb5b729f68ee1129e0f5a5d4713d93f82448249e82241876d8e8d86e as builder
 ARG VITE_SLACK_APP_SUPABASE_API_URL=default \
     VITE_SLACK_APP_SUPABASE_ANON_KEY=default
 
@@ -36,7 +36,7 @@ RUN yarn build
 
 
 # production image - START
-FROM node:slim as runner
+FROM node:slim@sha256:9b741b28148b0195d62fa456ed84dd6c953c1f17a3761f3e6e6797a754d9edff as runner
 
 ENV YARN_CACHE_FOLDER .yarn/cache
 ENV NODE_ENV production
