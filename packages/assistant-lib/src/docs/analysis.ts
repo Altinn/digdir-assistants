@@ -42,30 +42,47 @@ export async function userInputAnalysis(
 ): Promise<UserQueryAnalysis> {
   let queryResult: UserQueryAnalysis | null = null;
 
-  if (envVar("USE_AZURE_OPENAI_API", false) === "true") {
-    // queryResult = await azureClientInstance.chat.completions.create({
-    //     model: envVar('AZURE_OPENAI_DEPLOYMENT'),
-    //     response_model: { schema: UserQueryAnalysisSchema, name: "UserQueryAnalysis" },
-    //     temperature: 0.1,
-    //     messages: [
-    //         { role: "system", content: stage1_analyze_query },
-    //         { role: "user", content: userInput },
-    //     ],
-    // });
-  } else {
-    queryResult = await openaiClientInstance.chat.completions.create({
-      model: envVar("OPENAI_API_MODEL_NAME", ""),
-      response_model: {
-        schema: UserQueryAnalysisSchema,
-        name: "UserQueryAnalysis",
-      },
-      temperature: 0.1,
-      messages: [
-        { role: "system", content: stage1_analyze_query },
-        { role: "user", content: `[USER INPUT]\n${userInput}` },
-      ],
-      max_retries: 0,
-    });
+  try {
+    const modelName = envVar("OPENAI_API_MODEL_NAME", "");
+    if (!modelName) {
+      throw new Error(
+        "OPENAI_API_MODEL_NAME environment variable is not set or empty",
+      );
+    }
+
+    if (envVar("USE_AZURE_OPENAI_API", false) === "true") {
+      // queryResult = await azureClientInstance.chat.completions.create({
+      //     model: envVar('AZURE_OPENAI_DEPLOYMENT'),
+      //     response_model: { schema: UserQueryAnalysisSchema, name: "UserQueryAnalysis" },
+      //     temperature: 0.1,
+      //     messages: [
+      //         { role: "system", content: stage1_analyze_query },
+      //         { role: "user", content: userInput },
+      //     ],
+      // });
+      throw new Error("Azure OpenAI integration is not implemented");
+    } else {
+      console.log(`userInputAnalysis: calling OpenAI with model ${modelName}`);
+      queryResult = await openaiClientInstance.chat.completions.create({
+        model: modelName,
+        response_model: {
+          schema: UserQueryAnalysisSchema,
+          name: "UserQueryAnalysis",
+        },
+        temperature: 0.1,
+        messages: [
+          { role: "system", content: stage1_analyze_query },
+          { role: "user", content: `[USER INPUT]\n${userInput}` },
+        ],
+        max_retries: 2,
+      });
+      console.log(
+        `userInputAnalysis: received result of type ${typeof queryResult}`,
+      );
+    }
+  } catch (error) {
+    console.error(`userInputAnalysis failed:`, error);
+    throw error; // Re-throw to be caught by the calling code
   }
 
   return queryResult;
