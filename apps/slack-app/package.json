@@ -21,7 +21,7 @@
     "@bdb-dd/mack": "https://github.com/bdb-dd/mack.git#14338e54e63d85151e9065d28b25caa778b9a73a",
     "@digdir/assistant-lib": "1.0.0",
     "@instructor-ai/instructor": "1.6.0",
-    "@slack/bolt": "^3.21.1",
+    "@slack/bolt": "^4.0.0",
     "@slack/web-api": "^6.12.1",
     "@supabase/supabase-js": "^2.46.1",
     "@types/ramda": "^0.30.2",
