@@ -4,6 +4,7 @@ import App from "../App.jsx";
 import SlackAuth from "../auth/SlackAuth.tsx";
 import EmailAuth from "../auth/EmailAuth.tsx";
 import { isLoggedIn } from "../auth/authUtils.ts";
+import DashboardLayout from "../components/DashboardLayout.tsx";
 
 const MainRoutes = () => {
   console.log("Initializing routing...");
@@ -31,6 +32,12 @@ const MainRoutes = () => {
         <Route
           path="/"
           element={isAuthenticated ? <App /> : <Navigate to="/auth/email" />}
+        />
+
+        {/* Route for the dashboard view */}
+        <Route
+          path="/dashboard"
+          element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/auth/email" />}
         />
 
         {/* Route for the Slack authentication callback */}

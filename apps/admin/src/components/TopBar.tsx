@@ -1,6 +1,7 @@
 import React from "react";
 import { AppBar, Toolbar, Typography, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useNavigate, useLocation } from "react-router-dom";
 import TeamSelectionDropdown from "./TeamSelectionDropdown";
 import ChannelDropdown from "./ChannelDropdown";
 import { logout } from "../auth/authUtils"; // Import the logout function
@@ -21,6 +22,9 @@ const TopBar: React.FC<TopBarProps> = ({
   onTeamChange,
   onChannelSelect,
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const handleLogout = () => {
     console.log("Logging out user.");
     try {
@@ -37,6 +41,20 @@ const TopBar: React.FC<TopBarProps> = ({
         <Typography variant="h6" noWrap component="div">
           Digdir Assistants
         </Typography>
+        <Button
+          color="inherit"
+          onClick={() => navigate('/')}
+          variant={location.pathname === '/' ? 'outlined' : 'text'}
+        >
+          Chat
+        </Button>
+        <Button
+          color="inherit"
+          onClick={() => navigate('/dashboard')}
+          variant={location.pathname === '/dashboard' ? 'outlined' : 'text'}
+        >
+          Dashboard
+        </Button>
         <TeamSelectionDropdown onTeamChange={onTeamChange} />
         {selectedTeam && (
           <ChannelDropdown
