@@ -7,10 +7,6 @@ yarn = "4.9.3"
 # ensures correct package manager activated
 FNM_COREPACK_ENABLED=1
 
-# Assistent entity config file path. 
-# Example: config/ka_dev.edn
-ENTITY_CONFIG_FILE=""
-
 # Postgres secrets
 ADH_POSTGRES_URL="" 
 ADH_POSTGRES_HOST="" 
@@ -46,9 +42,6 @@ MAX_SOURCE_LENGTH=40000
 # ColBERT reranker
 COLBERT_API_URL=""
 COLBERT_API_KEY=""
-
-# Postmark email service
-POSTMARK_API_KEY=""
 
 # Auth secrets
 ADMIN_USER_EMAILS=""

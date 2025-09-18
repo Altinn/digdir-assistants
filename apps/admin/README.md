@@ -28,7 +28,7 @@ Messages are organized by teams and channels, with a dedicated pane for threaded
 ### Quickstart
 
 1. Clone the repository.
-2. Install dependencies with `npm install`.
+2. Install dependencies with `yarn install`.
 3. Set up `.env` file with Supabase URL and Anon Key.
 4. Run `npm run dev` to start the development server. The app will be accessible at `http://localhost:3000`.
 
