@@ -13,7 +13,7 @@
     "build": "tsc -p ."
   },
   "dependencies": {
-    "@azure/openai": "^1.0.0-beta.12",
+    "@azure/openai": "^2.0.0",
     "@babel/runtime": "^7.26.0",
     "@instructor-ai/instructor": "1.6.0",
     "@supabase/supabase-js": "^2.46.1",
