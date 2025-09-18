@@ -479,19 +479,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@babel/runtime", [\
-      ["npm:7.24.6", {\
-        "packageLocation": "./.yarn/cache/@babel-runtime-npm-7.24.6-3acd4a9fd9-224ad205de.zip/node_modules/@babel/runtime/",\
+      ["npm:7.28.3", {\
+        "packageLocation": "./.yarn/cache/@babel-runtime-npm-7.28.3-216c877217-b360f82c2c.zip/node_modules/@babel/runtime/",\
         "packageDependencies": [\
-          ["@babel/runtime", "npm:7.24.6"],\
-          ["regenerator-runtime", "npm:0.14.1"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:7.26.0", {\
-        "packageLocation": "./.yarn/cache/@babel-runtime-npm-7.26.0-9afa3c4ef6-12c01357e0.zip/node_modules/@babel/runtime/",\
-        "packageDependencies": [\
-          ["@babel/runtime", "npm:7.26.0"],\
-          ["regenerator-runtime", "npm:0.14.1"]\
+          ["@babel/runtime", "npm:7.28.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -1247,7 +1238,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@digdir/assistant-lib", "workspace:packages/assistant-lib"],\
           ["@azure/openai", "npm:1.0.0-beta.13"],\
-          ["@babel/runtime", "npm:7.26.0"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.6.0"],\
           ["@supabase/supabase-js", "npm:2.46.1"],\
           ["@types/js-yaml", "npm:4.0.9"],\
@@ -1274,7 +1265,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@digdir/assistant-slack-app", "workspace:apps/slack-app"],\
           ["@azure/openai", "npm:1.0.0-beta.13"],\
-          ["@babel/runtime", "npm:7.26.0"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@bdb-dd/mack", "https://github.com/bdb-dd/mack.git#commit=14338e54e63d85151e9065d28b25caa778b9a73a"],\
           ["@digdir/assistant-lib", "workspace:packages/assistant-lib"],\
           ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.6.0"],\
@@ -1330,7 +1321,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@emotion/babel-plugin", "npm:11.13.5"],\
           ["@babel/helper-module-imports", "npm:7.25.9"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@emotion/hash", "npm:0.9.2"],\
           ["@emotion/memoize", "npm:0.9.0"],\
           ["@emotion/serialize", "npm:1.3.3"],\
@@ -1410,7 +1401,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@emotion-react-virtual-022b1f3b6d/0/cache/@emotion-react-npm-11.14.0-2743f93910-d0864f571a.zip/node_modules/@emotion/react/",\
         "packageDependencies": [\
           ["@emotion/react", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:11.14.0"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@emotion/babel-plugin", "npm:11.13.5"],\
           ["@emotion/cache", "npm:11.14.0"],\
           ["@emotion/serialize", "npm:1.3.3"],\
@@ -1463,7 +1454,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@emotion-styled-virtual-3ae7fac687/0/cache/@emotion-styled-npm-11.14.0-36f2daa0c9-20aa5c488e.zip/node_modules/@emotion/styled/",\
         "packageDependencies": [\
           ["@emotion/styled", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:11.14.0"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@emotion/babel-plugin", "npm:11.13.5"],\
           ["@emotion/is-prop-valid", "npm:1.3.1"],\
           ["@emotion/react", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:11.14.0"],\
@@ -2330,7 +2321,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@mui-base-virtual-2c7d5448f0/0/cache/@mui-base-npm-5.0.0-beta.40-248417914d-631b4ee389.zip/node_modules/@mui/base/",\
         "packageDependencies": [\
           ["@mui/base", "virtual:81a25902455948634a5a2cf9c014b5f78f1de0977fdd9dafafd311c2c659cd9d42e2a6dd3a72d79f2ed6829819bbc0a0254f08904338939762ee44a4f481c549#npm:5.0.0-beta.40"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@floating-ui/react-dom", "virtual:2c7d5448f0fbc0a0353702b86b6f9cf106d5d181464ef3fc4aaad440c7d82d349b76db9462e4b47bdc5f0d6dae02967a57419e1699058961cfd887e4b13e6424#npm:2.1.2"],\
           ["@mui/types", "virtual:81a25902455948634a5a2cf9c014b5f78f1de0977fdd9dafafd311c2c659cd9d42e2a6dd3a72d79f2ed6829819bbc0a0254f08904338939762ee44a4f481c549#npm:7.2.19"],\
           ["@mui/utils", "virtual:81a25902455948634a5a2cf9c014b5f78f1de0977fdd9dafafd311c2c659cd9d42e2a6dd3a72d79f2ed6829819bbc0a0254f08904338939762ee44a4f481c549#npm:5.16.6"],\
@@ -2372,7 +2363,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@mui-icons-material-virtual-b2deca21aa/0/cache/@mui-icons-material-npm-5.16.7-3ba3ef0f30-49bab17543.zip/node_modules/@mui/icons-material/",\
         "packageDependencies": [\
           ["@mui/icons-material", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.16.7"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@mui/material", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.16.7"],\
           ["@types/mui__material", null],\
           ["@types/react", "npm:18.3.12"],\
@@ -2399,7 +2390,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@mui-lab-virtual-81a2590245/0/cache/@mui-lab-npm-5.0.0-alpha.173-1d336acc54-2ecd7da650.zip/node_modules/@mui/lab/",\
         "packageDependencies": [\
           ["@mui/lab", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.0.0-alpha.173"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@emotion/react", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:11.14.0"],\
           ["@emotion/styled", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:11.14.0"],\
           ["@mui/base", "virtual:81a25902455948634a5a2cf9c014b5f78f1de0977fdd9dafafd311c2c659cd9d42e2a6dd3a72d79f2ed6829819bbc0a0254f08904338939762ee44a4f481c549#npm:5.0.0-beta.40"],\
@@ -2444,7 +2435,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@mui-material-virtual-a14d9fb1a0/0/cache/@mui-material-npm-5.16.7-7070122752-b11419c1a7.zip/node_modules/@mui/material/",\
         "packageDependencies": [\
           ["@mui/material", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.16.7"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@emotion/react", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:11.14.0"],\
           ["@emotion/styled", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:11.14.0"],\
           ["@mui/core-downloads-tracker", "npm:5.16.7"],\
@@ -2490,7 +2481,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@mui-private-theming-virtual-4f540505c2/0/cache/@mui-private-theming-npm-5.16.6-5d5b0fab36-0a09afd6c2.zip/node_modules/@mui/private-theming/",\
         "packageDependencies": [\
           ["@mui/private-theming", "virtual:19806bde26350a1c0c361dfd798b7e3100a1ea5e8c08a8b04d5b12bd9ac4d3ce8975ce95259bfb19df4cd582b9c8d90099fc809a4ff326bd6193f7be3aa9295c#npm:5.16.6"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@mui/utils", "virtual:81a25902455948634a5a2cf9c014b5f78f1de0977fdd9dafafd311c2c659cd9d42e2a6dd3a72d79f2ed6829819bbc0a0254f08904338939762ee44a4f481c549#npm:5.16.6"],\
           ["@types/react", "npm:18.3.12"],\
           ["prop-types", "npm:15.8.1"],\
@@ -2515,7 +2506,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@mui-styled-engine-virtual-bf45579ffa/0/cache/@mui-styled-engine-npm-5.16.6-ff5d90c365-b15e653c87.zip/node_modules/@mui/styled-engine/",\
         "packageDependencies": [\
           ["@mui/styled-engine", "virtual:19806bde26350a1c0c361dfd798b7e3100a1ea5e8c08a8b04d5b12bd9ac4d3ce8975ce95259bfb19df4cd582b9c8d90099fc809a4ff326bd6193f7be3aa9295c#npm:5.16.6"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@emotion/cache", "npm:11.13.1"],\
           ["@emotion/react", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:11.14.0"],\
           ["@emotion/styled", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:11.14.0"],\
@@ -2549,7 +2540,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@mui-system-virtual-19806bde26/0/cache/@mui-system-npm-5.16.7-ee08842b92-c07479c072.zip/node_modules/@mui/system/",\
         "packageDependencies": [\
           ["@mui/system", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:5.16.7"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@emotion/react", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:11.14.0"],\
           ["@emotion/styled", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:11.14.0"],\
           ["@mui/private-theming", "virtual:19806bde26350a1c0c361dfd798b7e3100a1ea5e8c08a8b04d5b12bd9ac4d3ce8975ce95259bfb19df4cd582b9c8d90099fc809a4ff326bd6193f7be3aa9295c#npm:5.16.6"],\
@@ -2607,7 +2598,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/@mui-utils-virtual-e965a483cd/0/cache/@mui-utils-npm-5.16.6-19c1f450c3-2db3d11a83.zip/node_modules/@mui/utils/",\
         "packageDependencies": [\
           ["@mui/utils", "virtual:81a25902455948634a5a2cf9c014b5f78f1de0977fdd9dafafd311c2c659cd9d42e2a6dd3a72d79f2ed6829819bbc0a0254f08904338939762ee44a4f481c549#npm:5.16.6"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@mui/types", "virtual:81a25902455948634a5a2cf9c014b5f78f1de0977fdd9dafafd311c2c659cd9d42e2a6dd3a72d79f2ed6829819bbc0a0254f08904338939762ee44a4f481c549#npm:7.2.19"],\
           ["@types/prop-types", "npm:15.7.13"],\
           ["@types/react", "npm:18.3.12"],\
@@ -4435,7 +4426,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["assistant-crawler", "workspace:services/crawler"],\
           ["@apify/log", "npm:2.5.12"],\
-          ["@babel/runtime", "npm:7.26.0"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@crawlee/browser", "virtual:93de7ac422244803c188066537ae624c326819cee75009ae09b380c101ff0fbad4ad4d7ffab22b030756d2b37e6f5879c0f5ccd96e4bfdf338e7937638d2e891#npm:3.12.1"],\
           ["@crawlee/core", "npm:3.12.0"],\
           ["@crawlee/playwright", "virtual:93de7ac422244803c188066537ae624c326819cee75009ae09b380c101ff0fbad4ad4d7ffab22b030756d2b37e6f5879c0f5ccd96e4bfdf338e7937638d2e891#npm:3.12.1"],\
@@ -4508,7 +4499,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./cli/",\
         "packageDependencies": [\
           ["assistants-cli", "workspace:cli"],\
-          ["@babel/runtime", "npm:7.26.0"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@digdir/assistant-lib", "workspace:packages/assistant-lib"],\
           ["@instructor-ai/instructor", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.6.0"],\
           ["@types/node", "npm:22.5.1"],\
@@ -4582,7 +4573,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/babel-plugin-macros-npm-3.1.0-320e781f4e-c6dfb15de9.zip/node_modules/babel-plugin-macros/",\
         "packageDependencies": [\
           ["babel-plugin-macros", "npm:3.1.0"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["cosmiconfig", "npm:7.1.0"],\
           ["resolve", "patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=c3c19d"]\
         ],\
@@ -5640,7 +5631,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/dom-helpers-npm-5.2.1-b38bb4470b-f735074d66.zip/node_modules/dom-helpers/",\
         "packageDependencies": [\
           ["dom-helpers", "npm:5.2.1"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["csstype", "npm:3.1.3"]\
         ],\
         "linkType": "HARD"\
@@ -10630,7 +10621,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/react-syntax-highlighter-virtual-6dd38c2776/0/cache/react-syntax-highlighter-npm-15.6.1-f0ce0bfa5f-4a4cf4695c.zip/node_modules/react-syntax-highlighter/",\
         "packageDependencies": [\
           ["react-syntax-highlighter", "virtual:44849ea337a09ab56114394fbd807c50fde43dad837da8421ffc6cfef43e100e6c81a4d2e94f8d0c16ffb597b27fe3227efb07819be8291418f78912c83469a8#npm:15.6.1"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@types/react", "npm:18.3.12"],\
           ["highlight.js", "npm:10.7.3"],\
           ["highlightjs-vue", "npm:1.0.0"],\
@@ -10658,7 +10649,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/react-transition-group-virtual-c52a207a44/0/cache/react-transition-group-npm-4.4.5-98ea4ef96e-2ba754ba74.zip/node_modules/react-transition-group/",\
         "packageDependencies": [\
           ["react-transition-group", "virtual:a14d9fb1a0875dcd72812ebe7649e881591bd0c4ef09830afc0ae7d6639c77f4737503f78b20438aa66b6cb56c0e2f862eecb4933fa84140a6d9bcfef7bb4f2f#npm:4.4.5"],\
-          ["@babel/runtime", "npm:7.24.6"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@types/react", "npm:18.3.12"],\
           ["@types/react-dom", "npm:18.3.1"],\
           ["dom-helpers", "npm:5.2.1"],\
@@ -10722,15 +10713,6 @@ const RAW_RUNTIME_STATE =
           ["hastscript", "npm:6.0.0"],\
           ["parse-entities", "npm:2.0.0"],\
           ["prismjs", "npm:1.27.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["regenerator-runtime", [\
-      ["npm:0.14.1", {\
-        "packageLocation": "./.yarn/cache/regenerator-runtime-npm-0.14.1-a6c97c609a-1b16eb2c4b.zip/node_modules/regenerator-runtime/",\
-        "packageDependencies": [\
-          ["regenerator-runtime", "npm:0.14.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -12166,7 +12148,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/__virtual__/typesense-virtual-a39d42d82d/0/cache/typesense-npm-1.8.2-932edd9511-9a553b479e.zip/node_modules/typesense/",\
         "packageDependencies": [\
           ["typesense", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:1.8.2"],\
-          ["@babel/runtime", "npm:7.26.0"],\
+          ["@babel/runtime", "npm:7.28.3"],\
           ["@types/babel__runtime", null],\
           ["axios", "npm:1.7.7"],\
           ["loglevel", "npm:1.9.2"]\
