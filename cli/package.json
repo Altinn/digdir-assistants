@@ -1,6 +1,6 @@
 {
   "name": "assistants-cli",
-  "packageManager": "yarn@4.9.3",
+  "packageManager": "yarn@4.9.4",
   "version": "1.0.0",
   "description": "CLI interface to run tasks and configure Altinn Assistant",
   "main": "main.ts",
@@ -21,7 +21,7 @@
   "dependencies": {
     "@babel/runtime": "^7.26.0",
     "@digdir/assistant-lib": "1.0.0",
-    "@instructor-ai/instructor": "1.6.0",
+    "@instructor-ai/instructor": "1.7.0",
     "@types/node": "^22.5.1",
     "commander": "^12.1.0",
     "mysql2": "^3.10.2",
