@@ -1,6 +1,6 @@
 {
   "name": "@digdir/assistants",
-  "packageManager": "yarn@4.9.3",
+  "packageManager": "yarn@4.9.4",
   "private": true,
   "workspaces": [
     "packages/assistant-lib",
