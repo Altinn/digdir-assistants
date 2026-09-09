@@ -1,6 +1,6 @@
 {
   "name": "@digdir/assistants",
-  "packageManager": "yarn@4.14.1",
+  "packageManager": "yarn@4.18.0",
   "private": true,
   "workspaces": [
     "packages/assistant-lib",
@@ -30,7 +30,7 @@
     "buffer-equal-constant-time@npm:1.0.1": "patch:buffer-equal-constant-time@npm%3A1.0.1#~/.yarn/patches/buffer-equal-constant-time-npm-1.0.1-41826f3419.patch",
     "form-data@npm:^2.5.0": "2.5.5",
     "form-data@npm:^4.0.0": "4.0.5",
-    "flatted@npm:^3.2.9": "3.4.2",
+    "flatted@npm:^3.2.9": "3.4.4",
     "fast-xml-parser@npm:^4.4.0": "4.5.6",
     "tar@npm:^6.1.11": "7.5.13",
     "tar@npm:^6.2.1": "7.5.13",
