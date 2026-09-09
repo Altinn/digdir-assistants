@@ -4685,7 +4685,7 @@ const RAW_RUNTIME_STATE =
           ["@types/node", "npm:22.19.17"],\
           ["assistants-cli", "workspace:cli"],\
           ["commander", "npm:12.1.0"],\
-          ["mysql2", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:3.22.1"],\
+          ["mysql2", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:3.24.4"],\
           ["openai", "virtual:678a475b95025a4694d694d3a376bec1ca1e5438a8c9fcd71d57f55774bdac2bd8867ac3f037da5deb96bf900a5e1cae6038d2e721948a8264a3be902d1dfab2#npm:4.104.0"],\
           ["prettier", "npm:3.8.3"],\
           ["rimraf", "npm:6.1.3"],\
@@ -5802,15 +5802,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/delayed-stream-npm-1.0.0-c5a4c4cc02-d758899da0.zip/node_modules/delayed-stream/",\
         "packageDependencies": [\
           ["delayed-stream", "npm:1.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["denque", [\
-      ["npm:2.1.0", {\
-        "packageLocation": "./.yarn/cache/denque-npm-2.1.0-578d0b6297-f9ef81aa0a.zip/node_modules/denque/",\
-        "packageDependencies": [\
-          ["denque", "npm:2.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -7896,6 +7887,14 @@ const RAW_RUNTIME_STATE =
           ["safer-buffer", "npm:2.1.2"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:0.7.3", {\
+        "packageLocation": "./.yarn/cache/iconv-lite-npm-0.7.3-0c4725f953-be2fd2414f.zip/node_modules/iconv-lite/",\
+        "packageDependencies": [\
+          ["iconv-lite", "npm:0.7.3"],\
+          ["safer-buffer", "npm:2.1.2"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["idcac-playwright", [\
@@ -9859,26 +9858,25 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["mysql2", [\
-      ["npm:3.22.1", {\
-        "packageLocation": "./.yarn/cache/mysql2-npm-3.22.1-ec67219956-5023fcb7cf.zip/node_modules/mysql2/",\
+      ["npm:3.24.4", {\
+        "packageLocation": "./.yarn/cache/mysql2-npm-3.24.4-8ea726d406-12205aeb5d.zip/node_modules/mysql2/",\
         "packageDependencies": [\
-          ["mysql2", "npm:3.22.1"]\
+          ["mysql2", "npm:3.24.4"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:3.22.1", {\
-        "packageLocation": "./.yarn/__virtual__/mysql2-virtual-1f203430a4/0/cache/mysql2-npm-3.22.1-ec67219956-5023fcb7cf.zip/node_modules/mysql2/",\
+      ["virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:3.24.4", {\
+        "packageLocation": "./.yarn/__virtual__/mysql2-virtual-95b2a3e4c6/0/cache/mysql2-npm-3.24.4-8ea726d406-12205aeb5d.zip/node_modules/mysql2/",\
         "packageDependencies": [\
           ["@types/node", "npm:22.19.17"],\
           ["aws-ssl-profiles", "npm:1.1.2"],\
-          ["denque", "npm:2.1.0"],\
           ["generate-function", "npm:2.3.1"],\
-          ["iconv-lite", "npm:0.7.2"],\
+          ["iconv-lite", "npm:0.7.3"],\
           ["long", "npm:5.3.2"],\
           ["lru.min", "npm:1.1.4"],\
-          ["mysql2", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:3.22.1"],\
+          ["mysql2", "virtual:86562630a5df8bea6c5ee319cbebed52511ed46e8cee2225a5e63ce27e18d09520baba401eb4f55d54e983604fe7c125fb779235b913900b54cef7778e96288c#npm:3.24.4"],\
           ["named-placeholders", "npm:1.1.6"],\
-          ["sql-escaper", "npm:1.3.3"]\
+          ["sql-escaper", "npm:1.5.1"]\
         ],\
         "packagePeers": [\
           "@types/node"\
@@ -11866,10 +11864,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sql-escaper", [\
-      ["npm:1.3.3", {\
-        "packageLocation": "./.yarn/cache/sql-escaper-npm-1.3.3-c70aa57b0c-aa65456857.zip/node_modules/sql-escaper/",\
+      ["npm:1.5.1", {\
+        "packageLocation": "./.yarn/cache/sql-escaper-npm-1.5.1-8725034f18-49986adddd.zip/node_modules/sql-escaper/",\
         "packageDependencies": [\
-          ["sql-escaper", "npm:1.3.3"]\
+          ["sql-escaper", "npm:1.5.1"]\
         ],\
         "linkType": "HARD"\
       }]\
